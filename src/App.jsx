@@ -4,14 +4,8 @@ import LoadingScreen from "./LoadingScreen";
 import blobsBg from "./assets/wallpaper.svg";
 import Logo from "./Logo";
 import "./App.css";
-import SmoothScroll from "./components/SmoothScroll";
 import HeroSection from "./sections/HeroSection";
-import EedooSection from "./sections/EedooSection";
 import ThreeDissolveHero from "./ThreeDissolveHero";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 // =========================================  
 // Color Palette (matching Lando Norris site)
@@ -490,11 +484,6 @@ const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInteractive, setIsInteractive] = useState(true);
 
-  // Refs for the fixed canvas layer
-  const fixedCanvasRef = useRef(null);
-  const heroShrinkRef = useRef(null);
-  const morphCtxRef = useRef(null); // stores { scrollTrigger, timeline } for cleanup
-
   // Lock body scroll when menu is open
   useEffect(() => {
     if (isMenuOpen) {
@@ -507,180 +496,6 @@ const App = () => {
     };
   }, [isMenuOpen]);
 
-  // ─── GSAP: Position the fixed canvas & animate on scroll ───
-  const setupScrollAnimation = useCallback(() => {
-    const canvasEl = fixedCanvasRef.current;
-    if (!canvasEl) return;
-
-    const hero = document.getElementById('hero-canvas-placeholder');
-    const target = document.getElementById('eedoo-canvas-target');
-    const section = document.getElementById('signature-section');
-    if (!hero || !target || !section) return;
-
-    // Kill previous instances on re-setup (e.g. resize)
-    if (morphCtxRef.current) {
-      morphCtxRef.current.forEach(st => st.kill());
-      morphCtxRef.current = null;
-    }
-
-    const heroRect = hero.getBoundingClientRect();
-    const scrollY = window.scrollY || window.pageYOffset;
-
-    // Canvas constant dimensions (matches hero — never changes)
-    const canvasW = heroRect.width;
-    const canvasH = heroRect.height;
-
-    // Position the fixed canvas exactly at the hero's initial bounding box
-    gsap.set(canvasEl, {
-      position: 'fixed',
-      width: canvasW,
-      height: canvasH,
-      left: heroRect.left,
-      top: heroRect.top,
-      x: 0,
-      y: 0,
-      xPercent: 0, // removed -50 to use exact left position
-      scale: 1,
-      transformOrigin: 'center center', // Scale from center perfectly
-      borderRadius: 0,
-      backgroundColor: 'transparent',
-      force3D: true,
-    });
-
-    // Store the initial hero center for morph calculation
-    const heroCenterX = heroRect.left + canvasW / 2;
-    const heroCenterY = heroRect.top + canvasH / 2;
-
-    // ── Morph: hero → eedoo (scrubbed by scroll) ──
-    const morphSt = ScrollTrigger.create({
-      trigger: section,
-      start: 'top bottom',
-      end: 'top top',
-      scrub: true,
-      onUpdate: (self) => {
-        const rawProgress = self.progress;
-
-        // Disable hover after 15% scroll progress
-        const shouldBeInteractive = rawProgress < 0.15;
-        setIsInteractive(prev => prev !== shouldBeInteractive ? shouldBeInteractive : prev);
-
-        // Apply easing to progress for premium feel
-        const progress = rawProgress < 0.5
-          ? 2 * rawProgress * rawProgress
-          : 1 - Math.pow(-2 * rawProgress + 2, 2) / 2;
-
-        // Read the target's current viewport position
-        const targetRect = target.getBoundingClientRect();
-
-        // Scale: use width-based scale so image fills target width
-        const endScale = targetRect.width / canvasW;
-        const currentScale = 1 + (endScale - 1) * progress;
-
-        // Calculate target centers dynamically
-        const targetCenterX = targetRect.left + targetRect.width / 2;
-        const targetCenterY = targetRect.top + targetRect.height / 2;
-
-        // Translate: interpolate exact distance from hero center to target center
-        const currentX = (targetCenterX - heroCenterX) * progress;
-        const currentY = (targetCenterY - heroCenterY) * progress;
-
-        // Border radius: 0 → 16
-        const currentRadius = 16 * progress;
-
-        // Apply with GSAP set for GPU-accelerated transform
-        gsap.set(canvasEl, {
-          x: currentX,
-          y: currentY,
-          scale: currentScale,
-          borderRadius: currentRadius,
-          force3D: true,
-        });
-      },
-    });
-
-    // ── Hero background shrink (Lando Norris style) ──
-    // Shrinks ONLY the hero off-white background, revealing dark green behind
-    const heroEl = heroShrinkRef.current;
-    let heroShrinkSt = null;
-    if (heroEl) {
-      heroShrinkSt = ScrollTrigger.create({
-        trigger: section,
-        start: 'top bottom',
-        end: 'top top',
-        scrub: true,
-        onUpdate: (self) => {
-          const rawProgress = self.progress;
-
-          // Apply same easing as the canvas morph for perfect sync
-          const progress = rawProgress < 0.5
-            ? 2 * rawProgress * rawProgress
-            : 1 - Math.pow(-2 * rawProgress + 2, 2) / 2;
-
-          // Scale: 1 → 0.92 (matches Lando Norris feel)
-          const heroScale = 1 - 0.08 * progress;
-
-          // Border radius: 0 → 20px
-          const heroRadius = 20 * progress;
-
-          gsap.set(heroEl, {
-            scale: heroScale,
-            borderRadius: heroRadius,
-            force3D: true,
-          });
-        },
-      });
-    }
-
-    // ── Pinned section: grayscale the canvas ──
-    const pinnedSt = ScrollTrigger.create({
-      trigger: section,
-      start: 'top top',
-      end: '+=200%',
-      scrub: 1,
-      onUpdate: (self) => {
-        // Apply grayscale progressively during the pin
-        const grayProgress = Math.min(self.progress / 0.2, 1); // fully gray by 20% of pin
-        if (canvasEl) {
-          canvasEl.style.filter = `grayscale(${grayProgress * 100}%) contrast(${1 + grayProgress * 0.2})`;
-        }
-      },
-    });
-
-    // Store for cleanup
-    morphCtxRef.current = [
-      morphSt,
-      pinnedSt,
-      ...(heroShrinkSt ? [heroShrinkSt] : []),
-    ];
-  }, []);
-
-  // Setup on mount (after loading screen), and on resize
-  useEffect(() => {
-    if (isLoading) return;
-
-    // Wait for DOM to settle after mount
-    const rafId = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setupScrollAnimation();
-      });
-    });
-
-    // Recalculate on resize
-    const handleResize = () => {
-      setupScrollAnimation();
-      ScrollTrigger.refresh();
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', handleResize);
-      if (morphCtxRef.current) {
-        morphCtxRef.current.forEach(st => st.kill());
-      }
-    };
-  }, [isLoading, setupScrollAnimation]);
-
   return (
     <>
       <AnimatePresence mode="wait">
@@ -690,7 +505,7 @@ const App = () => {
       </AnimatePresence>
 
       {!isLoading && (
-        <SmoothScroll>
+        <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden" }}>
           {/* ======= NAVBAR ======= */}
           <nav className="nav-bar">
             <div className="nav-inner relative flex justify-between items-center w-full">
@@ -718,14 +533,6 @@ const App = () => {
           {/* ======= FULLSCREEN MENU ======= */}
           <FullscreenMenu isOpen={isMenuOpen} currentPage="Home" />
 
-          {/* ======= FIXED CANVAS LAYER ======= */}
-          <div
-            ref={fixedCanvasRef}
-            className="hero-canvas-fixed"
-          >
-            <ThreeDissolveHero isInteractive={isInteractive} />
-          </div>
-
           {/* ======= PAGE CONTENT ======= */}
           <motion.div
             animate={{
@@ -735,11 +542,7 @@ const App = () => {
             transition={{ duration: 1, ease: EASE_SMOOTH }}
             className="page-content"
           >
-            {/* Hero shrink wrapper — off-white bg that scales down on scroll */}
-            <div
-              ref={heroShrinkRef}
-              className="hero-shrink-wrapper"
-            >
+            <div className="hero-shrink-wrapper">
               <motion.div
                 className="bg-blobs"
                 animate={{
@@ -762,15 +565,15 @@ const App = () => {
               </motion.div>
               <div className="bg-gradient-overlay" />
 
-              <div className="hero-inner">
+              <div className="hero-inner" style={{ position: "relative", width: "100%", height: "100vh" }}>
+                <div style={{ position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none' }}>
+                   <ThreeDissolveHero isInteractive={isInteractive} />
+                </div>
                 <HeroSection />
               </div>
             </div>
-
-            {/* Eedoo section — sits on dark green, no shrink */}
-            <EedooSection />
           </motion.div>
-        </SmoothScroll>
+        </div>
       )}
     </>
   );

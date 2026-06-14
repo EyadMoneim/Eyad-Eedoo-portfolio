@@ -127,18 +127,27 @@ function SceneContent({ hoverProgress, globalMouse }) {
 
   const aspect = humanTexture.image.width / humanTexture.image.height;
 
-  const scale = useMemo(() => {
-    const vpAspect = viewport.width / viewport.height;
-    let w, h;
-    if (vpAspect > aspect) {
-      w = viewport.width;
-      h = viewport.width / aspect;
-    } else {
-      h = viewport.height;
-      w = viewport.height * aspect;
+  const [scale, baseY] = useMemo(() => {
+    const isPortrait = viewport.width < viewport.height;
+    
+    // On mobile (portrait), we want the image to be much larger to focus on the face, 
+    // because the PNG might have a lot of transparent padding.
+    // On desktop (landscape), we keep it nicely contained.
+    const maxH = isPortrait ? viewport.height * 0.85 : viewport.height * 0.85; 
+    const maxW = isPortrait ? viewport.width * 2.2 : viewport.width * 0.90;
+
+    let targetH = maxH;
+    let targetW = targetH * aspect;
+
+    if (targetW > maxW) {
+      targetW = maxW;
+      targetH = targetW / aspect;
     }
-    // Multiply by 1.1 to give a 10% extra margin so moving the image doesn't reveal the background
-    return [w * 1.05, h * 1.05, 1];
+
+    // Anchor to bottom: bottom of plane (-targetH / 2) touches bottom of viewport (-viewport.height / 2)
+    const yPos = (targetH - viewport.height) / 2;
+
+    return [[targetW, targetH, 1], yPos];
   }, [aspect, viewport.width, viewport.height]);
 
   const dissolveUniforms = useMemo(
@@ -167,9 +176,10 @@ function SceneContent({ hoverProgress, globalMouse }) {
       // 2. Parallax tracking — vertical only, NO horizontal drift
       const parallaxY = globalMouse.current.y * (viewport.height * 0.01);
 
-      // Smooth dampening: X always returns to center (0), Y follows mouse + float
+      // Smooth dampening: X always returns to center (0), Y follows mouse + float around baseY
+      const targetY = baseY + parallaxY + floatY;
       groupRef.current.position.x += (0 - groupRef.current.position.x) * 0.04;
-      groupRef.current.position.y += (parallaxY + floatY - groupRef.current.position.y) * 0.03;
+      groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.03;
     }
   });
 
@@ -184,7 +194,7 @@ function SceneContent({ hoverProgress, globalMouse }) {
     <group
       ref={groupRef}
       scale={scale}
-      position={[0, 0.8, 0]}
+      position={[0, baseY, 0]}
     >
       {/* Single Layer: Human and Robot mixed dynamically */}
       <mesh position={[0, 0, 0]} onPointerMove={handlePointerMove}>

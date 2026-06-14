@@ -25,25 +25,10 @@ export default function HeroSection() {
         width: '100%',
         height: 'calc(100vh - 8rem)', // fill screen minus hero-inner padding
         display: 'flex',
-        alignItems: 'flex-end', // push the canvas to the absolute bottom
+        alignItems: 'center', 
         justifyContent: 'center',
       }}
     >
-      {/* 
-        This is an invisible placeholder that reserves space where the canvas 
-        visually appears on load. The actual canvas lives in EedooSection and 
-        is translated here via GSAP on mount.
-      */}
-      <div
-        id="hero-canvas-placeholder"
-        style={{
-          width: 'min(1100px, 100vw)',
-          height: '100%', 
-          maxHeight: '100%', // remove 650px restriction so it can be truly responsive
-          margin: '0 auto',
-          pointerEvents: 'none',
-        }}
-      />
 
       {/* Left Card: Next Project */}
       <motion.div 
