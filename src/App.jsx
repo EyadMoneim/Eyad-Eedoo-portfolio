@@ -1,11 +1,17 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LoadingScreen from "./LoadingScreen";
 import blobsBg from "./assets/wallpaper.svg";
+import eyadSmallSrc from "./assets/eyad-small.png";
 import Logo from "./Logo";
 import "./App.css";
 import HeroSection from "./sections/HeroSection";
 import ThreeDissolveHero from "./ThreeDissolveHero";
+import ScrollVelocity from "./components/ScrollVelocity";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // =========================================  
 // Color Palette (matching Lando Norris site)
@@ -109,68 +115,88 @@ const LandoBrand = ({ color1 = "#c8cbbd", color2 = "#ebeee0" }) => (
 // =========================================
 // 1. Text Logo (Top Left)
 // =========================================
-const TextLogo = ({ isMenuOpen }) => (
-  <a
-    href="#home"
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      pointerEvents: "auto",
-      color: isMenuOpen ? "#f4f4ed" : "#2D3126",
-      textDecoration: "none",
-      lineHeight: 0.8,
-      transition: "color 0.5s ease",
-      zIndex: 100,
-    }}
-  >
-    <span style={{ 
-      fontSize: "2.6rem", 
-      fontWeight: 500, 
-      letterSpacing: "0.05em", 
-      fontFamily: "'Playfair Display', serif" 
-    }}>
-      EYAD
-    </span>
-    <span style={{ 
-      fontSize: "2.3rem", 
-      fontWeight: 900, 
-      letterSpacing: "-0.04em", 
-      fontFamily: "'Brier ', sans-serif",
-      marginTop: "0.2rem"
-    }}>
-      MONEIM
-    </span>
-  </a>
-);
+const TextLogo = ({ isMenuOpen, isScrolled }) => {
+  let eyadColor = "#2D3126";
+  let moneimColor = "#2D3126";
+
+  if (isMenuOpen) {
+    eyadColor = "#f4f4ed";
+    moneimColor = "#f4f4ed";
+  } else if (isScrolled) {
+    eyadColor = "gray";
+    moneimColor = "#f4f4ed";
+  }
+
+  return (
+    <a
+      href="#home"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        pointerEvents: "auto",
+        textDecoration: "none",
+        lineHeight: 0.8,
+        zIndex: 100,
+      }}
+    >
+      <span style={{ 
+        color: eyadColor,
+        transition: "color 0.5s ease",
+        fontSize: "2.6rem", 
+        fontWeight: 500, 
+        letterSpacing: "0.05em", 
+        fontFamily: "'Playfair Display', serif" 
+      }}>
+        EYAD
+      </span>
+      <span style={{ 
+        color: moneimColor,
+        transition: "color 0.5s ease",
+        fontSize: "2.3rem", 
+        fontWeight: 900, 
+        letterSpacing: "-0.04em", 
+        fontFamily: "'Brier ', sans-serif",
+        marginTop: "0.2rem"
+      }}>
+        MONEIM
+      </span>
+    </a>
+  );
+};
 
 // =========================================
 // 1.5 Header Logo (Center Monogram)
 // =========================================
-const HeaderLogo = ({ isMenuOpen }) => (
-  <a
-    href="#home"
-    className="header-logo-link relative group flex items-center justify-center"
-    style={{
-      width: "5rem",
-      height: "3.75rem",
-      opacity: isMenuOpen ? 0 : 1,
-      pointerEvents: isMenuOpen ? "none" : "auto",
-      transition: "opacity 0.5s ease",
-    }}
-  >
-    {/* Primary Logo */}
-    <Logo
-      color={isMenuOpen ? COLORS.greenOffWhite1 : COLORS.darkGreen}
-      className="absolute inset-0 w-full h-full transition-all duration-500 ease-out group-hover:opacity-0"
-    />
+const HeaderLogo = ({ isMenuOpen, isScrolled }) => {
+  const normalColor = isScrolled ? COLORS.lime : COLORS.darkGreen;
+  const hoverColor = isScrolled ? "gray" : COLORS.lime;
 
-    {/* Green Hover Logo */}
-    <Logo
-      color={COLORS.lime}
-      className="absolute inset-0 w-full h-full transition-all duration-500 ease-out scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100"
-    />
-  </a>
-);
+  return (
+    <a
+      href="#home"
+      className="header-logo-link relative group flex items-center justify-center"
+      style={{
+        width: "5rem",
+        height: "3.75rem",
+        opacity: isMenuOpen ? 0 : 1,
+        pointerEvents: isMenuOpen ? "none" : "auto",
+        transition: "opacity 0.5s ease",
+      }}
+    >
+      {/* Primary Logo */}
+      <Logo
+        color={isMenuOpen ? COLORS.greenOffWhite1 : normalColor}
+        className="absolute inset-0 w-full h-full transition-all duration-500 ease-out group-hover:opacity-0"
+      />
+
+      {/* Hover Logo */}
+      <Logo
+        color={hoverColor}
+        className="absolute inset-0 w-full h-full transition-all duration-500 ease-out scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100"
+      />
+    </a>
+  );
+};
 
 // =========================================
 // 2. Store Button (Lime green, matching site)
@@ -483,6 +509,14 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInteractive, setIsInteractive] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Refs for GSAP ScrollTrigger
+  const heroScrollSectionRef = useRef(null);
+  const groupWallpaperRef = useRef(null);
+  const eyadSmallRef = useRef(null);
+  const threeDissolveRef = useRef(null);
+  const bgBlobsRef = useRef(null);
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -496,6 +530,193 @@ const App = () => {
     };
   }, [isMenuOpen]);
 
+  // =========================================
+  // GSAP ScrollTrigger — Hero Shrink Animation
+  // =========================================
+  useLayoutEffect(() => {
+    if (isLoading) return;
+
+    const ctx = gsap.context(() => {
+      let currentTl = null;
+      let currentInteractiveST = null;
+
+      const setup = () => {
+        const groupEl = groupWallpaperRef.current;
+        const eyadSmallEl = eyadSmallRef.current;
+        const threeDissolveEl = threeDissolveRef.current;
+        const bgBlobsEl = bgBlobsRef.current;
+        const nextProjectEl = document.querySelector('.next-project-card');
+
+        if (!groupEl) return;
+
+        // Kill any previously created timeline/scrolltrigger before rebuilding
+        if (currentTl) {
+          currentTl.scrollTrigger?.kill();
+          currentTl.kill();
+          currentTl = null;
+        }
+        if (currentInteractiveST) {
+          currentInteractiveST.kill();
+          currentInteractiveST = null;
+        }
+
+        // Reset elements back to their initial state before recalculating
+        gsap.set(groupEl, { scale: 1, clipPath: 'inset(0px 0px 0px 0px round 0px)' });
+        if (eyadSmallEl) gsap.set(eyadSmallEl, { opacity: 0 });
+        if (threeDissolveEl) gsap.set(threeDissolveEl, { opacity: 1 });
+        if (bgBlobsEl) gsap.set(bgBlobsEl, { opacity: 1 });
+        if (nextProjectEl) gsap.set(nextProjectEl, { autoAlpha: 1, y: 0 });
+
+        // Calculate scale and clipPath values
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        let baseScale, cutX, cutY = 0, targetRadius;
+
+        if (vw <= 991) {
+          // Mobile: square, centralized — bumped up for a larger final size
+          const S = Math.min(vw * 0.88, 380);
+
+          // Override baseScale so the image covers the S x S square completely
+          baseScale = Math.max(S / vw, S / vh);
+
+          cutX = (vw - (S / baseScale)) / 2;
+          cutY = (vh - (S / baseScale)) / 2;
+          if (cutX < 0) cutX = 0;
+          if (cutY < 0) cutY = 0;
+
+          targetRadius = 24 / baseScale;
+
+          // Position the scrolling text exactly 15px below the square
+          const scrollBgSection = document.querySelector('.scroll-reveal-bg section');
+          if (scrollBgSection) {
+            gsap.set(scrollBgSection, {
+              position: 'absolute',
+              top: `${(vh / 2) + (S / 2) + 15}px`,
+              left: 0,
+              width: '100%'
+            });
+          }
+        } else {
+          // Desktop logic — bumped up final size
+          const oldTargetSize = 900;
+          const oldScaleX = oldTargetSize / vw;
+          const oldScaleY = oldTargetSize / vh;
+          baseScale = Math.min(oldScaleX, oldScaleY);
+
+          const finalHeight = vh * baseScale;
+          const targetWidth = finalHeight * 1.1;
+
+          cutX = (vw - (targetWidth / baseScale)) / 2;
+          if (cutX < 0) cutX = 0;
+          targetRadius = 24 / baseScale;
+
+          // Ensure desktop text stays as is (it's centered by flexbox)
+          const scrollBgSection = document.querySelector('.scroll-reveal-bg section');
+          if (scrollBgSection) {
+            gsap.set(scrollBgSection, { clearProps: "position,top,left,width" });
+          }
+        }
+
+        // Create the master timeline — no pin needed since group-wallpaper is position:fixed
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: heroScrollSectionRef.current,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 1.2,
+          },
+        });
+
+        // 1. Next Project card fades out quickly when shrinking starts
+        if (nextProjectEl) {
+          tl.to(
+            nextProjectEl,
+            {
+              autoAlpha: 0,
+              y: 30,
+              duration: 0.2,
+              ease: 'power1.inOut',
+            },
+            0
+          );
+        }
+
+        // Fade out 3D canvas and blobs
+        if (threeDissolveEl) {
+          tl.to(threeDissolveEl, { opacity: 0, duration: 0.3, ease: 'power1.inOut' }, 0);
+        }
+        if (bgBlobsEl) {
+          tl.to(bgBlobsEl, { opacity: 0, duration: 0.3, ease: 'power1.inOut' }, 0);
+        }
+
+        // 2. Group wallpaper shrinks and clips to form a square-ish shape
+        // (targetRadius is calculated above)
+        tl.to(
+          groupEl,
+          {
+            scale: baseScale,
+            clipPath: `inset(${cutY}px ${cutX}px ${cutY}px ${cutX}px round ${targetRadius}px)`,
+            duration: 0.8,
+            ease: 'none',
+          },
+          0
+        );
+
+        // 3. eyad-small.png crossfades in (30% → 70%)
+        if (eyadSmallEl) {
+          tl.to(
+            eyadSmallEl,
+            {
+              opacity: 1,
+              duration: 0.4,
+              ease: 'power1.inOut',
+            },
+            0.3
+          );
+        }
+
+        currentTl = tl;
+
+        // 4. Disable ThreeDissolveHero interactivity during scroll
+        currentInteractiveST = ScrollTrigger.create({
+          trigger: heroScrollSectionRef.current,
+          start: 'top top',
+          end: 'bottom bottom',
+          onUpdate: (self) => {
+            setIsInteractive(self.progress < 0.05);
+            setIsScrolled(self.progress > 0.05);
+          },
+        });
+
+        ScrollTrigger.refresh();
+      };
+
+      // Initial setup — wait for layout to settle
+      const rafId = requestAnimationFrame(() => {
+        requestAnimationFrame(setup);
+      });
+
+      // Rebuild on resize / orientation change (covers mobile address-bar
+      // resize, devtools device toggling, and rotation)
+      let resizeTimeout;
+      const handleResize = () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(setup, 200);
+      };
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('orientationchange', handleResize);
+
+      return () => {
+        cancelAnimationFrame(rafId);
+        clearTimeout(resizeTimeout);
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('orientationchange', handleResize);
+      };
+    });
+
+    return () => ctx.revert();
+  }, [isLoading]);
+
   return (
     <>
       <AnimatePresence mode="wait">
@@ -505,27 +726,123 @@ const App = () => {
       </AnimatePresence>
 
       {!isLoading && (
-        <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden" }}>
+        <div style={{ position: "relative", width: "100%", minHeight: "100vh" }}>
+          {/* ======= Z-0: DARK GREEN BACKGROUND + MARQUEE ======= */}
+          <div className="scroll-reveal-bg">
+            <motion.div
+              className="bg-blobs"
+              style={{ opacity: 0.1 }}
+              animate={{
+                x: [0, 30, -15, 0],
+                y: [0, -30, 20, 0],
+                scale: [1, 1.1, 0.95, 1],
+                rotate: [0, 2, -2, 0],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <img
+                src={blobsBg}
+                alt="Background Blobs"
+                className="bg-blobs-img"
+              />
+            </motion.div>
+            <ScrollVelocity
+              texts={['To get something you never had']}
+              velocity={80}
+              className="scroll-text-green"
+              numCopies={8}
+              damping={50}
+              stiffness={400}
+              scrollerStyle={{ gap: '2rem' }}
+              parallaxClassName="parallax green-parallax"
+            />
+            <ScrollVelocity
+              texts={['You have to do something you never did']}
+              velocity={-80}
+              className="scroll-text-white"
+              numCopies={8}
+              damping={50}
+              stiffness={400}
+              scrollerStyle={{ gap: '2rem' }}
+              parallaxClassName="parallax white-parallax"
+            />
+          </div>
+
           {/* ======= NAVBAR ======= */}
           <nav className="nav-bar">
             <div className="nav-inner relative flex justify-between items-center w-full">
-              {/* Left: Text Logo */}
-              <div className="flex-shrink-0 flex items-center" style={{ width: "8rem" }}>
-                <TextLogo isMenuOpen={isMenuOpen} />
+              {/* Left: Text Logo (Desktop) & Mobile Store Button */}
+              <div className="flex-shrink-0 flex items-center">
+                <div className="desktop-logo" style={{ width: "8rem" }}>
+                  <TextLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
+                </div>
+                <div className="mobile-logo">
+                  <StoreButton isMenuOpen={isMenuOpen} />
+                </div>
               </div>
 
-              {/* Center: Brand Monogram Logo */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <HeaderLogo isMenuOpen={isMenuOpen} />
+              {/* Center: Brand Monogram Logo (Desktop) */}
+              <div className="desktop-logo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+                <HeaderLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
+                <div style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  opacity: (isScrolled && !isMenuOpen) ? 1 : 0,
+                  transition: "opacity 0.5s ease",
+                  pointerEvents: (isScrolled && !isMenuOpen) ? "auto" : "none",
+                  paddingTop: "0.08rem",
+                  whiteSpace: "nowrap"
+                }}>
+                  <span style={{ fontSize: "0.60rem", fontWeight: 800, letterSpacing: "0.3em", color: "#f4f4ed", textTransform: "uppercase" }}>
+                    MESSAGE FROM EYAD
+                  </span>
+                </div>
               </div>
 
-              {/* Right: Store + Hamburger */}
-              <div className="nav-btns">
-                <StoreButton isMenuOpen={isMenuOpen} />
-                <HamburgerButton
-                  isOpen={isMenuOpen}
-                  toggle={() => setIsMenuOpen(!isMenuOpen)}
-                />
+              {/* Center: Mobile Logo Cluster */}
+              <div className="mobile-logo absolute left-1/2 flex-col items-center pointer-events-auto" style={{ top: "5.5rem", transform: "translateX(-50%)", width: "max-content", textAlign: "center" }}>
+                <div style={{ 
+                  transform: isScrolled ? "scale(0.6) translateY(2.2rem)" : "scale(0.85) translateY(0)", 
+                  transformOrigin: "center top", 
+                  marginBottom: "-0.5rem",
+                  transition: "transform 0.5s ease" 
+                }}>
+                  <HeaderLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
+                </div>
+                <div style={{ opacity: isMenuOpen ? 0 : 1, pointerEvents: isMenuOpen ? "none" : "auto", transition: "opacity 0.5s ease", position: "relative" }}>
+                  
+                  {/* Default State (Not Scrolled) */}
+                  <div style={{ opacity: isScrolled ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: isScrolled ? "none" : "auto" }}>
+                    <div className="flex gap-1 items-baseline justify-center">
+                      <span style={{ fontSize: "1.4rem", fontWeight: 500, fontFamily: "'Playfair Display', serif", color: "#2D3126" }}>EYAD</span>
+                      <span style={{ fontSize: "1.3rem", fontWeight: 900, fontFamily: "'Brier ', sans-serif", color: "#2D3126" }}>MONEIM</span>
+                    </div>
+                    <span style={{ display: "block", fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.05em", marginTop: "0.15rem", color: "#2D3126" }}>DEVELOPER SINCE 2024</span>
+                  </div>
+
+                  {/* Scrolled State */}
+                  <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", opacity: isScrolled ? 1 : 0, transition: "opacity 0.5s ease", pointerEvents: isScrolled ? "auto" : "none" }}>
+                    <span style={{ fontSize: "0.65rem", fontWeight: 800, letterSpacing: "0.2em", color: "#f4f4ed", textTransform: "uppercase" }}>MESSAGE FROM EYAD</span>
+                  </div>
+                  
+                </div>
+              </div>
+
+              {/* Right: Store + Hamburger (Desktop) & Mobile Hamburger */}
+              <div className="flex items-center">
+                <div className="desktop-logo nav-btns">
+                  <StoreButton isMenuOpen={isMenuOpen} />
+                  <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen(!isMenuOpen)} />
+                </div>
+                <div className="mobile-logo">
+                  <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen(!isMenuOpen)} />
+                </div>
               </div>
             </div>
           </nav>
@@ -533,46 +850,61 @@ const App = () => {
           {/* ======= FULLSCREEN MENU ======= */}
           <FullscreenMenu isOpen={isMenuOpen} currentPage="Home" />
 
-          {/* ======= PAGE CONTENT ======= */}
-          <motion.div
-            animate={{
-              filter: isMenuOpen ? "blur(12px)" : "blur(0px)",
+          {/* ======= GROUP-WALLPAPER: fixed layer that shrinks on scroll ======= */}
+          {/* Uses CSS transition (not framer-motion filter) to avoid breaking position:fixed */}
+          <div
+            className="group-wallpaper"
+            ref={groupWallpaperRef}
+            style={{
+              filter: isMenuOpen ? "blur(12px)" : "none",
               opacity: isMenuOpen ? 0.3 : 1,
+              transition: "filter 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            transition={{ duration: 1, ease: EASE_SMOOTH }}
-            className="page-content"
           >
-            <div className="hero-shrink-wrapper">
-              <motion.div
-                className="bg-blobs"
-                animate={{
-                  x: [0, 30, -15, 0],
-                  y: [0, -30, 20, 0],
-                  scale: [1, 1.1, 0.95, 1],
-                  rotate: [0, 2, -2, 0],
-                }}
-                transition={{
-                  duration: 20,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <img
-                  src={blobsBg}
-                  alt="Background Blobs"
-                  className="bg-blobs-img"
-                />
-              </motion.div>
-              <div className="bg-gradient-overlay" />
+            {/* Animated wallpaper blobs */}
+            <motion.div
+              ref={bgBlobsRef}
+              className="bg-blobs"
+              animate={{
+                x: [0, 30, -15, 0],
+                y: [0, -30, 20, 0],
+                scale: [1, 1.1, 0.95, 1],
+                rotate: [0, 2, -2, 0],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <img
+                src={blobsBg}
+                alt="Background Blobs"
+                className="bg-blobs-img"
+              />
+            </motion.div>
+            <div className="bg-gradient-overlay" />
 
-              <div className="hero-inner" style={{ position: "relative", width: "100%", height: "100vh" }}>
-                <div style={{ position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none' }}>
-                   <ThreeDissolveHero isInteractive={isInteractive} />
-                </div>
-                <HeroSection />
+            {/* Hero inner content */}
+            <div className="hero-inner" style={{ position: "relative", width: "100%", height: "100vh" }}>
+              <div ref={threeDissolveRef} style={{ position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none' }}>
+                <ThreeDissolveHero isInteractive={isInteractive} />
               </div>
+              <HeroSection />
             </div>
-          </motion.div>
+
+            {/* eyad-small.png crossfade overlay */}
+            <img
+              ref={eyadSmallRef}
+              src={eyadSmallSrc}
+              alt="Eyad portrait"
+              className="eyad-small-overlay"
+            />
+          </div>
+
+          {/* ======= SCROLL SPACER ======= */}
+          {/* Provides scroll distance for the shrink animation */}
+          <div className="hero-scroll-section" ref={heroScrollSectionRef} />
         </div>
       )}
     </>

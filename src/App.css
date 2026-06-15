@@ -505,11 +505,11 @@ body {
   flex-direction: column;
   flex-grow: 1;
   width: 100%;
-  padding-top: 8rem;
+  padding-top: 5rem;
 }
 
 .bg-blobs {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 0;
   opacity: 0.8;
@@ -522,9 +522,9 @@ body {
 }
 
 .bg-gradient-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   background: linear-gradient(
     to bottom,
     rgba(244, 243, 241, 0.4),
@@ -678,6 +678,23 @@ body {
   }
 }
 
+.desktop-logo {
+  display: flex;
+}
+
+.mobile-logo {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .desktop-logo {
+    display: none !important;
+  }
+  .mobile-logo {
+    display: flex !important;
+  }
+}
+
 /* ================================================
    RESPONSIVE (Tablet / Mobile)
    ================================================ */
@@ -694,16 +711,11 @@ body {
     font-size: 3.5rem;
   }
 
-  .store-btn {
-    display: none;
-  }
-}
-
 @media (max-width: 479px) {
   .nav-menu-link {
     font-size: 2.5rem;
   }
-
+}
   .menu-img-wrapper {
     width: 100%;
     height: 15rem;
@@ -727,5 +739,97 @@ body {
   .nav-ham-line {
     width: 18px;
     height: 2px;
+  }
+}
+
+/* ================================================
+   SCROLL-DRIVEN HERO SHRINK EFFECT (Phase 1)
+   ================================================ */
+
+/* Dark green background layer — sits behind everything,
+   revealed as group-wallpaper shrinks */
+.scroll-reveal-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--color-dark-green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ScrollVelocity marquee wrapper — centered in the dark bg */
+.scroll-reveal-bg section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Marquee text color variants */
+.scroll-text-green {
+  color: #d2ff00;
+}
+
+.scroll-text-white {
+  color: #f4f4ed;
+}
+
+/* The grouped hero element that shrinks on scroll.
+   Contains: white bg, wallpaper.svg, ThreeDissolveHero, eyad-small overlay.
+   Fixed so it stays centered in viewport during the scroll-driven shrink. */
+.group-wallpaper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f4f3f1;
+  will-change: transform, border-radius;
+  transform-origin: center center;
+  z-index: 10;
+}
+
+/* eyad-small.png overlay — fades in during scroll shrink */
+.eyad-small-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  z-index: 25;
+  pointer-events: none;
+}
+
+/* The pinned scroll section that drives the shrink animation */
+.hero-scroll-section {
+  position: relative;
+  width: 100%;
+  /* Extra height creates scroll room for the pinned shrink animation */
+  height: 250vh;
+  z-index: 10;
+}
+
+@media (max-width: 991px) {
+  .scroll-reveal-bg {
+    justify-content: flex-end;
+    padding-bottom: 8vh;
+  }
+  
+  /* Move the top green text down towards the white text */
+  .green-parallax {
+    position: relative;
+    top: 5rem;
+  }
+
+  /* Make sure the image is not zoomed-in on tall mobile screens */
+  .eyad-small-overlay {
+    object-fit:cover;
+    justify-content: flex-end;
+    padding-bottom: 8vh;
   }
 }

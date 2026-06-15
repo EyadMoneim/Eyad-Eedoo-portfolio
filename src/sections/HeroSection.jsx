@@ -35,7 +35,7 @@ export default function HeroSection() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 0.6 }}
-        className="absolute left-4 lg:left-12 bottom-4 lg:bottom-12 hidden md:flex flex-col w-[140px]"
+        className="next-project-card absolute left-4 lg:left-12 bottom-4 lg:bottom-12 hidden md:flex flex-col w-[140px]"
         style={{ zIndex: 20 }}
       >
         <div style={{ position: 'relative', width: '100%', padding: '1.25rem 0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
