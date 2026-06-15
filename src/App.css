@@ -823,13 +823,14 @@ body {
   /* Move the top green text down towards the white text */
   .green-parallax {
     position: relative;
-    top: 5rem;
+    top: 3rem;
   }
 
   /* Make sure the image is not zoomed-in on tall mobile screens */
   .eyad-small-overlay {
     object-fit: cover;
     justify-content: flex-end;
-    padding-bottom: 8vh;
+    padding-top: 23vh;
+    padding-right: 0.1vh;
   }
 }
