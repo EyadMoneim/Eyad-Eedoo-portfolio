@@ -111,10 +111,14 @@ void main() {
 // ================================================
 // Scene Content
 // ================================================
-function SceneContent({ hoverProgress, globalMouse }) {
+function SceneContent({ hoverProgress, globalMouse, mouseNDC }) {
   const dissolveMaterialRef = useRef();
   const groupRef = useRef();
-  const { viewport } = useThree();
+  const meshRef = useRef();
+  const { viewport, camera } = useThree();
+
+  // Create a dedicated raycaster (not from R3F's event system)
+  const raycaster = useMemo(() => new THREE.Raycaster(), []);
 
   const [humanTexture, robotTexture] = useTexture([eyadHumanSrc, eyadRobotSrc]);
 
@@ -168,6 +172,18 @@ function SceneContent({ hoverProgress, globalMouse }) {
       dissolveMaterialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     }
 
+    // Raycast from mouse NDC to get UV on the plane
+    if (meshRef.current && dissolveMaterialRef.current && mouseNDC.current) {
+      raycaster.setFromCamera(mouseNDC.current, camera);
+      const intersects = raycaster.intersectObject(meshRef.current, false);
+      if (intersects.length > 0 && intersects[0].uv) {
+        dissolveMaterialRef.current.uniforms.uMouse.value.set(
+          intersects[0].uv.x,
+          intersects[0].uv.y
+        );
+      }
+    }
+
     if (groupRef.current && globalMouse) {
       // 1. Continuous breathing / floating effect (1% of viewport height)
       const t = state.clock.elapsedTime;
@@ -183,13 +199,6 @@ function SceneContent({ hoverProgress, globalMouse }) {
     }
   });
 
-  const handlePointerMove = useCallback((e) => {
-    if (dissolveMaterialRef.current && e.uv) {
-      // e.uv gives the 0..1 coordinates on the plane for the dissolve effect
-      dissolveMaterialRef.current.uniforms.uMouse.value.copy(e.uv);
-    }
-  }, []);
-
   return (
     <group
       ref={groupRef}
@@ -197,7 +206,7 @@ function SceneContent({ hoverProgress, globalMouse }) {
       position={[0, baseY, 0]}
     >
       {/* Single Layer: Human and Robot mixed dynamically */}
-      <mesh position={[0, 0, 0]} onPointerMove={handlePointerMove}>
+      <mesh ref={meshRef} position={[0, 0, 0]}>
         <planeGeometry args={[1, 1]} />
         <shaderMaterial
           ref={dissolveMaterialRef}
@@ -218,38 +227,78 @@ function SceneContent({ hoverProgress, globalMouse }) {
 export default function ThreeDissolveHero({ isInteractive = true }) {
   const hoverProgress = useRef(0);
   const tweenRef = useRef(null);
+  const containerRef = useRef(null);
+  const wasInsideRef = useRef(false);
   
-  // Track global mouse position for parallax
+  // Track global mouse position for parallax (-1 to +1)
   const globalMouse = useRef(new THREE.Vector2(0, 0));
+  
+  // Track mouse in NDC space (-1 to +1) for raycasting, relative to canvas
+  const mouseNDC = useRef(new THREE.Vector2(0, 0));
 
   useEffect(() => {
-    const handleGlobalMouseMove = (e) => {
-      // Normalize to -1 to +1
+    // Listen on WINDOW so pointer-events:none on parents doesn't matter
+    const handleMouseMove = (e) => {
+      // Update global parallax
       globalMouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
       globalMouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const isInside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+
+      // Convert screen position to NDC for the canvas (-1 to +1)
+      const ndcX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const ndcY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      mouseNDC.current.set(ndcX, ndcY);
+
+      if (isInside && isInteractive) {
+        if (!wasInsideRef.current) {
+          // Mouse just entered
+          wasInsideRef.current = true;
+          if (tweenRef.current) tweenRef.current.kill();
+          tweenRef.current = gsap.to(hoverProgress, {
+            current: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+        }
+      } else {
+        if (wasInsideRef.current) {
+          // Mouse just left
+          wasInsideRef.current = false;
+          if (tweenRef.current) tweenRef.current.kill();
+          tweenRef.current = gsap.to(hoverProgress, {
+            current: 0,
+            duration: 0.8,
+            ease: "power2.inOut",
+          });
+        }
+      }
     };
-    
-    window.addEventListener("mousemove", handleGlobalMouseMove);
-    return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
-  }, []);
 
-  const handlePointerEnter = useCallback(() => {
-    if (tweenRef.current) tweenRef.current.kill();
-    tweenRef.current = gsap.to(hoverProgress, {
-      current: 1,
-      duration: 0.8,
-      ease: "power2.out",
-    });
-  }, []);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [isInteractive]);
 
-  const handlePointerLeave = useCallback(() => {
-    if (tweenRef.current) tweenRef.current.kill();
-    tweenRef.current = gsap.to(hoverProgress, {
-      current: 0,
-      duration: 0.8,
-      ease: "power2.inOut",
-    });
-  }, []);
+  // When interactivity is disabled (scrolled past hero), smoothly reverse any active hover
+  useEffect(() => {
+    if (!isInteractive && wasInsideRef.current) {
+      wasInsideRef.current = false;
+      if (tweenRef.current) tweenRef.current.kill();
+      tweenRef.current = gsap.to(hoverProgress, {
+        current: 0,
+        duration: 0.8,
+        ease: "power2.inOut",
+      });
+    }
+  }, [isInteractive]);
 
   useEffect(() => {
     return () => {
@@ -257,22 +306,12 @@ export default function ThreeDissolveHero({ isInteractive = true }) {
     };
   }, []);
 
-  // When interactivity is disabled (scrolled past hero), smoothly reverse any active hover
-  useEffect(() => {
-    if (!isInteractive) {
-      handlePointerLeave();
-    }
-  }, [isInteractive, handlePointerLeave]);
-
   return (
     <div
-      onPointerEnter={isInteractive ? handlePointerEnter : undefined}
-      onPointerLeave={isInteractive ? handlePointerLeave : undefined}
+      ref={containerRef}
       style={{
         width: "100%",
         height: "100%",
-        cursor: isInteractive ? "pointer" : "default",
-        pointerEvents: isInteractive ? "auto" : "none",
       }}
     >
       <Canvas
@@ -283,7 +322,11 @@ export default function ThreeDissolveHero({ isInteractive = true }) {
         camera={{ zoom: 1, position: [0, 0, 5], near: 0.1, far: 100 }}
         style={{ background: "transparent" }}
       >
-        <SceneContent hoverProgress={hoverProgress} globalMouse={globalMouse} />
+        <SceneContent
+          hoverProgress={hoverProgress}
+          globalMouse={globalMouse}
+          mouseNDC={mouseNDC}
+        />
       </Canvas>
     </div>
   );

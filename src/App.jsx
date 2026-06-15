@@ -861,28 +861,14 @@ const App = () => {
               transition: "filter 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
-            {/* Animated wallpaper blobs */}
-            <motion.div
-              ref={bgBlobsRef}
-              className="bg-blobs"
-              animate={{
-                x: [0, 30, -15, 0],
-                y: [0, -30, 20, 0],
-                scale: [1, 1.1, 0.95, 1],
-                rotate: [0, 2, -2, 0],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
+            {/* Wallpaper blobs (static, centered) */}
+            <div ref={bgBlobsRef} className="bg-blobs">
               <img
                 src={blobsBg}
                 alt="Background Blobs"
                 className="bg-blobs-img"
               />
-            </motion.div>
+            </div>
             <div className="bg-gradient-overlay" />
 
             {/* Hero inner content */}

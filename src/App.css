@@ -711,11 +711,11 @@ body {
     font-size: 3.5rem;
   }
 
-@media (max-width: 479px) {
-  .nav-menu-link {
-    font-size: 2.5rem;
+  @media (max-width: 479px) {
+    .nav-menu-link {
+      font-size: 2.5rem;
+    }
   }
-}
   .menu-img-wrapper {
     width: 100%;
     height: 15rem;
@@ -819,7 +819,7 @@ body {
     justify-content: flex-end;
     padding-bottom: 8vh;
   }
-  
+
   /* Move the top green text down towards the white text */
   .green-parallax {
     position: relative;
@@ -828,7 +828,7 @@ body {
 
   /* Make sure the image is not zoomed-in on tall mobile screens */
   .eyad-small-overlay {
-    object-fit:cover;
+    object-fit: cover;
     justify-content: flex-end;
     padding-bottom: 8vh;
   }
