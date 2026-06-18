@@ -703,22 +703,22 @@ const App = () => {
           {
             scale: baseScale,
             clipPath: `inset(${cutY}px ${cutX}px ${cutY}px ${cutX}px round ${targetRadius}px)`,
-            duration: 0.8,
+            duration: 2.6, // Slower shrink
             ease: 'none',
           },
           0
         );
 
-        // 3. eyad-small.png crossfades in (30% → 70%)
+        // 3. eyad-small.png crossfades in (much slower fade)
         if (eyadSmallEl) {
           tl.to(
             eyadSmallEl,
             {
               opacity: 1,
-              duration: 0.4,
+              duration: 1.6,
               ease: 'power1.inOut',
             },
-            0.3
+            0.6
           );
         }
 
@@ -728,7 +728,7 @@ const App = () => {
           tl.to(
             sigMainRect,
             { attr: { width: sigMainBox.width + SIG_PAD * 2 }, duration: 0.85, ease: 'none' },
-            0.4
+            1.9
           );
         }
 
@@ -737,7 +737,7 @@ const App = () => {
           tl.to(
             sigUnderlineRect,
             { attr: { width: sigUnderlineBox.width + SIG_PAD * 2 }, duration: 0.35, ease: 'none' },
-            1.25
+            2.05
           );
         }
 
@@ -746,7 +746,7 @@ const App = () => {
           tl.to(
             sigSixRect,
             { attr: { width: sigSixBox.width + SIG_PAD * 2 }, duration: 0.45, ease: 'none' },
-            1.60
+            2.4
           );
         }
 

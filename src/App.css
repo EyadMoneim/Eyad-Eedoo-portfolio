@@ -852,7 +852,7 @@ body {
   position: relative;
   width: 100%;
   /* Extra height creates scroll room for the pinned shrink animation */
-  height: 220vh;
+  height: 280vh;
   z-index: 10;
 }
 
