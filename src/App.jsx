@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LoadingScreen from "./LoadingScreen";
 import blobsBg from "./assets/wallpaper.svg";
 import eyadSmallSrc from "./assets/eyad-small.png";
+import signatureRaw from "./assets/signature.svg?raw";
 import Logo from "./Logo";
 import "./App.css";
 import HeroSection from "./sections/HeroSection";
@@ -12,6 +13,22 @@ import ThreeDissolveHero from "./ThreeDissolveHero";
 import ScrollVelocity from "./components/ScrollVelocity";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// =========================================
+// Parse signature SVG paths for Phase 2
+// =========================================
+const _sigParser = new DOMParser();
+const _sigDoc = _sigParser.parseFromString(signatureRaw, 'image/svg+xml');
+const _sigAllPaths = Array.from(_sigDoc.querySelectorAll('path'));
+const _sigSt0 = _sigAllPaths.filter(p => p.classList.contains('st0'));
+const _sigSt1 = _sigAllPaths.filter(p => p.classList.contains('st1'));
+const SIG_PATHS = {
+  main: [_sigSt0[0]].map(p => p?.getAttribute('d')).filter(Boolean),
+  underline: [_sigSt0[1]].map(p => p?.getAttribute('d')).filter(Boolean),
+  six: _sigSt0[2]?.getAttribute('d') || '',
+  dots: [_sigSt0[3], _sigSt0[4]].map(p => p?.getAttribute('d')).filter(Boolean),
+  highlights: _sigSt1.map(p => p?.getAttribute('d')).filter(Boolean),
+};
 
 // =========================================  
 // Color Palette (matching Lando Norris site)
@@ -517,6 +534,8 @@ const App = () => {
   const eyadSmallRef = useRef(null);
   const threeDissolveRef = useRef(null);
   const bgBlobsRef = useRef(null);
+  const signatureRef = useRef(null);
+  const signatureLayerRef = useRef(null);
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -546,6 +565,14 @@ const App = () => {
         const threeDissolveEl = threeDissolveRef.current;
         const bgBlobsEl = bgBlobsRef.current;
         const nextProjectEl = document.querySelector('.next-project-card');
+        const sigEl = signatureRef.current;
+        const sigMainGroup = sigEl?.querySelector('.sig-main');
+        const sigUnderlineGroup = sigEl?.querySelector('.sig-underline');
+        const sigSixGroup = sigEl?.querySelector('.sig-six');
+        const sigMainRect = sigEl?.querySelector('.sig-main-rect');
+        const sigUnderlineRect = sigEl?.querySelector('.sig-underline-rect');
+        const sigSixRect = sigEl?.querySelector('.sig-six-rect');
+        const sigLayerEl = signatureLayerRef.current;
 
         if (!groupEl) return;
 
@@ -566,6 +593,26 @@ const App = () => {
         if (threeDissolveEl) gsap.set(threeDissolveEl, { opacity: 1 });
         if (bgBlobsEl) gsap.set(bgBlobsEl, { opacity: 1 });
         if (nextProjectEl) gsap.set(nextProjectEl, { autoAlpha: 1, y: 0 });
+
+        const SIG_PAD = 10;
+        const initSigClip = (rectEl, groupEl) => {
+          if (!rectEl || !groupEl) return null;
+          let box;
+          try { box = groupEl.getBBox(); } catch (e) { return null; }
+          if (!box || box.width === 0) return null;
+          gsap.set(rectEl, {
+            attr: {
+              x: box.x - SIG_PAD,
+              y: box.y - SIG_PAD,
+              height: box.height + SIG_PAD * 2,
+              width: 0,
+            },
+          });
+          return box;
+        };
+        const sigMainBox = initSigClip(sigMainRect, sigMainGroup);
+        const sigUnderlineBox = initSigClip(sigUnderlineRect, sigUnderlineGroup);
+        const sigSixBox = initSigClip(sigSixRect, sigSixGroup);
 
         // Calculate scale and clipPath values
         const vw = window.innerWidth;
@@ -672,6 +719,34 @@ const App = () => {
               ease: 'power1.inOut',
             },
             0.3
+          );
+        }
+
+        // 4. Signature build-up effect (Phase 2)
+        // Stage 1 — E.Moneim name writes in
+        if (sigMainRect && sigMainBox) {
+          tl.to(
+            sigMainRect,
+            { attr: { width: sigMainBox.width + SIG_PAD * 2 }, duration: 0.85, ease: 'none' },
+            0.4
+          );
+        }
+
+        // Stage 2 — underline draws after name
+        if (sigUnderlineRect && sigUnderlineBox) {
+          tl.to(
+            sigUnderlineRect,
+            { attr: { width: sigUnderlineBox.width + SIG_PAD * 2 }, duration: 0.35, ease: 'none' },
+            1.25
+          );
+        }
+
+        // Stage 3 — number 6 writes in (same wipe technique, no scale/fade/pop)
+        if (sigSixRect && sigSixBox) {
+          tl.to(
+            sigSixRect,
+            { attr: { width: sigSixBox.width + SIG_PAD * 2 }, duration: 0.45, ease: 'none' },
+            1.60
           );
         }
 
@@ -879,13 +954,62 @@ const App = () => {
               <HeroSection />
             </div>
 
-            {/* eyad-small.png crossfade overlay */}
-            <img
-              ref={eyadSmallRef}
-              src={eyadSmallSrc}
-              alt="Eyad portrait"
-              className="eyad-small-overlay"
-            />
+            {/* Message image wrapper: eyad-small (Phase 2) */}
+            <div className="message-image-wrapper">
+              <img
+                ref={eyadSmallRef}
+                src={eyadSmallSrc}
+                alt="Eyad portrait"
+                className="eyad-small-overlay"
+              />
+            </div>
+          </div>
+
+          {/* SIGNATURE LAYER — lives outside group-wallpaper so it escapes the portrait frame */}
+          <div className="signature-layer" ref={signatureLayerRef}>
+            <svg
+              ref={signatureRef}
+              className="signature-overlay"
+              viewBox="0 0 841.9 595.3"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <clipPath id="sig-main-clip">
+                  <rect className="sig-main-rect" x="0" y="0" width="0" height="600" />
+                </clipPath>
+                <clipPath id="sig-underline-clip">
+                  <rect className="sig-underline-rect" x="0" y="0" width="0" height="600" />
+                </clipPath>
+                <clipPath id="sig-six-clip">
+                  <rect className="sig-six-rect" x="0" y="0" width="0" height="600" />
+                </clipPath>
+              </defs>
+
+              {/* Stage 1 — name body + dots + highlights */}
+              <g className="sig-main" clipPath="url(#sig-main-clip)">
+                {SIG_PATHS.main.map((d, i) => (
+                  <path key={`sig-main-${i}`} d={d} fill="#d2ff00" />
+                ))}
+                {SIG_PATHS.dots.map((d, i) => (
+                  <path key={`sig-dot-${i}`} d={d} fill="#d2ff00" />
+                ))}
+                {SIG_PATHS.highlights.map((d, i) => (
+                  <path key={`sig-hl-${i}`} d={d} fill="#E1E670" />
+                ))}
+              </g>
+
+              {/* Stage 2 — underline stroke */}
+              <g className="sig-underline" clipPath="url(#sig-underline-clip)">
+                {SIG_PATHS.underline.map((d, i) => (
+                  <path key={`sig-underline-${i}`} d={d} fill="#d2ff00" />
+                ))}
+              </g>
+
+              {/* Stage 3 — number 6 */}
+              <g className="sig-six" clipPath="url(#sig-six-clip)">
+                <path d={SIG_PATHS.six} fill="#d2ff00" />
+              </g>
+            </svg>
           </div>
 
           {/* ======= SCROLL SPACER ======= */}

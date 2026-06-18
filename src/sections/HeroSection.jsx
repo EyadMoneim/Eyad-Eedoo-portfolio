@@ -112,7 +112,7 @@ export default function HeroSection() {
                 lineHeight: 1.2
               }}
             >
-              Building<br />Since 2021
+              DEVELOPER<br />Since 2024
             </div>
           </div>
         </div>

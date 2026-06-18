@@ -35,13 +35,12 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-white);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-dark-green);
   border-radius: 6px;
-  border: 2px solid var(--color-white);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -59,7 +58,7 @@ body {
   overflow-x: hidden;
   background-color: var(--color-dark-green);
   scrollbar-width: thin;
-  scrollbar-color: var(--color-dark-green) var(--color-white);
+  scrollbar-color: var(--color-dark-green) transparent;
 }
 
 /* ================================================
@@ -770,11 +769,11 @@ body {
 
 /* Marquee text color variants */
 .scroll-text-green {
-  color: #d2ff00;
+  color: #b2c73c;
 }
 
 .scroll-text-white {
-  color: #f4f4ed;
+  color: #dde1d2;
 }
 
 /* The grouped hero element that shrinks on scroll.
@@ -801,8 +800,51 @@ body {
   height: 100%;
   object-fit: cover;
   opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Message image wrapper — holds eyad-small + signature (Phase 2) */
+.message-image-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 25;
   pointer-events: none;
+}
+
+/* Signature SVG overlay — draws on scroll (Phase 2) */
+.signature-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: visible;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.signature-overlay {
+  width: min(1800px, 220vw);
+  max-width: none;
+  flex-shrink: 0;
+  height: auto;
+  transform: rotate(-5deg) translate(2%, -3%);
+  overflow: visible;
+  filter: drop-shadow(0 0 12px rgba(210, 255, 0, 0.45))
+          drop-shadow(0 0 30px rgba(210, 255, 0, 0.16));
+}
+
+@media (max-width: 991px) {
+  .signature-overlay {
+    width: 260vw;
+    max-width: none;
+    transform: rotate(-5deg) translate(2%, -3%);
+  }
 }
 
 /* The pinned scroll section that drives the shrink animation */
@@ -810,7 +852,7 @@ body {
   position: relative;
   width: 100%;
   /* Extra height creates scroll room for the pinned shrink animation */
-  height: 250vh;
+  height: 220vh;
   z-index: 10;
 }
 
