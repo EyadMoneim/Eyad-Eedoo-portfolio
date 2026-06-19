@@ -4,8 +4,8 @@ import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 
-import eyadHumanSrc from "./assets/eyad-human.png";
-import eyadRobotSrc from "./assets/eyad-robot.png";
+import eyadHumanSrc from "./assets/eyad-human.avif";
+import eyadRobotSrc from "./assets/eyad-robot.avif";
 
 // ================================================
 // Simplex 2D noise GLSL (Ashima Arts)
@@ -149,7 +149,8 @@ function SceneContent({ hoverProgress, globalMouse, mouseNDC }) {
     }
 
     // Anchor to bottom: bottom of plane (-targetH / 2) touches bottom of viewport (-viewport.height / 2)
-    const yPos = (targetH - viewport.height) / 2;
+    // Subtract viewport.height * 0.02 so the max upward float and parallax (1% + 1%) never reveal a gap
+    const yPos = (targetH - viewport.height) / 2 - (viewport.height * 0.02);
 
     return [[targetW, targetH, 1], yPos];
   }, [aspect, viewport.width, viewport.height]);
@@ -189,12 +190,15 @@ function SceneContent({ hoverProgress, globalMouse, mouseNDC }) {
       const t = state.clock.elapsedTime;
       const floatY = Math.sin(t * 1.5) * (viewport.height * 0.01);
 
-      // 2. Parallax tracking — vertical only, NO horizontal drift
-      const parallaxY = globalMouse.current.y * (viewport.height * 0.01);
+      // 2. Subtle premium mouse-follow parallax on both axes
+      const parallaxX = globalMouse.current.x * (viewport.width * 0.010);
+      const parallaxY = globalMouse.current.y * (viewport.height * 0.000);
 
-      // Smooth dampening: X always returns to center (0), Y follows mouse + float around baseY
+      // Smooth dampening: X follows mouse horizontally, Y follows mouse + float around baseY
+      const targetX = parallaxX;
       const targetY = baseY + parallaxY + floatY;
-      groupRef.current.position.x += (0 - groupRef.current.position.x) * 0.04;
+      
+      groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.04;
       groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.03;
     }
   });

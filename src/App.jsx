@@ -4,8 +4,10 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LoadingScreen from "./LoadingScreen";
 import blobsBg from "./assets/wallpaper.svg";
-import eyadSmallSrc from "./assets/eyad-small.png";
+import eyadSmallSrc from "./assets/eyad-small.avif";
 import signatureRaw from "./assets/signature.svg?raw";
+import laurelWreathSrc from "./assets/Laurel_Wreath.svg";
+import reactLogoSrc from "./assets/react.svg";
 import Logo from "./Logo";
 import "./App.css";
 import HeroSection from "./sections/HeroSection";
@@ -83,6 +85,16 @@ const HelmetIcon = () => (
   >
     <path d="M68.4 33.8c.1-.7.3-1.4.4-2.3 1.1-6.1.4-11.8-2-17-2.9-6.2-9.3-12.9-18.3-13.1-9.1 0-15.6 6.4-18.7 12.6-2.6 5.1-3.4 10.8-2.4 17 .1.9.3 1.6.4 2.3 0 .5.1.9.3 1.4.1.6.3 1.2.4 1.7v.2c.1.5.3 1 .4 1.5.3 1 .5 1.5.8 1.9 0 .2.2.4.3.7l.3.9v.3c0 .3.1.5.2.8 0 1.4.7 2.2 1.5 3.3.9 1.1 1.6 1.3 2.9 1.5.9.1 1.4.2 3 .6l2 .4c2.3.8 4.6 1.3 7.9 1.3h.4c3.1 0 5.2-.4 7.5-1.1s1.9-.4 1.9-.4c1.6-.3 2.2-.4 3.1-.5 1.3-.2 2-.3 3-1.5.9-1 1.5-1.8 1.6-3.2.1-.3.2-.5.3-.8V42c0-.4.2-.7.3-.9.1-.3.2-.5.3-.7.3-.5.5-.9.8-1.9.1-.5.3-1 .4-1.5v-.2c.1-.5.3-1.1.4-1.7.2-.4.3-.9.3-1.4Z" />
   </svg>
+);
+
+// =========================================
+// Developer Badge
+// =========================================
+export const DeveloperBadge = () => (
+  <div className="developer-badge">
+    <img src={laurelWreathSrc} alt="Laurel Wreath" className="developer-badge-wreath" />
+    <img src={reactLogoSrc} alt="React Logo" className="developer-badge-react" />
+  </div>
 );
 
 // =========================================
@@ -233,7 +245,7 @@ const StoreButton = ({ isMenuOpen }) => (
     }}
   >
     <StoreIcon />
-    <span className="store-btn-text">Store</span>
+    <span className="store-btn-text">Eedoo</span>
   </motion.a>
 );
 
@@ -303,22 +315,45 @@ const MenuImage = ({ src, alt, index, isOpen }) => {
 // =========================================
 // 5. Strikethrough SVG for current link
 // =========================================
-const CurrentLinkSVG = () => (
-  <svg
-    width="100%"
-    height="100%"
-    viewBox="0 0 412 26"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="nav-link-current-svg"
-  >
-    <path
-      d="M0 2h73.539c5.858 0 11.47 2.35 15.58 6.525l8.565 8.7a21.863 21.863 0 0 0 15.58 6.525h72.678c6.045 0 11.82-2.503 15.954-6.914l6.485-6.922A21.865 21.865 0 0 1 224.336 3h76.752a21.864 21.864 0 0 1 16.806 7.88l4.362 5.24A21.864 21.864 0 0 0 339.063 24H412"
-      stroke="currentColor"
-      strokeWidth="6"
-    />
-  </svg>
-);
+const CurrentLinkSVG = ({ delay = 0.4 }) => {
+  const clipId = "current-link-clip";
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 412 26"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="nav-link-current-svg"
+    >
+      <defs>
+        <clipPath id={clipId}>
+          <motion.rect
+            x="-10"
+            y="-10"
+            width="432"
+            height="46"
+            initial={{ width: 0 }}
+            animate={{ 
+              width: 432, 
+              transition: { duration: 0.75, delay, ease: EASE_DEFAULT } 
+            }}
+            exit={{ 
+              width: 0, 
+              transition: { duration: 0.5, ease: EASE_DEFAULT } 
+            }}
+          />
+        </clipPath>
+      </defs>
+      <path
+        clipPath={`url(#${clipId})`}
+        d="M0 2h73.539c5.858 0 11.47 2.35 15.58 6.525l8.565 8.7a21.863 21.863 0 0 0 15.58 6.525h72.678c6.045 0 11.82-2.503 15.954-6.914l6.485-6.922A21.865 21.865 0 0 1 224.336 3h76.752a21.864 21.864 0 0 1 16.806 7.88l4.362 5.24A21.864 21.864 0 0 0 339.063 24H412"
+        stroke="currentColor"
+        strokeWidth="6"
+      />
+    </svg>
+  );
+};
 
 // =========================================
 // Hover Split Text Effect
@@ -469,7 +504,7 @@ const FullscreenMenu = ({ isOpen, currentPage }) => {
                         }}
                       >
                         <HoverSplitText text={link.label} />
-                        {link.label === currentPage && <CurrentLinkSVG />}
+                        {link.label === currentPage && <CurrentLinkSVG delay={0.4 + i * 0.06} />}
                       </motion.a>
                     </div>
                   ))}
@@ -484,7 +519,7 @@ const FullscreenMenu = ({ isOpen, currentPage }) => {
                   transition={{ duration: 0.8, delay: 0.5, ease: EASE_DEFAULT }}
                 >
                   <div className="nav-helmet-icon">
-                    <HelmetIcon />
+                    <DeveloperBadge />
                   </div>
                   <div className="nav-helmet-text">developer since 2024</div>
                 </motion.div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { DeveloperBadge } from '../App';
 
 // =========================================
 // Helmet SVG Icon
@@ -101,7 +102,9 @@ export default function HeroSection() {
               alignItems: 'center',
             }}
           >
-            <div style={{ width: '1.25rem', height: '1.5rem', backgroundColor: '#888', borderRadius: '40% 40% 50% 50%' }} />
+            <div className="next-project-badge">
+              <DeveloperBadge />
+            </div>
             <div
               style={{
                 fontSize: '0.45rem',
