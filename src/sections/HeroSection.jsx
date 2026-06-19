@@ -16,7 +16,7 @@ const HelmetIcon = () => (
   </svg>
 );
 
-export default function HeroSection() {
+export default function HeroSection({ setIsRobotActive }) {
   return (
     <main
       id="hero-section"
@@ -38,6 +38,14 @@ export default function HeroSection() {
         transition={{ duration: 0.8, delay: 0.6 }}
         className="next-project-card absolute left-4 lg:left-12 bottom-4 lg:bottom-12 hidden md:flex flex-col w-[140px]"
         style={{ zIndex: 20 }}
+        onMouseEnter={() => {
+          console.log("CARD ENTER");
+          setIsRobotActive(true);
+        }}
+        onMouseLeave={() => {
+          console.log("CARD LEAVE");
+          setIsRobotActive(false);
+        }}
       >
         <div style={{ position: 'relative', width: '100%', padding: '1.25rem 0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Card Background and Border SVG */}

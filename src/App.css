@@ -459,10 +459,10 @@ body {
 
 @media (max-width: 991px) {
   .developer-badge-wreath {
-    width: 110px;
+    width: 75px;
   }
   .developer-badge-react {
-    width: 42px;
+    width: 35px;
   }
 }
 
@@ -902,7 +902,7 @@ body {
 .hero-scroll-section {
   position: relative;
   width: 100%;
-  /* Extra height creates scroll room for the pinned shrink animation */
+  pointer-events: none !important;
   height: 280vh;
   z-index: 10;
 }

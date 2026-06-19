@@ -562,6 +562,11 @@ const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInteractive, setIsInteractive] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isRobotActive, setIsRobotActive] = useState(false);
+
+  useEffect(() => {
+    console.log("Robot State =", isRobotActive);
+  }, [isRobotActive]);
 
   // Refs for GSAP ScrollTrigger
   const heroScrollSectionRef = useRef(null);
@@ -971,22 +976,36 @@ const App = () => {
               transition: "filter 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
-            {/* Wallpaper blobs (static, centered) */}
-            <div ref={bgBlobsRef} className="bg-blobs">
+            {/* Wallpaper blobs (animated, centered) */}
+            <motion.div 
+              ref={bgBlobsRef} 
+              className="bg-blobs"
+              animate={{
+                x: [0, 30, -15, 0],
+                y: [0, -30, 20, 0],
+                scale: [1, 1.1, 0.95, 1],
+                rotate: [0, 2, -2, 0],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
               <img
                 src={blobsBg}
                 alt="Background Blobs"
                 className="bg-blobs-img"
               />
-            </div>
+            </motion.div>
             <div className="bg-gradient-overlay" />
 
             {/* Hero inner content */}
             <div className="hero-inner" style={{ position: "relative", width: "100%", height: "100vh" }}>
               <div ref={threeDissolveRef} style={{ position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none' }}>
-                <ThreeDissolveHero isInteractive={isInteractive} />
+                <ThreeDissolveHero isInteractive={isInteractive} isRobotActive={isRobotActive} />
               </div>
-              <HeroSection />
+              <HeroSection setIsRobotActive={setIsRobotActive} />
             </div>
 
             {/* Message image wrapper: eyad-small (Phase 2) */}
