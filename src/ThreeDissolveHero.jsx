@@ -60,6 +60,7 @@ uniform float uHover;
 uniform vec2 uMouse;
 uniform float uTime;
 uniform float uAspect;
+uniform float uFullTransform;
 
 varying vec2 vUv;
 
@@ -67,20 +68,22 @@ void main() {
   vec4 humanColor = texture2D(uTexture, vUv);
   vec4 robotColor = texture2D(uRobotTexture, vUv);
   
-  // Natural noise pattern to look like dust blowing away
+  // ============================================
+  // MODE 1: Cursor Reveal (circular, mouse-follow)
+  // Original premium hover effect — robot appears
+  // locally around the cursor with a noisy edge.
+  // ============================================
   float n1 = snoise(vUv * 4.0 + uTime * 0.1);
   float n2 = snoise(vUv * 8.0 - uTime * 0.05) * 0.5;
-  float noise = (n1 + n2) * 0.5 + 0.5; // 0..1
+  float cursorNoise = (n1 + n2) * 0.5 + 0.5; // 0..1
   
-  // Adjust coordinates for a perfectly round circle based on aspect ratio
+  // Aspect-corrected distance from pixel to mouse
   vec2 aspectUv = vec2(vUv.x * uAspect, vUv.y);
   vec2 aspectMouse = vec2(uMouse.x * uAspect, uMouse.y);
-  
-  // Distance from current pixel to mouse
   float dist = distance(aspectUv, aspectMouse);
   
-  // Set the max radius for the hover reveal
-  float maxRadius = 0.35; 
+  // Max radius for the hover reveal
+  float maxRadius = 0.35;
   
   // Idle pulsing tease (only active when NOT hovering)
   // Pulses between 0.0 and 0.015 radius to hint at the hidden layer
@@ -88,15 +91,41 @@ void main() {
   float currentRadius = maxRadius * uHover + idlePulse * (1.0 - uHover);
   
   // Add noise to the edge so it's not a perfect circle, mimicking a sand/dust edge
-  float noisyBoundary = currentRadius + (noise - 0.5) * 0.15;
+  float noisyBoundary = currentRadius + (cursorNoise - 0.5) * 0.15;
   
   // effectAlpha is 0 inside the radius (dissolved), 1 outside
   float effectAlpha = smoothstep(noisyBoundary - 0.05, noisyBoundary + 0.05, dist);
   
-  // mixAmount is 1 inside the radius (show robot), 0 outside (show human)
-  float mixAmount = 1.0 - effectAlpha;
+  // cursorMix is 1 inside the radius (show robot), 0 outside (show human)
+  float cursorMix = 1.0 - effectAlpha;
   
-  // Mix colors and alphas
+  // ============================================
+  // MODE 2: Full Surface Transformation (badge hover)
+  // Entire portrait dissolves from Human → Robot
+  // using multi-octave noise threshold.
+  // ============================================
+  float fn1 = snoise(vUv * 3.0 + uTime * 0.08);
+  float fn2 = snoise(vUv * 6.0 - uTime * 0.04) * 0.5;
+  float fn3 = snoise(vUv * 12.0 + uTime * 0.12) * 0.25;
+  float fullNoise = (fn1 + fn2 + fn3) / 1.75; // approx -1..1
+  fullNoise = fullNoise * 0.5 + 0.5;           // normalize to 0..1
+  
+  // Threshold mapping — corrected direction:
+  //   uFullTransform = 0 → threshold = 1.2 → noise(0..1) always below → fullMix = 0 → 100% Human
+  //   uFullTransform = 1 → threshold = -0.2 → noise(0..1) always above → fullMix = 1 → 100% Robot
+  float threshold = (1.0 - uFullTransform) * 1.4 - 0.2;
+  float edge = 0.08; // softness of dissolve boundary
+  float fullMix = smoothstep(threshold - edge, threshold + edge, fullNoise);
+  
+  // ============================================
+  // Combine both modes: full transform takes
+  // natural priority via max(). When badge is
+  // active (fullMix→1), it overrides cursorMix
+  // everywhere. When badge is idle (fullMix=0),
+  // only cursor reveal matters.
+  // ============================================
+  float mixAmount = max(cursorMix, fullMix);
+  
   vec4 finalColor = mix(humanColor, robotColor, mixAmount);
   
   if (finalColor.a < 0.01) discard;
@@ -111,7 +140,7 @@ void main() {
 // ================================================
 // Scene Content
 // ================================================
-function SceneContent({ hoverProgress, globalMouse, mouseNDC }) {
+function SceneContent({ hoverProgress, fullTransformProgress, globalMouse, mouseNDC }) {
   const dissolveMaterialRef = useRef();
   const groupRef = useRef();
   const meshRef = useRef();
@@ -163,6 +192,7 @@ function SceneContent({ hoverProgress, globalMouse, mouseNDC }) {
       uMouse: { value: new THREE.Vector2(0.5, 0.5) },
       uTime: { value: 0 },
       uAspect: { value: aspect },
+      uFullTransform: { value: 0 },
     }),
     [humanTexture, robotTexture, aspect]
   );
@@ -170,6 +200,7 @@ function SceneContent({ hoverProgress, globalMouse, mouseNDC }) {
   useFrame((state) => {
     if (dissolveMaterialRef.current) {
       dissolveMaterialRef.current.uniforms.uHover.value = hoverProgress.current;
+      dissolveMaterialRef.current.uniforms.uFullTransform.value = fullTransformProgress.current;
       dissolveMaterialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     }
 
@@ -228,11 +259,80 @@ function SceneContent({ hoverProgress, globalMouse, mouseNDC }) {
 // ================================================
 // Main Component
 // ================================================
-export default function ThreeDissolveHero({ isInteractive = true }) {
-  const hoverProgress = useRef(0);
-  const tweenRef = useRef(null);
+export default function ThreeDissolveHero({ isInteractive = true, isRobotActive = false }) {
+  const hoverProgress = useRef(0);           // Cursor reveal mode (0..1)
+  const fullTransformProgress = useRef(0);    // Full surface dissolve mode (0..1)
+  const hoverTweenRef = useRef(null);
+  const fullTransformTweenRef = useRef(null);
   const containerRef = useRef(null);
-  const wasInsideRef = useRef(false);
+  
+  // Track hover states
+  const isHeroHoveredRef = useRef(false);
+  const isRobotActiveRef = useRef(false);     // Synced ref for use inside event handlers
+
+  // --- Cursor Reveal: Hero Canvas Hover ---
+  const handleHeroHoverEnter = useCallback(() => {
+    if (isRobotActiveRef.current) return; // Badge has priority — suppress cursor reveal
+    if (hoverTweenRef.current) hoverTweenRef.current.kill();
+    hoverTweenRef.current = gsap.to(hoverProgress, {
+      current: 1,
+      duration: 0.8,
+      ease: "power2.out",
+    });
+  }, []);
+
+  const handleHeroHoverLeave = useCallback(() => {
+    if (hoverTweenRef.current) hoverTweenRef.current.kill();
+    hoverTweenRef.current = gsap.to(hoverProgress, {
+      current: 0,
+      duration: 0.8,
+      ease: "power2.inOut",
+    });
+  }, []);
+
+  // --- Full Transformation: Developer Badge Hover ---
+  useEffect(() => {
+    isRobotActiveRef.current = isRobotActive;
+    
+    if (isRobotActive) {
+      // 1. Kill cursor reveal — badge takes full priority
+      if (hoverTweenRef.current) hoverTweenRef.current.kill();
+      hoverTweenRef.current = gsap.to(hoverProgress, {
+        current: 0,
+        duration: 0.3,
+        ease: "power2.inOut",
+      });
+      
+      // 2. Animate full surface transformation: Human → Robot
+      if (fullTransformTweenRef.current) fullTransformTweenRef.current.kill();
+      fullTransformTweenRef.current = gsap.to(fullTransformProgress, {
+        current: 1,
+        duration: 1.0,
+        ease: "power2.out",
+      });
+    } else {
+      // Reverse full surface transformation: Robot → Human
+      if (fullTransformTweenRef.current) fullTransformTweenRef.current.kill();
+      fullTransformTweenRef.current = gsap.to(fullTransformProgress, {
+        current: 0,
+        duration: 1.0,
+        ease: "power2.inOut",
+      });
+      
+      // Re-enable cursor reveal if mouse is still over the hero canvas
+      if (isHeroHoveredRef.current && isInteractive) {
+        handleHeroHoverEnter();
+      }
+    }
+  }, [isRobotActive, isInteractive, handleHeroHoverEnter]);
+
+  // When interactivity is disabled (scrolled past hero), smoothly reverse everything
+  useEffect(() => {
+    if (!isInteractive) {
+      isHeroHoveredRef.current = false;
+      handleHeroHoverLeave();
+    }
+  }, [isInteractive, handleHeroHoverLeave]);
   
   // Track global mouse position for parallax (-1 to +1)
   const globalMouse = useRef(new THREE.Vector2(0, 0));
@@ -263,50 +363,28 @@ export default function ThreeDissolveHero({ isInteractive = true }) {
       mouseNDC.current.set(ndcX, ndcY);
 
       if (isInside && isInteractive) {
-        if (!wasInsideRef.current) {
-          // Mouse just entered
-          wasInsideRef.current = true;
-          if (tweenRef.current) tweenRef.current.kill();
-          tweenRef.current = gsap.to(hoverProgress, {
-            current: 1,
-            duration: 0.8,
-            ease: "power2.out",
-          });
+        if (!isHeroHoveredRef.current) {
+          isHeroHoveredRef.current = true;
+          if (!isRobotActiveRef.current) {
+            handleHeroHoverEnter();
+          }
         }
       } else {
-        if (wasInsideRef.current) {
-          // Mouse just left
-          wasInsideRef.current = false;
-          if (tweenRef.current) tweenRef.current.kill();
-          tweenRef.current = gsap.to(hoverProgress, {
-            current: 0,
-            duration: 0.8,
-            ease: "power2.inOut",
-          });
+        if (isHeroHoveredRef.current) {
+          isHeroHoveredRef.current = false;
+          handleHeroHoverLeave();
         }
       }
     };
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [isInteractive]);
-
-  // When interactivity is disabled (scrolled past hero), smoothly reverse any active hover
-  useEffect(() => {
-    if (!isInteractive && wasInsideRef.current) {
-      wasInsideRef.current = false;
-      if (tweenRef.current) tweenRef.current.kill();
-      tweenRef.current = gsap.to(hoverProgress, {
-        current: 0,
-        duration: 0.8,
-        ease: "power2.inOut",
-      });
-    }
-  }, [isInteractive]);
+  }, [isInteractive, handleHeroHoverEnter, handleHeroHoverLeave]);
 
   useEffect(() => {
     return () => {
-      if (tweenRef.current) tweenRef.current.kill();
+      if (hoverTweenRef.current) hoverTweenRef.current.kill();
+      if (fullTransformTweenRef.current) fullTransformTweenRef.current.kill();
     };
   }, []);
 
@@ -328,6 +406,7 @@ export default function ThreeDissolveHero({ isInteractive = true }) {
       >
         <SceneContent
           hoverProgress={hoverProgress}
+          fullTransformProgress={fullTransformProgress}
           globalMouse={globalMouse}
           mouseNDC={mouseNDC}
         />

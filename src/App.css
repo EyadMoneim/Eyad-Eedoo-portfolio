@@ -52,6 +52,16 @@ html {
   overflow-x: hidden;
 }
 
+::selection {
+  background: #d0fe00;
+  color: #000;
+}
+
+::-moz-selection {
+  background: #d0fe00;
+  color: #000;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -124,10 +134,6 @@ body {
   transition:
     background-color 0.4s ease,
     border-color 0.4s ease;
-}
-
-.store-btn:hover {
-  background-color: #e8ff66;
 }
 
 .store-btn-text {
@@ -447,22 +453,24 @@ body {
 .developer-badge-wreath {
   width: 85px;
   height: auto;
-  filter: brightness(0) saturate(100%) invert(76%) sepia(7%) saturate(343%) hue-rotate(35deg);
+  filter: brightness(0) saturate(100%) invert(76%) sepia(7%) saturate(343%)
+    hue-rotate(35deg);
 }
 
 .developer-badge-react {
   position: absolute;
   width: 45px;
   height: auto;
-  filter: brightness(0) saturate(100%) invert(76%) sepia(7%) saturate(343%) hue-rotate(35deg);
+  filter: brightness(0) saturate(100%) invert(76%) sepia(7%) saturate(343%)
+    hue-rotate(35deg);
 }
 
 @media (max-width: 991px) {
   .developer-badge-wreath {
-    width: 110px;
+    width: 75px;
   }
   .developer-badge-react {
-    width: 42px;
+    width: 35px;
   }
 }
 
@@ -886,8 +894,6 @@ body {
   height: auto;
   transform: rotate(-5deg) translate(2%, -3%);
   overflow: visible;
-  filter: drop-shadow(0 0 12px rgba(210, 255, 0, 0.45))
-          drop-shadow(0 0 30px rgba(210, 255, 0, 0.16));
 }
 
 @media (max-width: 991px) {
@@ -902,7 +908,7 @@ body {
 .hero-scroll-section {
   position: relative;
   width: 100%;
-  /* Extra height creates scroll room for the pinned shrink animation */
+  pointer-events: none !important;
   height: 280vh;
   z-index: 10;
 }

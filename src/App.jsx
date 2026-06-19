@@ -102,18 +102,18 @@ export const DeveloperBadge = () => (
 // =========================================
 const StoreIcon = () => (
   <svg
-    width="17"
-    height="18"
-    viewBox="0 0 17 18"
-    fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    style={{ width: "1rem", height: "1rem" }}
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    style={{ width: "1.7rem", height: "1.7rem" }}
   >
     <path
-      d="m10.931 5.783-.759.812c-1.132 1.212-2.89 1.212-4.022 0l-.76-.812C4.313 4.637 2.568 5.29 2.275 6.928l-1.238 7.18c-.227 1.318.652 2.543 1.838 2.543h10.588c1.185 0 2.064-1.225 1.838-2.544l-1.239-7.179c-.28-1.638-2.037-2.29-3.116-1.145h-.014ZM10.839 3.048 9.84 1.849C8.894.717 7.43.717 6.484 1.85l-1 1.199"
-      stroke="currentColor"
-      strokeWidth="1.949"
-      strokeMiterlimit="10"
+      fill="currentColor"
+      fillRule="evenodd"
+      d="M7.703 7a3.056 3.056 0 0 0-2.82 1.88c-.433 1.04-1.017 3.615-1.281 4.845-.074.34-.104.633-.08.896.078.88.35 1.3.606 1.516.267.227.673.363 1.267.363.653 0 1.26-.337 1.607-.89l1.645-2.632 2.187-3.645-.51-.85A3.056 3.056 0 0 0 7.704 7ZM12 7.39a5.056 5.056 0 0 0-8.963.721c-.52 1.249-1.143 4.038-1.39 5.194a4.988 4.988 0 0 0-.118 1.494c.111 1.24.54 2.214 1.305 2.863.753.639 1.687.838 2.561.838a3.895 3.895 0 0 0 3.303-1.83l1.65-2.64.01-.015L12 11.277l1.642 2.738.01.015 1.65 2.64a3.895 3.895 0 0 0 3.302 1.83c.983 0 2.005-.28 2.772-1.086.76-.799 1.124-1.96 1.124-3.414 0-.923-.35-2.266-.675-3.341a43.426 43.426 0 0 0-.815-2.422A5.056 5.056 0 0 0 12 7.39Zm1.166 1.943 2.186 3.645 1.645 2.631c.346.554.954.891 1.607.891.617 0 1.043-.17 1.323-.465.288-.302.573-.89.573-2.035 0-.584-.255-1.655-.59-2.764a41.348 41.348 0 0 0-.774-2.303 3.056 3.056 0 0 0-5.46-.45l-.51.85Z"
+      clipRule="evenodd"
     />
   </svg>
 );
@@ -234,6 +234,8 @@ const StoreButton = ({ isMenuOpen }) => (
   <motion.a
     href="#store"
     className="store-btn"
+    initial="initial"
+    whileHover="hovered"
     animate={{
       opacity: isMenuOpen ? 0 : 1,
       y: isMenuOpen ? -10 : 0,
@@ -245,7 +247,9 @@ const StoreButton = ({ isMenuOpen }) => (
     }}
   >
     <StoreIcon />
-    <span className="store-btn-text">Eedoo</span>
+    <span className="store-btn-text">
+      <HoverSplitText text="Eedoo" />
+    </span>
   </motion.a>
 );
 
@@ -562,6 +566,11 @@ const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInteractive, setIsInteractive] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isRobotActive, setIsRobotActive] = useState(false);
+
+  useEffect(() => {
+    console.log("Robot State =", isRobotActive);
+  }, [isRobotActive]);
 
   // Refs for GSAP ScrollTrigger
   const heroScrollSectionRef = useRef(null);
@@ -971,22 +980,36 @@ const App = () => {
               transition: "filter 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
-            {/* Wallpaper blobs (static, centered) */}
-            <div ref={bgBlobsRef} className="bg-blobs">
+            {/* Wallpaper blobs (animated, centered) */}
+            <motion.div 
+              ref={bgBlobsRef} 
+              className="bg-blobs"
+              animate={{
+                x: [0, 30, -15, 0],
+                y: [0, -30, 20, 0],
+                scale: [1, 1.1, 0.95, 1],
+                rotate: [0, 2, -2, 0],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
               <img
                 src={blobsBg}
                 alt="Background Blobs"
                 className="bg-blobs-img"
               />
-            </div>
+            </motion.div>
             <div className="bg-gradient-overlay" />
 
             {/* Hero inner content */}
             <div className="hero-inner" style={{ position: "relative", width: "100%", height: "100vh" }}>
               <div ref={threeDissolveRef} style={{ position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none' }}>
-                <ThreeDissolveHero isInteractive={isInteractive} />
+                <ThreeDissolveHero isInteractive={isInteractive} isRobotActive={isRobotActive} />
               </div>
-              <HeroSection />
+              <HeroSection setIsRobotActive={setIsRobotActive} />
             </div>
 
             {/* Message image wrapper: eyad-small (Phase 2) */}
@@ -1023,20 +1046,18 @@ const App = () => {
               {/* Stage 1 — name body + dots + highlights */}
               <g className="sig-main" clipPath="url(#sig-main-clip)">
                 {SIG_PATHS.main.map((d, i) => (
-                  <path key={`sig-main-${i}`} d={d} fill="#d2ff00" />
+                  <path key={`sig-main-${i}`} d={d} fill="#d3fd07" />
                 ))}
                 {SIG_PATHS.dots.map((d, i) => (
-                  <path key={`sig-dot-${i}`} d={d} fill="#d2ff00" />
+                  <path key={`sig-dot-${i}`} d={d} fill="#d3fd07" />
                 ))}
-                {SIG_PATHS.highlights.map((d, i) => (
-                  <path key={`sig-hl-${i}`} d={d} fill="#E1E670" />
-                ))}
+
               </g>
 
               {/* Stage 2 — underline stroke */}
               <g className="sig-underline" clipPath="url(#sig-underline-clip)">
                 {SIG_PATHS.underline.map((d, i) => (
-                  <path key={`sig-underline-${i}`} d={d} fill="#d2ff00" />
+                  <path key={`sig-underline-${i}`} d={d} fill="#d3fd07" />
                 ))}
               </g>
 
