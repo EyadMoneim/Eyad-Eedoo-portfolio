@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -13,6 +13,7 @@ import "./App.css";
 import HeroSection from "./sections/HeroSection";
 import ThreeDissolveHero from "./ThreeDissolveHero";
 import ScrollVelocity from "./components/ScrollVelocity";
+import SplitSection from "./sections/SplitSection";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -144,13 +145,16 @@ const LandoBrand = ({ color1 = "#c8cbbd", color2 = "#ebeee0" }) => (
 // =========================================
 // 1. Text Logo (Top Left)
 // =========================================
-const TextLogo = ({ isMenuOpen, isScrolled }) => {
+const TextLogo = ({ isMenuOpen, isScrolled, isPhase4 }) => {
   let eyadColor = "#2D3126";
   let moneimColor = "#2D3126";
 
   if (isMenuOpen) {
     eyadColor = "#f4f4ed";
     moneimColor = "#f4f4ed";
+  } else if (isPhase4) {
+    eyadColor = "#2D3126";
+    moneimColor = "#2D3126";
   } else if (isScrolled) {
     eyadColor = "gray";
     moneimColor = "#f4f4ed";
@@ -566,11 +570,10 @@ const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInteractive, setIsInteractive] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isPhase3, setIsPhase3] = useState(false);
+  const [isPhase4, setIsPhase4] = useState(false);
   const [isRobotActive, setIsRobotActive] = useState(false);
 
-  useEffect(() => {
-    console.log("Robot State =", isRobotActive);
-  }, [isRobotActive]);
 
   // Refs for GSAP ScrollTrigger
   const heroScrollSectionRef = useRef(null);
@@ -580,6 +583,20 @@ const App = () => {
   const bgBlobsRef = useRef(null);
   const signatureRef = useRef(null);
   const signatureLayerRef = useRef(null);
+
+  // Phase 3 Refs
+  const messageWithEyadGroupRef = useRef(null);
+  const developerSignaturePhase3Ref = useRef(null);
+  const quoteRow1Ref = useRef(null);
+  const quoteRow2Ref = useRef(null);
+  const quoteRow3Ref = useRef(null);
+  const quoteRow4Ref = useRef(null);
+
+  // Phase 4 Refs
+  const transitionSpacerRef = useRef(null);
+  const splitSectionRef = useRef(null);
+  const phase4BgRef = useRef(null);
+  const quoteSectionRef = useRef(null);
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -794,6 +811,67 @@ const App = () => {
           );
         }
 
+        // Fade in developer signature at the bottom
+        if (developerSignaturePhase3Ref.current) {
+          tl.to(developerSignaturePhase3Ref.current, { opacity: 1, duration: 0.5, ease: 'power1.inOut' }, 2.6);
+        }
+
+        // ----------------------------------------------------
+        // PHASE 3: Move everything up, quote rows reveal
+        // ----------------------------------------------------
+        const phase3Start = 3.5;
+
+        // Move the entire Phase 2 package UP out of view
+        if (messageWithEyadGroupRef.current) {
+          tl.to(messageWithEyadGroupRef.current, { y: "-120vh", duration: 1.5, ease: 'power2.inOut' }, phase3Start);
+          const velocityGroup = document.getElementById('scroll-velocity-group');
+          if (velocityGroup) {
+            tl.to(velocityGroup, { y: "-120vh", duration: 1.5, ease: 'power2.inOut' }, phase3Start);
+          }
+        }
+
+        // Move Developer Signature from bottom to top
+        if (developerSignaturePhase3Ref.current) {
+          tl.to(developerSignaturePhase3Ref.current, {
+            y: () => -window.innerHeight * 0.65,
+            scale: 1,
+            duration: 1.5,
+            ease: 'power2.inOut'
+          }, phase3Start);
+        }
+
+        // Block-reveal animation for the 4 quote rows
+        const quoteRevealTl = gsap.timeline({ paused: true });
+        const rows = [quoteRow1Ref.current, quoteRow2Ref.current, quoteRow3Ref.current, quoteRow4Ref.current].filter(Boolean);
+        rows.forEach((row, index) => {
+          const content = row.querySelector('.quote-row-content');
+          const block = row.querySelector('.block-revealer');
+          if (!content || !block) return;
+          gsap.set(content, { opacity: 0 });
+          gsap.set(block, { scaleX: 0, transformOrigin: "left center" });
+          const delay = index * 0.18;
+          quoteRevealTl.to(block, { scaleX: 1, duration: 0.45, ease: "power4.inOut" }, delay);
+          quoteRevealTl.set(content, { opacity: 1 }, delay + 0.45);
+          quoteRevealTl.set(block, { transformOrigin: "right center" }, delay + 0.45);
+          quoteRevealTl.to(block, { scaleX: 0, duration: 0.45, ease: "power4.inOut" }, delay + 0.45);
+        });
+
+        ScrollTrigger.create({
+          trigger: heroScrollSectionRef.current,
+          start: '70% top',
+          end: 'bottom bottom',
+          onEnter: () => quoteRevealTl.play(),
+          onLeaveBack: () => {
+            quoteRevealTl.pause(0);
+            rows.forEach((row) => {
+              const content = row.querySelector('.quote-row-content');
+              const block = row.querySelector('.block-revealer');
+              if (content) gsap.set(content, { opacity: 0 });
+              if (block) gsap.set(block, { scaleX: 0, transformOrigin: "left center" });
+            });
+          },
+        });
+
         currentTl = tl;
 
         // 4. Disable ThreeDissolveHero interactivity during scroll
@@ -804,6 +882,7 @@ const App = () => {
           onUpdate: (self) => {
             setIsInteractive(self.progress < 0.05);
             setIsScrolled(self.progress > 0.05);
+            setIsPhase3(self.progress > 0.65);
           },
         });
 
@@ -836,6 +915,86 @@ const App = () => {
     return () => ctx.revert();
   }, [isLoading]);
 
+  // =========================================
+  // PHASE 4: White background + slide quote up
+  // =========================================
+  useLayoutEffect(() => {
+    if (isLoading) return;
+    if (!splitSectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const trigger = splitSectionRef.current;
+      const bg = phase4BgRef.current;
+      const quoteSection = quoteSectionRef.current;
+      const devSig = developerSignaturePhase3Ref.current;
+      const sigLayer = signatureLayerRef.current;
+
+      // 1. Fade in white background overlay — scrubbed over the transition spacer
+      if (bg && transitionSpacerRef.current) {
+        gsap.fromTo(bg,
+          { opacity: 0 },
+          {
+            opacity: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: transitionSpacerRef.current,
+              start: 'top bottom',
+              end: 'bottom bottom',
+              scrub: true,
+            }
+          }
+        );
+      }
+
+      // 2. Slide the quote section UP out of view as user scrolls
+      if (quoteSection && transitionSpacerRef.current) {
+        gsap.fromTo(quoteSection,
+          { y: '0%' },
+          {
+            y: '-60vh',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: transitionSpacerRef.current,
+              start: 'top bottom',
+              end: 'bottom bottom',
+              scrub: true,
+            }
+          }
+        );
+      }
+
+      // 3. Slide devSig UP from its -65vh position so it goes up with the quote
+      if (devSig && transitionSpacerRef.current) {
+        gsap.fromTo(devSig,
+          { y: '-65vh' },
+          {
+            y: '-125vh',
+            ease: 'none',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: transitionSpacerRef.current,
+              start: 'top bottom',
+              end: 'bottom bottom',
+              scrub: true,
+            }
+          }
+        );
+      }
+
+      // 3. Track Phase 4 for navbar color
+      ScrollTrigger.create({
+        trigger,
+        start: 'top 50%',
+        end: 'bottom top',
+        onToggle: (self) => setIsPhase4(self.isActive),
+      });
+
+      ScrollTrigger.refresh();
+    });
+
+    return () => ctx.revert();
+  }, [isLoading]);
+
   return (
     <>
       <AnimatePresence mode="wait">
@@ -847,7 +1006,7 @@ const App = () => {
       {!isLoading && (
         <div style={{ position: "relative", width: "100%", minHeight: "100vh" }}>
           {/* ======= Z-0: DARK GREEN BACKGROUND + MARQUEE ======= */}
-          <div className="scroll-reveal-bg">
+          <div className="scroll-reveal-bg" id="scroll-reveal-bg">
             <motion.div
               className="bg-blobs"
               style={{ opacity: 0.1 }}
@@ -869,26 +1028,81 @@ const App = () => {
                 className="bg-blobs-img"
               />
             </motion.div>
-            <ScrollVelocity
-              texts={['To get something you never had']}
-              velocity={80}
-              className="scroll-text-green"
-              numCopies={8}
-              damping={50}
-              stiffness={400}
-              scrollerStyle={{ gap: '2rem' }}
-              parallaxClassName="parallax green-parallax"
-            />
-            <ScrollVelocity
-              texts={['You have to do something you never did']}
-              velocity={-80}
-              className="scroll-text-white"
-              numCopies={8}
-              damping={50}
-              stiffness={400}
-              scrollerStyle={{ gap: '2rem' }}
-              parallaxClassName="parallax white-parallax"
-            />
+            <div id="scroll-velocity-group" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              <ScrollVelocity
+                texts={['To get something you never had']}
+                velocity={80}
+                className="scroll-text-green"
+                numCopies={8}
+                damping={50}
+                stiffness={400}
+                scrollerStyle={{ gap: '2rem' }}
+                parallaxClassName="parallax green-parallax"
+              />
+              <ScrollVelocity
+                texts={['You have to do something you never did']}
+                velocity={-80}
+                className="scroll-text-white"
+                numCopies={8}
+                damping={50}
+                stiffness={400}
+                scrollerStyle={{ gap: '2rem' }}
+                parallaxClassName="parallax white-parallax"
+              />
+            </div>
+          </div>
+
+          {/* ======= PHASE 4: WHITE BG OVERLAY ======= */}
+          <div
+            ref={phase4BgRef}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: '#f4f4ec',
+              opacity: 0,
+              pointerEvents: 'none',
+              zIndex: 40,
+            }}
+          >
+            <motion.div
+              style={{ position: 'absolute', inset: 0, opacity: 0.08 }}
+              animate={{ x: [0, 30, -15, 0], y: [0, -30, 20, 0], scale: [1, 1.1, 0.95, 1], rotate: [0, 2, -2, 0] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <img src={blobsBg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </motion.div>
+          </div>
+
+          {/* ======= PHASE 3: DEVELOPER SIGNATURE ======= */}
+
+          {/* ======= PHASE 3: 4 QUOTE ROWS ======= */}
+          <div className="quote-section" ref={quoteSectionRef}>
+            <div className="quote-row" ref={quoteRow1Ref}>
+              <div className="quote-row-content">
+                <span className="message-text">TO GET SOMTHING YOU,</span>
+              </div>
+              <div className="block-revealer" style={{ backgroundColor: 'var(--color-white)' }} />
+            </div>
+            <div className="quote-row" ref={quoteRow2Ref}>
+              <div className="quote-row-content">
+                <span className="message-text">NEVER</span>
+                <span className="quote-text">HAD</span>
+              </div>
+              <div className="block-revealer" style={{ backgroundColor: 'var(--color-lime)' }} />
+            </div>
+            <div className="quote-row" ref={quoteRow3Ref}>
+              <div className="quote-row-content">
+                <span className="message-text">YOU HAD TO DO SOMTHING YOU,</span>
+              </div>
+              <div className="block-revealer" style={{ backgroundColor: 'var(--color-white)' }} />
+            </div>
+            <div className="quote-row" ref={quoteRow4Ref}>
+              <div className="quote-row-content">
+                <span className="message-text">NEVER</span>
+                <span className="quote-text">DID</span>
+              </div>
+              <div className="block-revealer" style={{ backgroundColor: 'var(--color-lime)' }} />
+            </div>
           </div>
 
           {/* ======= NAVBAR ======= */}
@@ -897,7 +1111,7 @@ const App = () => {
               {/* Left: Text Logo (Desktop) & Mobile Store Button */}
               <div className="flex-shrink-0 flex items-center">
                 <div className="desktop-logo" style={{ width: "8rem" }}>
-                  <TextLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
+                  <TextLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} isPhase4={isPhase4} />
                 </div>
                 <div className="mobile-logo">
                   <StoreButton isMenuOpen={isMenuOpen} />
@@ -905,7 +1119,7 @@ const App = () => {
               </div>
 
               {/* Center: Brand Monogram Logo (Desktop) */}
-              <div className="desktop-logo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+              <div className="desktop-logo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex-col items-center" style={{ opacity: isPhase3 ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: isPhase3 ? "none" : "auto" }}>
                 <HeaderLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
                 <div style={{
                   position: "absolute",
@@ -925,7 +1139,7 @@ const App = () => {
               </div>
 
               {/* Center: Mobile Logo Cluster */}
-              <div className="mobile-logo absolute left-1/2 flex-col items-center pointer-events-auto" style={{ top: "5.5rem", transform: "translateX(-50%)", width: "max-content", textAlign: "center" }}>
+              <div className={`mobile-logo absolute left-1/2 flex-col items-center pointer-events-auto ${isScrolled ? 'mobile-hide-scrolled' : ''}`} style={{ top: "5.5rem", transform: "translateX(-50%)", width: "max-content", textAlign: "center" }}>
                 <div style={{ 
                   transform: isScrolled ? "scale(0.6) translateY(2.2rem)" : "scale(0.85) translateY(0)", 
                   transformOrigin: "center top", 
@@ -968,6 +1182,9 @@ const App = () => {
 
           {/* ======= FULLSCREEN MENU ======= */}
           <FullscreenMenu isOpen={isMenuOpen} currentPage="Home" />
+
+          {/* ======= PHASE 2: MESSAGE WITH EYAD GROUP ======= */}
+          <div className="message-with-eyad-group" ref={messageWithEyadGroupRef}>
 
           {/* ======= GROUP-WALLPAPER: fixed layer that shrinks on scroll ======= */}
           {/* Uses CSS transition (not framer-motion filter) to avoid breaking position:fixed */}
@@ -1068,9 +1285,18 @@ const App = () => {
             </svg>
           </div>
 
+          </div>{/* END message-with-eyad-group */}
+
           {/* ======= SCROLL SPACER ======= */}
           {/* Provides scroll distance for the shrink animation */}
-          <div className="hero-scroll-section" ref={heroScrollSectionRef} />
+          <div className="hero-scroll-section" ref={heroScrollSectionRef} style={{ height: "400vh" }} />
+
+          {/* ======= TRANSITION SPACER ======= */}
+          {/* Empty scroll space for the green-to-white scrubbed transition */}
+          <div ref={transitionSpacerRef} style={{ height: "150vh", width: "100%" }} />
+
+          {/* ======= PHASE 4: SPLIT SECTION ======= */}
+          <SplitSection sectionRef={splitSectionRef} />
         </div>
       )}
     </>
