@@ -308,6 +308,16 @@ const App = () => {
           }, phase3Start);
         }
 
+        // Slide the Quote Section up from below the viewport
+        if (quoteSectionRef.current) {
+          gsap.set(quoteSectionRef.current, { y: '100vh' });
+          tl.to(quoteSectionRef.current, {
+            y: 0,
+            duration: 1.5,
+            ease: 'power2.inOut'
+          }, phase3Start);
+        }
+
         // Block-reveal animation for the 4 quote rows
         const quoteRevealTl = gsap.timeline({ paused: true });
         const rows = [quoteRow1Ref.current, quoteRow2Ref.current, quoteRow3Ref.current, quoteRow4Ref.current].filter(Boolean);
@@ -328,16 +338,8 @@ const App = () => {
           trigger: heroScrollSectionRef.current,
           start: '70% top',
           end: 'bottom bottom',
+          once: true,
           onEnter: () => quoteRevealTl.play(),
-          onLeaveBack: () => {
-            quoteRevealTl.pause(0);
-            rows.forEach((row) => {
-              const content = row.querySelector('.quote-row-content');
-              const block = row.querySelector('.block-revealer');
-              if (content) gsap.set(content, { opacity: 0 });
-              if (block) gsap.set(block, { scaleX: 0, transformOrigin: "left center" });
-            });
-          },
         });
 
         currentTl = tl;

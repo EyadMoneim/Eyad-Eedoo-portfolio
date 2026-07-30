@@ -52,6 +52,45 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
         stagger: 0.15,
       }, '-=0.8');
 
+      // Add Block-Reveal for titles
+      const leftRevealGroups = gsap.utils.toArray('.split-left-content .split-reveal-group');
+      const rightRevealGroups = gsap.utils.toArray('.split-right-content .split-reveal-group');
+      
+      const titleRevealTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: triggerRef ? triggerRef.current : sectionRef.current,
+          start: 'top 40%',
+          once: true,
+        }
+      });
+
+      const applyReveal = (groups) => {
+        groups.forEach((group, index) => {
+          const content = group.querySelector('.split-reveal-content');
+          const block = group.querySelector('.split-block-revealer');
+          const direction = group.getAttribute('data-direction') || 'left';
+          if (!content || !block) return;
+          
+          gsap.set(content, { opacity: 0 });
+          
+          const originStart = direction === 'left' ? 'right center' : 'left center';
+          const originEnd = direction === 'left' ? 'left center' : 'right center';
+          gsap.set(block, { scaleX: 0, transformOrigin: originStart });
+          
+          const duration = 0.5;
+          const ease = "power3.inOut";
+          const delay = index * 0.15; // Cascading waterfall effect
+          
+          titleRevealTl.to(block, { scaleX: 1, duration: duration, ease: ease }, delay);
+          titleRevealTl.set(content, { opacity: 1 }, delay + duration);
+          titleRevealTl.set(block, { transformOrigin: originEnd }, delay + duration);
+          titleRevealTl.to(block, { scaleX: 0, duration: duration, ease: ease }, delay + duration);
+        });
+      };
+
+      applyReveal(leftRevealGroups);
+      applyReveal(rightRevealGroups);
+
     }, sectionRef);
 
     return () => ctx.revert();
@@ -136,55 +175,117 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
           <div style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           {/* Eedoo stacked title */}
           <div style={{ position: 'relative', lineHeight: 0.85 }}>
-            {/* Background "EEDOO" – big black letters */}
-            <div className="split-title-bg" style={{ 
-              position: 'relative',
-              fontSize: 'clamp(4rem, 7.7vw, 10rem)',
-              fontWeight: 900,
-              color: '#1f231f', // Match reference dark color
-              textTransform: 'uppercase',
-              letterSpacing: '-0.05em', // Tight letter spacing like TRACK
-              fontFamily: "'Inter', sans-serif",
-              lineHeight: 0.85,
-            }}>
-              Eedoo
+            <div className="split-reveal-group" data-direction="left" data-step="1" style={{ position: 'relative', width: 'max-content' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-5%', bottom: '-5%', left: '-5%', right: '-5%',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                {/* Background "EEDOO" – big black letters */}
+                <div className="split-title-bg" style={{ 
+                  position: 'relative',
+                  fontSize: 'clamp(4rem, 7.7vw, 10rem)',
+                  fontWeight: 900,
+                  color: '#1f231f',
+                  textTransform: 'uppercase',
+                  letterSpacing: '-0.05em',
+                  fontFamily: "'Inter', sans-serif",
+                  lineHeight: 0.85,
+                }}>
+                  Eedoo
+                </div>
+              </div>
             </div>
-            {/* Overlapping "Eedoo" in lime like "ON" overlay in reference */}
-            <div className="split-title-fg" style={{ 
+
+            <div className="split-reveal-group" data-direction="left" data-step="1" style={{ 
               position: 'absolute',
               top: '40%',
               left: '45%',
               transform: 'translate(-50%, -50%) rotate(-15deg)',
-              fontSize: 'clamp(2.5rem, 5vw, 6rem)', // Scaled down to prevent massive overflow
-              fontWeight: 900,
-              color: '#a58ed9',
-              textTransform: 'uppercase',
-              letterSpacing: '0.02em',
-              fontFamily: "'Playfair Display', serif",
-              fontStyle: 'italic',
-              lineHeight: 0.85,
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
+              width: 'max-content',
+              zIndex: 15
             }}>
-              tech-guy
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-5%', bottom: '-5%', left: '-10%', right: '-10%',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                {/* Overlapping "tech-guy" */}
+                <div className="split-title-fg" style={{ 
+                  fontSize: 'clamp(2.5rem, 5vw, 6rem)',
+                  fontWeight: 900,
+                  color: '#a58ed9',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.02em',
+                  fontFamily: "'Playfair Display', serif",
+                  fontStyle: 'italic',
+                  lineHeight: 0.85,
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap',
+                }}>
+                  tech-guy
+                </div>
+              </div>
             </div>
           </div>
           </div>
 
-          <p style={{ 
-            marginTop: '2rem',
-            maxWidth: '280px',
-            fontSize: '1.125rem',
-            fontWeight: 500,
-            color: '#222',
-            lineHeight: 1.4,
-            fontFamily: "'Inter', sans-serif",
-          }}>
-            Innovative projects, robust architectures, and deep-dives into modern tech stacks.
-          </p>
+          <div style={{ marginTop: '2rem', maxWidth: '280px', display: 'flex', flexDirection: 'column' }}>
+            <div className="split-reveal-group" data-direction="left" data-step="2" style={{ position: 'relative', width: 'max-content', marginBottom: '4px' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                <span style={{ 
+                  fontSize: '1.125rem',
+                  fontWeight: 500,
+                  color: '#222',
+                  lineHeight: 1.4,
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+                  Innovative projects, robust
+                </span>
+              </div>
+            </div>
+            <div className="split-reveal-group" data-direction="left" data-step="2" style={{ position: 'relative', width: 'max-content', marginBottom: '4px' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                <span style={{ 
+                  fontSize: '1.125rem',
+                  fontWeight: 500,
+                  color: '#222',
+                  lineHeight: 1.4,
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+                  architectures, and deep-dives
+                </span>
+              </div>
+            </div>
+            <div className="split-reveal-group" data-direction="left" data-step="2" style={{ position: 'relative', width: 'max-content' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                <span style={{ 
+                  fontSize: '1.125rem',
+                  fontWeight: 500,
+                  color: '#222',
+                  lineHeight: 1.4,
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+                  into modern tech stacks.
+                </span>
+              </div>
+            </div>
+          </div>
 
           <button className="split-button" style={{ alignSelf: 'flex-end', marginTop: '2.5rem' }}>
-            <img src={arrowLeft} alt="Left Arrow" style={{ width: '24px', height: '24px' }} />
+            <div className="svg-arrow left"></div>
           </button>
         </div>
       </div>
@@ -218,45 +319,103 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
           <div style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           {/* OFF / Eyad Moneim stacked title */}
           <div style={{ lineHeight: 0.85 }}>
-            <div className="split-title-sub" style={{ 
-              fontSize: 'clamp(2.5rem, 5vw, 6rem)',
-              fontWeight: 500,
-              color: '#1f231f', // Match dark color
-              textTransform: 'uppercase',
-              letterSpacing: '-0.02em', // Tight spacing
-              fontFamily: "'Playfair Display', serif",
-              lineHeight: 0.85,
-            }}>
-              Eyad
+            <div className="split-reveal-group" data-direction="right" data-step="1" style={{ position: 'relative', width: 'max-content' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-5%', bottom: '-5%', left: '-5%', right: '-5%',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                <div className="split-title-sub" style={{ 
+                  fontSize: 'clamp(2.5rem, 5vw, 6rem)',
+                  fontWeight: 500,
+                  color: '#1f231f',
+                  textTransform: 'uppercase',
+                  letterSpacing: '-0.02em',
+                  fontFamily: "'Playfair Display', serif",
+                  lineHeight: 0.85,
+                }}>
+                  Eyad
+                </div>
+              </div>
             </div>
-            <div className="split-title-main" style={{ 
-              fontSize: 'clamp(3.5rem, 6.5vw, 8.5rem)',
-              fontWeight: 900,
-              color: '#1f231f', // Match dark color
-              textTransform: 'uppercase',
-              letterSpacing: '-0.05em', // Very tight like TRACK
-              fontFamily: "'Inter', sans-serif",
-              lineHeight: 0.85,
-            }}>
-              Moneim
+            <div className="split-reveal-group" data-direction="right" data-step="1" style={{ position: 'relative', width: 'max-content' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-5%', bottom: '-5%', left: '-5%', right: '-5%',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                <div className="split-title-main" style={{ 
+                  fontSize: 'clamp(3.5rem, 6.5vw, 8.5rem)',
+                  fontWeight: 900,
+                  color: '#1f231f',
+                  textTransform: 'uppercase',
+                  letterSpacing: '-0.05em',
+                  fontFamily: "'Inter', sans-serif",
+                  lineHeight: 0.85,
+                }}>
+                  Moneim
+                </div>
+              </div>
             </div>
           </div>
           </div>
 
-          <p style={{ 
-            marginTop: '2rem',
-            maxWidth: '280px',
-            fontSize: '1.125rem',
-            fontWeight: 500,
-            color: '#222',
-            lineHeight: 1.4,
-            fontFamily: "'Inter', sans-serif",
-          }}>
-            Creative campaigns, UI/UX designs, and engaging digital experiences.
-          </p>
+          <div style={{ marginTop: '2rem', maxWidth: '280px', display: 'flex', flexDirection: 'column' }}>
+            <div className="split-reveal-group" data-direction="right" data-step="2" style={{ position: 'relative', width: 'max-content', marginBottom: '4px' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                <span style={{ 
+                  fontSize: '1.125rem',
+                  fontWeight: 500,
+                  color: '#222',
+                  lineHeight: 1.4,
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+                  Creative campaigns, UI/UX
+                </span>
+              </div>
+            </div>
+            <div className="split-reveal-group" data-direction="right" data-step="2" style={{ position: 'relative', width: 'max-content', marginBottom: '4px' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                <span style={{ 
+                  fontSize: '1.125rem',
+                  fontWeight: 500,
+                  color: '#222',
+                  lineHeight: 1.4,
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+                  designs, and engaging digital
+                </span>
+              </div>
+            </div>
+            <div className="split-reveal-group" data-direction="right" data-step="2" style={{ position: 'relative', width: 'max-content' }}>
+              <div className="split-block-revealer" style={{
+                position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
+                backgroundColor: '#2a2d22', zIndex: 10
+              }}></div>
+              <div className="split-reveal-content">
+                <span style={{ 
+                  fontSize: '1.125rem',
+                  fontWeight: 500,
+                  color: '#222',
+                  lineHeight: 1.4,
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+                  experiences.
+                </span>
+              </div>
+            </div>
+          </div>
 
           <button className="split-button" style={{ alignSelf: 'flex-start', marginTop: '2.5rem' }}>
-            <img src={arrowRight} alt="Right Arrow" style={{ width: '24px', height: '24px' }} />
+            <div className="svg-arrow right"></div>
           </button>
         </div>
 

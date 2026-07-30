@@ -116,12 +116,12 @@ body {
   display: flex;
   align-items: center;
   gap: calc(var(--gap) * 0.5);
-  background-color: var(--color-lime);
+  background-color: #b184ff;
   color: var(--color-dark-green);
   height: 3.75rem;
   padding: 0 1rem;
   border-radius: 0.54rem;
-  border: 1px solid var(--color-lime);
+  border: 1px solid #8370a5;
   text-decoration: none;
   cursor: pointer;
   pointer-events: auto;
@@ -849,25 +849,77 @@ body {
   z-index: 1;
 }
 
-.split-button::before {
+/* SVG Mask Animated Arrow */
+.svg-arrow {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(17, 17, 18, 0.3); /* Base color */
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  transition: transform 0.1s;
+}
+
+.svg-arrow::before,
+.svg-arrow::after {
   content: '';
   position: absolute;
+  background-color: #111112; /* Fill color */
+}
+
+/* Top half */
+.svg-arrow::after {
+  top: 0;
+  bottom: 50%;
+  transition: width 0.15s ease-out 0s; /* Empties immediately on mouse leave */
+}
+
+/* Bottom half */
+.svg-arrow::before {
+  top: 50%;
   bottom: 0;
+  transition: width 0.15s ease-out 0.15s; /* Waits 0.15s to empty on mouse leave */
+}
+
+/* Right Arrow Fill Directions */
+.svg-arrow.right {
+  mask-image: url('./assets/arrow-right.svg');
+  -webkit-mask-image: url('./assets/arrow-right.svg');
+}
+.svg-arrow.right::after,
+.svg-arrow.right::before {
   left: 0;
+  width: 0%;
+}
+
+/* Left Arrow Fill Directions */
+.svg-arrow.left {
+  mask-image: url('./assets/arrow-left.svg');
+  -webkit-mask-image: url('./assets/arrow-left.svg');
+}
+.svg-arrow.left::after,
+.svg-arrow.left::before {
   right: 0;
-  height: 0;
-  background-color: #8F74C6;
-  transition: height 0.3s ease-out;
-  z-index: -1;
+  width: 0%;
 }
 
-.split-button:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(165, 142, 217, 0.3);
+/* Hover States */
+.split-button:hover .svg-arrow::before {
+  width: 100%;
+  transition-delay: 0s; /* Bottom fills immediately */
 }
 
-.split-button:hover::before {
-  height: 100%;
+.split-button:hover .svg-arrow::after {
+  width: 100%;
+  transition-delay: 0.15s; /* Top fills after */
+}
+
+.split-button:active .svg-arrow {
+  transform: scale(0.9);
 }
 
 .quote-row-content {
