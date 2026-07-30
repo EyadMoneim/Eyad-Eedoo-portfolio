@@ -1,20 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { DeveloperBadge } from '../App';
+import DeveloperBadge from '../components/badges/DeveloperBadge';
 
-// =========================================
-// Helmet SVG Icon
-// =========================================
-const HelmetIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 97 50.1"
-    style={{ width: "2rem", height: "auto" }}
-    fill="currentColor"
-  >
-    <path d="M68.4 33.8c.1-.7.3-1.4.4-2.3 1.1-6.1.4-11.8-2-17-2.9-6.2-9.3-12.9-18.3-13.1-9.1 0-15.6 6.4-18.7 12.6-2.6 5.1-3.4 10.8-2.4 17 .1.9.3 1.6.4 2.3 0 .5.1.9.3 1.4.1.6.3 1.2.4 1.7v.2c.1.5.3 1 .4 1.5.3 1 .5 1.5.8 1.9 0 .2.2.4.3.7l.3.9v.3c0 .3.1.5.2.8 0 1.4.7 2.2 1.5 3.3.9 1.1 1.6 1.3 2.9 1.5.9.1 1.4.2 3 .6l2 .4c2.3.8 4.6 1.3 7.9 1.3h.4c3.1 0 5.2-.4 7.5-1.1s1.9-.4 1.9-.4c1.6-.3 2.2-.4 3.1-.5 1.3-.2 2-.3 3-1.5.9-1 1.5-1.8 1.6-3.2.1-.3.2-.5.3-.8V42c0-.4.2-.7.3-.9.1-.3.2-.5.3-.7.3-.5.5-.9.8-1.9.1-.5.3-1 .4-1.5v-.2c.1-.5.3-1.1.4-1.7.2-.4.3-.9.3-1.4Z" />
-  </svg>
-);
 
 export default function HeroSection({ setIsRobotActive }) {
   return (
@@ -39,11 +25,9 @@ export default function HeroSection({ setIsRobotActive }) {
         className="next-project-card absolute left-4 lg:left-12 bottom-4 lg:bottom-12 hidden md:flex flex-col w-[140px]"
         style={{ zIndex: 20 }}
         onMouseEnter={() => {
-          console.log("CARD ENTER");
           setIsRobotActive(true);
         }}
         onMouseLeave={() => {
-          console.log("CARD LEAVE");
           setIsRobotActive(false);
         }}
       >

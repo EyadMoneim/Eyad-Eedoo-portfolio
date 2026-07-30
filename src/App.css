@@ -11,13 +11,13 @@
 /* ---- Font Import ---- */
 
 :root {
-  --color-dark-green: #282c20;
+  --color-dark-green: #131217;
   --color-white: #f4f4ed;
-  --color-lime: #d2ff00;
-  --color-lime-off: #b2c73a;
-  --color-green-off-white-1: #dde1d2;
-  --color-green-off-white-2: #b8aaa5;
-  --color-black: #111112;
+  --color-lime: #CDB8FF;
+  --color-lime-off: #B08CF5;
+  --color-green-off-white-1: #C9C7D2;
+  --color-green-off-white-2: #8B67C2;
+  --color-black: #070709;
   --gap: 1.25rem;
   --cubic-default: cubic-bezier(0.65, 0.05, 0, 1);
   --duration-default: 0.75s;
@@ -53,13 +53,13 @@ html {
 }
 
 ::selection {
-  background: #d0fe00;
-  color: #000;
+  background: #CDB8FF;
+  color: #070709;
 }
 
 ::-moz-selection {
-  background: #d0fe00;
-  color: #000;
+  background: #CDB8FF;
+  color: #070709;
 }
 
 body {
@@ -330,7 +330,7 @@ body {
   position: absolute;
   inset: 0;
   mix-blend-mode: plus-lighter;
-  background-color: #282c20;
+  background-color: #131217;
   z-index: 2;
 }
 
@@ -338,7 +338,7 @@ body {
   position: absolute;
   inset: 0;
   opacity: 0.4;
-  background-color: #343a26;
+  background-color: #241B33;
   z-index: 3;
 }
 
@@ -664,11 +664,11 @@ body {
 
 /* Marquee text color variants */
 .scroll-text-green {
-  color: #b2c73c;
+  color: #B08CF5;
 }
 
 .scroll-text-white {
-  color: #dde1d2;
+  color: #C9C7D2;
 }
 
 /* The grouped hero element that shrinks on scroll.
@@ -788,7 +788,7 @@ body {
   left: 50%;
   bottom: 5%;
   transform: translate(-50%, 0);
-  z-index: 40;
+  z-index: 35;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -799,9 +799,9 @@ body {
 
 .developer-signature-phase3 span {
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: 0.05em;
-  margin-top: 0.5rem;
+  margin-top: -0.2rem;
   color: var(--color-green-off-white-1);
 }
 
@@ -827,6 +827,47 @@ body {
   display: flex;
   align-items: center;
   margin-bottom: -0.15em;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Split Section Button */
+.split-button {
+  margin-top: 1.5rem;
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #a58ed9;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1;
+}
+
+.split-button::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background-color: #8F74C6;
+  transition: height 0.3s ease-out;
+  z-index: -1;
+}
+
+.split-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(165, 142, 217, 0.3);
+}
+
+.split-button:hover::before {
+  height: 100%;
 }
 
 .quote-row-content {

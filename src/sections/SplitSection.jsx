@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import { useRef, useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import rightSideImg from '../assets/right-side.avif';
@@ -6,24 +6,12 @@ import leftSideImg from '../assets/left-side.avif';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const CurvedArrowIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    width="20" 
-    height="20" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2.5" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <path d="M5 12h14"></path>
-    <path d="M12 5l7 7-7 7"></path>
-  </svg>
-);
+import CurvedArrowIcon from '../components/icons/CurvedArrowIcon';
+import BackgroundBlobs from '../components/background/BackgroundBlobs';
+import arrowLeft from '../assets/arrow-left.svg';
+import arrowRight from '../assets/arrow-right.svg';
 
-const SplitSection = ({ sectionRef }) => {
+const SplitSection = ({ sectionRef, triggerRef }) => {
   const leftImgRef = useRef(null);
   const rightImgRef = useRef(null);
   const leftContentRef = useRef(null);
@@ -42,10 +30,10 @@ const SplitSection = ({ sectionRef }) => {
       // Images slide in from sides
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 60%',
-          end: 'top 10%',
-          toggleActions: 'play none none reverse',
+          trigger: triggerRef ? triggerRef.current : sectionRef.current,
+          start: 'top 50%',
+          end: 'bottom bottom',
+          scrub: 1,
         }
       });
 
@@ -73,15 +61,24 @@ const SplitSection = ({ sectionRef }) => {
     <section 
       ref={sectionRef} 
       style={{
-        position: 'relative',
+        position: 'fixed',
+        inset: 0,
         width: '100%',
         height: '100vh',
         display: 'flex',
         overflow: 'hidden',
-        zIndex: 50, // Above the white overlay (40) and quote-section (35)
-        backgroundColor: 'transparent',
+        zIndex: 30, // Behind quote-section (35) so quote can slide up over it
+        backgroundColor: '#f4f4ec',
+        opacity: 0, // Hidden until crossfade
+        pointerEvents: 'none',
       }}
     >
+      {/* Background blobs for Phase 4 */}
+      <BackgroundBlobs 
+        style={{ position: 'absolute', inset: 0, opacity: 0.2, pointerEvents: 'none' }} 
+        imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+      />
+
       {/* LEFT SIDE: "EEDOO" and right-side.avif */}
       <div style={{ 
         position: 'relative', 
@@ -89,8 +86,7 @@ const SplitSection = ({ sectionRef }) => {
         height: '100%', 
         display: 'flex', 
         alignItems: 'center', 
-        justifyContent: 'center',
-        borderRight: '1px solid rgba(45,49,38,0.12)',
+        justifyContent: 'flex-end', // Push text towards the center line
         overflow: 'hidden',
       }}>
         
@@ -123,7 +119,6 @@ const SplitSection = ({ sectionRef }) => {
           />
         </div>
 
-        {/* Left Content */}
         <div 
           ref={leftContentRef} 
           className="split-left-content"
@@ -132,21 +127,23 @@ const SplitSection = ({ sectionRef }) => {
             zIndex: 5, 
             display: 'flex', 
             flexDirection: 'column', 
-            alignItems: 'center',
-            marginLeft: '30%', 
-            textAlign: 'center',
+            alignItems: 'flex-start', // Left-aligned internal content
+            marginRight: '5%', // Closer to center line
+            textAlign: 'left',
           }}
         >
-          {/* ON / Eedoo stacked title */}
-          <div style={{ position: 'relative', lineHeight: 1 }}>
+          {/* Fixed height wrapper for title to align paragraphs horizontally */}
+          <div style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          {/* Eedoo stacked title */}
+          <div style={{ position: 'relative', lineHeight: 0.85 }}>
             {/* Background "EEDOO" – big black letters */}
             <div className="split-title-bg" style={{ 
               position: 'relative',
-              fontSize: 'clamp(3rem, 5vw, 6.5rem)',
+              fontSize: 'clamp(4rem, 7.7vw, 10rem)',
               fontWeight: 900,
-              color: '#111112',
+              color: '#1f231f', // Match reference dark color
               textTransform: 'uppercase',
-              letterSpacing: '-0.04em',
+              letterSpacing: '-0.05em', // Tight letter spacing like TRACK
               fontFamily: "'Inter', sans-serif",
               lineHeight: 0.85,
             }}>
@@ -155,52 +152,39 @@ const SplitSection = ({ sectionRef }) => {
             {/* Overlapping "Eedoo" in lime like "ON" overlay in reference */}
             <div className="split-title-fg" style={{ 
               position: 'absolute',
-              top: '30%',
-              left: '50%',
-              transform: 'translate(-50%, -50%) rotate(-12deg)',
-              fontSize: 'clamp(3.5rem, 6vw, 7.5rem)',
+              top: '40%',
+              left: '45%',
+              transform: 'translate(-50%, -50%) rotate(-15deg)',
+              fontSize: 'clamp(2.5rem, 5vw, 6rem)', // Scaled down to prevent massive overflow
               fontWeight: 900,
-              color: '#d2ff00',
+              color: '#a58ed9',
               textTransform: 'uppercase',
-              letterSpacing: '-0.04em',
+              letterSpacing: '0.02em',
               fontFamily: "'Playfair Display', serif",
               fontStyle: 'italic',
               lineHeight: 0.85,
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
             }}>
-              Eedoo
+              tech-guy
             </div>
+          </div>
           </div>
 
           <p style={{ 
-            marginTop: '3rem',
-            maxWidth: '220px',
-            fontSize: '0.875rem',
+            marginTop: '2rem',
+            maxWidth: '280px',
+            fontSize: '1.125rem',
             fontWeight: 500,
-            color: '#555',
-            lineHeight: 1.5,
+            color: '#222',
+            lineHeight: 1.4,
             fontFamily: "'Inter', sans-serif",
           }}>
-            Most recent results, career stats and photos from trackside.
+            Innovative projects, robust architectures, and deep-dives into modern tech stacks.
           </p>
 
-          <button style={{ 
-            marginTop: '1.5rem',
-            width: '3.5rem',
-            height: '3.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#d2ff00',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-          }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#b2c73a'}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#d2ff00'}
-          >
-            <CurvedArrowIcon />
+          <button className="split-button" style={{ alignSelf: 'flex-end', marginTop: '2.5rem' }}>
+            <img src={arrowLeft} alt="Left Arrow" style={{ width: '24px', height: '24px' }} />
           </button>
         </div>
       </div>
@@ -212,7 +196,7 @@ const SplitSection = ({ sectionRef }) => {
         height: '100%', 
         display: 'flex', 
         alignItems: 'center', 
-        justifyContent: 'center',
+        justifyContent: 'flex-start', // Push text towards center line
         overflow: 'hidden',
       }}>
 
@@ -225,65 +209,54 @@ const SplitSection = ({ sectionRef }) => {
             zIndex: 5, 
             display: 'flex', 
             flexDirection: 'column', 
-            alignItems: 'center',
-            marginRight: '30%',
-            textAlign: 'center',
+            alignItems: 'flex-start', // Match reference: left-aligned content
+            marginLeft: '5%', // Closer to center line
+            textAlign: 'left',
           }}
         >
-          {/* OFF / Eyad Moneim stacked title — matching reference */}
+          {/* Fixed height wrapper for title to align paragraphs horizontally */}
+          <div style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          {/* OFF / Eyad Moneim stacked title */}
           <div style={{ lineHeight: 0.85 }}>
             <div className="split-title-sub" style={{ 
-              fontSize: 'clamp(2.5rem, 4.5vw, 5rem)',
+              fontSize: 'clamp(2.5rem, 5vw, 6rem)',
               fontWeight: 500,
-              color: '#111112',
+              color: '#1f231f', // Match dark color
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
+              letterSpacing: '-0.02em', // Tight spacing
               fontFamily: "'Playfair Display', serif",
-              lineHeight: 0.9,
+              lineHeight: 0.85,
             }}>
               Eyad
             </div>
             <div className="split-title-main" style={{ 
-              fontSize: 'clamp(3rem, 5vw, 6.5rem)',
+              fontSize: 'clamp(3.5rem, 6.5vw, 8.5rem)',
               fontWeight: 900,
-              color: '#111112',
+              color: '#1f231f', // Match dark color
               textTransform: 'uppercase',
-              letterSpacing: '-0.04em',
+              letterSpacing: '-0.05em', // Very tight like TRACK
               fontFamily: "'Inter', sans-serif",
               lineHeight: 0.85,
             }}>
               Moneim
             </div>
           </div>
+          </div>
 
           <p style={{ 
-            marginTop: '3rem',
-            maxWidth: '220px',
-            fontSize: '0.875rem',
+            marginTop: '2rem',
+            maxWidth: '280px',
+            fontSize: '1.125rem',
             fontWeight: 500,
-            color: '#555',
-            lineHeight: 1.5,
+            color: '#222',
+            lineHeight: 1.4,
             fontFamily: "'Inter', sans-serif",
           }}>
-            Campaigns, shoots and other such promotional materials for fans.
+            Creative campaigns, UI/UX designs, and engaging digital experiences.
           </p>
 
-          <button style={{ 
-            marginTop: '1.5rem',
-            width: '3.5rem',
-            height: '3.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#d2ff00',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-          }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#b2c73a'}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#d2ff00'}
-          >
-            <CurvedArrowIcon />
+          <button className="split-button" style={{ alignSelf: 'flex-start', marginTop: '2.5rem' }}>
+            <img src={arrowRight} alt="Right Arrow" style={{ width: '24px', height: '24px' }} />
           </button>
         </div>
 

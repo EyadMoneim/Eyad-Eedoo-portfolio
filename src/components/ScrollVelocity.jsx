@@ -2,10 +2,8 @@ import { useRef, useLayoutEffect, useState } from 'react';
 import {
   motion,
   useScroll,
-  useSpring,
   useTransform,
   useMotionValue,
-  useVelocity,
   useAnimationFrame
 } from 'framer-motion';
 import './ScrollVelocity.css';
@@ -46,10 +44,8 @@ export const ScrollVelocity = ({
     baseVelocity = velocity,
     scrollContainerRef,
     className = '',
-    damping,
-    stiffness,
     numCopies,
-    velocityMapping,
+
     parallaxClassName,
     scrollerClassName,
     parallaxStyle,
@@ -57,18 +53,7 @@ export const ScrollVelocity = ({
   }) {
     const baseX = useMotionValue(0);
     const scrollOptions = scrollContainerRef ? { container: scrollContainerRef } : {};
-    const { scrollY } = useScroll(scrollOptions);
-    const scrollVelocity = useVelocity(scrollY);
-    const smoothVelocity = useSpring(scrollVelocity, {
-      damping: damping ?? 50,
-      stiffness: stiffness ?? 400
-    });
-    const velocityFactor = useTransform(
-      smoothVelocity,
-      velocityMapping?.input || [0, 1000],
-      velocityMapping?.output || [0, 5],
-      { clamp: false }
-    );
+    useScroll(scrollOptions);
 
     const copyRef = useRef(null);
     const copyWidth = useElementWidth(copyRef);
@@ -84,7 +69,6 @@ export const ScrollVelocity = ({
       return `${wrap(-copyWidth, 0, v)}px`;
     });
 
-    const directionFactor = useRef(1);
     useAnimationFrame((t, delta) => {
       let moveBy = baseVelocity * (delta / 1000);
       baseX.set(baseX.get() + moveBy);

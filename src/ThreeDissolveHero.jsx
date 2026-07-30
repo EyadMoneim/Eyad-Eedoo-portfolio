@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useCallback, useEffect } from "react";
+import { useRef, useMemo, useCallback, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -64,6 +64,21 @@ uniform float uFullTransform;
 
 varying vec2 vUv;
 
+// Function to draw a perfect rounded capsule (pill shape) scratch with blur
+float drawScratch(vec2 uv, vec2 center, float angle, float halfLen, float radius, float blur) {
+    vec2 p = uv - center;
+    float s = sin(angle);
+    float c = cos(angle);
+    vec2 rp = vec2(p.x * c - p.y * s, p.x * s + p.y * c);
+    
+    // Distance field for a line segment
+    float dX = abs(rp.x) - halfLen;
+    float dist = length(vec2(max(dX, 0.0), abs(rp.y)));
+    
+    // Smoothstep for blurred edge
+    return smoothstep(radius + blur, max(0.0, radius - blur), dist);
+}
+
 void main() {
   vec4 humanColor = texture2D(uTexture, vUv);
   vec4 robotColor = texture2D(uRobotTexture, vUv);
@@ -85,9 +100,9 @@ void main() {
   // Max radius for the hover reveal
   float maxRadius = 0.35;
   
-  // Idle pulsing tease (only active when NOT hovering)
-  // Pulses between 0.0 and 0.015 radius to hint at the hidden layer
-  float idlePulse = (sin(uTime * 3.0) * 0.5 + 0.5) * 0.015;
+  // Phase 8: Shader Enhancement - Improve existing idle pulse
+  // Pulses between 0.0 and 0.025 radius to hint at the hidden layer (slightly increased visibility)
+  float idlePulse = (sin(uTime * 2.5) * 0.5 + 0.5) * 0.025;
   float currentRadius = maxRadius * uHover + idlePulse * (1.0 - uHover);
   
   // Add noise to the edge so it's not a perfect circle, mimicking a sand/dust edge
@@ -126,6 +141,37 @@ void main() {
   // ============================================
   float mixAmount = max(cursorMix, fullMix);
   
+  // ============================================
+  // Permanent Cyber Scratches (Explicit Rounded Geometry)
+  // ============================================
+  // using drawScratch(uv, center, angle, halfLen, radius)
+  
+  // 1. Neck
+  float breath1 = (sin(uTime * 1.5 + 0.0) * 0.5 + 0.5) * 0.85 + 0.15;
+  vec2 off1 = vec2(sin(uTime * 0.4 + 0.0), cos(uTime * 0.5 + 1.0)) * 0.015;
+  float mask1 = drawScratch(vUv, vec2(0.5, 0.36) + off1, 0.5, 0.16, 0.012, 0.020) * breath1;
+
+  // 2. Face (Viewer Right Cheek)
+  float breath2 = (sin(uTime * 1.5 + 2.0) * 0.5 + 0.5) * 0.85 + 0.15;
+  vec2 off2 = vec2(cos(uTime * 0.6 + 2.0), sin(uTime * 0.3 + 3.0)) * 0.015;
+  float mask2 = drawScratch(vUv, vec2(0.62, 0.52) + off2, -0.4, 0.14, 0.010, 0.018) * breath2;
+
+  // 3. Right Shoulder (Viewer Left)
+  float breath3 = (sin(uTime * 1.5 + 4.0) * 0.5 + 0.5) * 0.85 + 0.15;
+  vec2 off3 = vec2(sin(uTime * 0.5 + 4.0), cos(uTime * 0.4 + 5.0)) * 0.015;
+  float mask3 = drawScratch(vUv, vec2(0.28, 0.20) + off3, 0.8, 0.18, 0.015, 0.022) * breath3;
+
+  // 4. Left Shoulder (Viewer Right)
+  float breath4 = (sin(uTime * 1.5 + 1.0) * 0.5 + 0.5) * 0.85 + 0.15;
+  vec2 off4 = vec2(cos(uTime * 0.4 + 6.0), sin(uTime * 0.7 + 7.0)) * 0.015;
+  float mask4 = drawScratch(vUv, vec2(0.72, 0.22) + off4, -0.7, 0.18, 0.014, 0.020) * breath4;
+
+  // Combine the prominent rounded slashes
+  float staticScratches = max(mask1, max(mask2, max(mask3, mask4)));
+  
+  // Make the scratch 100% opaque robot texture where the mask is active
+  mixAmount = max(mixAmount, staticScratches);
+  
   vec4 finalColor = mix(humanColor, robotColor, mixAmount);
   
   if (finalColor.a < 0.01) discard;
@@ -136,6 +182,140 @@ void main() {
   #include <colorspace_fragment>
 }
 `;
+
+// ================================================
+// HUD Halo Component (Phase 3)
+// ================================================
+const hudVertexShader = /* glsl */ `
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const hudFragmentShader = /* glsl */ `
+uniform float uTime;
+uniform float uOpacity;
+varying vec2 vUv;
+
+// Function to draw a perfect rounded capsule (pill shape) scratch
+float drawScratch(vec2 uv, vec2 center, float angle, float halfLen, float radius) {
+    vec2 p = uv - center;
+    float s = sin(angle);
+    float c = cos(angle);
+    vec2 rp = vec2(p.x * c - p.y * s, p.x * s + p.y * c);
+    
+    // Distance field for a line segment
+    float dX = abs(rp.x) - halfLen;
+    float dist = length(vec2(max(dX, 0.0), abs(rp.y)));
+    
+    // Smoothstep for anti-aliasing (sharp but smooth edge)
+    return smoothstep(radius + 0.003, radius - 0.001, dist);
+}
+
+void main() {
+  vec2 centered = vUv - 0.5;
+  float dist = length(centered);
+  
+  // Create a futuristic wireframe/HUD scan ring
+  // Multiple thin rings and dashed segments
+  float ring1 = smoothstep(0.48, 0.49, dist) - smoothstep(0.49, 0.5, dist);
+  float ring2 = smoothstep(0.42, 0.425, dist) - smoothstep(0.425, 0.43, dist);
+  
+  // Dashed effect based on angle
+  float angle = atan(centered.y, centered.x);
+  float dashes = sin(angle * 40.0 + uTime * 2.0);
+  float dashedRing = ring1 * step(0.0, dashes);
+  
+  // Inner scanning circle
+  float scan = (sin(dist * 50.0 - uTime * 4.0) * 0.5 + 0.5) * 0.2;
+  float innerFill = smoothstep(0.4, 0.38, dist) * scan;
+  
+  float alpha = (dashedRing + ring2 * 0.5 + innerFill) * uOpacity;
+  if (alpha < 0.01) discard;
+  
+  // Use a dark, premium color (dark green from theme) since background is off-white
+  gl_FragColor = vec4(vec3(0.176, 0.192, 0.149), alpha);
+}
+`;
+
+function HudHalo({ targetX, targetY, targetScale, targetOpacity, baseScale }) {
+  const meshRef = useRef();
+  const materialRef = useRef();
+  
+  const uniforms = useMemo(() => ({
+    uTime: { value: 0 },
+    uOpacity: { value: 0.15 } // base opacity
+  }), []);
+
+  useFrame((state) => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+      // Smoothly interpolate opacity
+      materialRef.current.uniforms.uOpacity.value += (targetOpacity - materialRef.current.uniforms.uOpacity.value) * 0.05;
+    }
+    if (meshRef.current) {
+      // Smoothly interpolate position and scale (Phase 4 layered movement)
+      meshRef.current.position.x += (targetX - meshRef.current.position.x) * 0.04;
+      meshRef.current.position.y += (targetY - meshRef.current.position.y) * 0.04;
+      meshRef.current.scale.x += (targetScale * baseScale - meshRef.current.scale.x) * 0.05;
+      meshRef.current.scale.y += (targetScale * baseScale - meshRef.current.scale.y) * 0.05;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 0, -0.2]}>
+      <planeGeometry args={[1, 1]} />
+      <shaderMaterial 
+        ref={materialRef}
+        vertexShader={hudVertexShader}
+        fragmentShader={hudFragmentShader}
+        uniforms={uniforms}
+        transparent={true}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
+// ================================================
+// Rim Light Component (Phase 7)
+// ================================================
+const rimFragmentShader = /* glsl */ `
+varying vec2 vUv;
+void main() {
+  vec2 centered = vUv - 0.5;
+  float dist = length(centered);
+  // Soft radial gradient - increased opacity so it can slightly brighten the #fcfcfa background
+  float alpha = smoothstep(0.5, 0.0, dist) * 0.3; 
+  if (alpha < 0.01) discard;
+  gl_FragColor = vec4(1.0, 1.0, 1.0, alpha);
+}
+`;
+
+function RimLight({ targetX, targetY, baseScale }) {
+  const meshRef = useRef();
+  
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.position.x += (targetX - meshRef.current.position.x) * 0.035;
+      meshRef.current.position.y += (targetY - meshRef.current.position.y) * 0.035;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 0, -0.1]} scale={baseScale * 1.2}>
+      <planeGeometry args={[1, 1]} />
+      <shaderMaterial 
+        vertexShader={hudVertexShader} // reuse vertex shader
+        fragmentShader={rimFragmentShader}
+        transparent={true}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
 
 // ================================================
 // Scene Content
@@ -149,13 +329,27 @@ function SceneContent({ hoverProgress, fullTransformProgress, globalMouse, mouse
   // Create a dedicated raycaster (not from R3F's event system)
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
 
-  const [humanTexture, robotTexture] = useTexture([eyadHumanSrc, eyadRobotSrc]);
+  const [rawHumanTexture, rawRobotTexture] = useTexture([eyadHumanSrc, eyadRobotSrc]);
+
+  const humanTexture = useMemo(() => {
+    const texture = rawHumanTexture.clone();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+    return texture;
+  }, [rawHumanTexture]);
+
+  const robotTexture = useMemo(() => {
+    const texture = rawRobotTexture.clone();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+    return texture;
+  }, [rawRobotTexture]);
 
   useEffect(() => {
-    humanTexture.colorSpace = THREE.SRGBColorSpace;
-    robotTexture.colorSpace = THREE.SRGBColorSpace;
-    humanTexture.needsUpdate = true;
-    robotTexture.needsUpdate = true;
+    return () => {
+      humanTexture.dispose();
+      robotTexture.dispose();
+    };
   }, [humanTexture, robotTexture]);
 
   const aspect = humanTexture.image.width / humanTexture.image.height;
@@ -217,42 +411,76 @@ function SceneContent({ hoverProgress, fullTransformProgress, globalMouse, mouse
     }
 
     if (groupRef.current && globalMouse) {
-      // 1. Continuous breathing / floating effect (1% of viewport height)
+      // Phase 1: Hero Idle State (Float & Rotation)
+      // Amplitude: 5-7px, Duration: 7-9s (freq ~0.785)
       const t = state.clock.elapsedTime;
-      const floatY = Math.sin(t * 1.5) * (viewport.height * 0.01);
+      const floatFreq = 0.785; // 8 seconds
+      const floatY = Math.sin(t * floatFreq) * (viewport.height * 0.015); // Increased to 1.5% for perceptibility
+      const floatRot = Math.sin(t * floatFreq * 0.8) * 0.006; // max ~0.35 degrees
 
-      // 2. Subtle premium mouse-follow parallax on both axes
-      const parallaxX = globalMouse.current.x * (viewport.width * 0.010);
-      const parallaxY = globalMouse.current.y * (viewport.height * 0.000);
+      // Phase 4: Hero Parallax layered movement
+      // Portrait moves ~5px
+      const px5 = viewport.height * 0.005;
+      const parallaxX = globalMouse.current.x * px5;
+      const parallaxY = globalMouse.current.y * px5;
 
-      // Smooth dampening: X follows mouse horizontally, Y follows mouse + float around baseY
       const targetX = parallaxX;
       const targetY = baseY + parallaxY + floatY;
       
       groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.04;
       groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.03;
+      groupRef.current.rotation.z += (floatRot - groupRef.current.rotation.z) * 0.05;
     }
   });
 
+  // Calculate parameters for background layers
+  // HUD moves 8px, which is 1.6x the portrait movement
+  const px8 = viewport.height * 0.008;
+  const hudTargetX = globalMouse.current.x * px8;
+  const hudTargetY = baseY + (globalMouse.current.y * px8) + (Math.sin(0 * 0.785) * viewport.height * 0.007); // Approximation for hud Y
+  
+  // Head offset (HUD sits behind head)
+  const headOffsetY = scale[1] * 0.25; 
+  
+  // Hover interpolations for HUD (15% idle, 35% hover)
+  const hudScale = 1.0 + (hoverProgress.current * 0.06);
+  const hudOpacity = 0.15 + (hoverProgress.current * 0.20);
+
   return (
-    <group
-      ref={groupRef}
-      scale={scale}
-      position={[0, baseY, 0]}
-    >
-      {/* Single Layer: Human and Robot mixed dynamically */}
-      <mesh ref={meshRef} position={[0, 0, 0]}>
-        <planeGeometry args={[1, 1]} />
-        <shaderMaterial
-          ref={dissolveMaterialRef}
-          vertexShader={dissolveVertexShader}
-          fragmentShader={dissolveFragmentShader}
-          uniforms={dissolveUniforms}
-          transparent={true}
-          depthWrite={false}
-        />
-      </mesh>
-    </group>
+    <>
+      {/* Background Layers */}
+      <RimLight 
+        targetX={hudTargetX} 
+        targetY={hudTargetY + headOffsetY} 
+        baseScale={scale[0]} 
+      />
+      <HudHalo 
+        targetX={hudTargetX} 
+        targetY={hudTargetY + headOffsetY} 
+        targetScale={hudScale}
+        targetOpacity={hudOpacity}
+        baseScale={scale[0] * 0.60}
+      />
+
+      <group
+        ref={groupRef}
+        scale={scale}
+        position={[0, baseY, 0]}
+      >
+        {/* Single Layer: Human and Robot mixed dynamically */}
+        <mesh ref={meshRef} position={[0, 0, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <shaderMaterial
+            ref={dissolveMaterialRef}
+            vertexShader={dissolveVertexShader}
+            fragmentShader={dissolveFragmentShader}
+            uniforms={dissolveUniforms}
+            transparent={true}
+            depthWrite={false}
+          />
+        </mesh>
+      </group>
+    </>
   );
 }
 
@@ -277,7 +505,6 @@ export default function ThreeDissolveHero({ isInteractive = true, isRobotActive 
     hoverTweenRef.current = gsap.to(hoverProgress, {
       current: 1,
       duration: 0.8,
-      ease: "power2.out",
     });
   }, []);
 
@@ -286,9 +513,40 @@ export default function ThreeDissolveHero({ isInteractive = true, isRobotActive 
     hoverTweenRef.current = gsap.to(hoverProgress, {
       current: 0,
       duration: 0.8,
-      ease: "power2.inOut",
     });
   }, []);
+
+  // Phase 2: Interactive Discovery Teaser
+  const hasTeased = useRef(false);
+  useEffect(() => {
+    if (isInteractive && !hasTeased.current) {
+      const teaserDelay = setTimeout(() => {
+        hasTeased.current = true; // Set here to bypass StrictMode double-mount issues
+        
+        // Only tease if user hasn't hovered or interacted yet
+        if (isRobotActiveRef.current || isHeroHoveredRef.current) return;
+        
+        if (hoverTweenRef.current) hoverTweenRef.current.kill();
+        
+        // Human -> Robot -> Human (subtle opacity)
+        const tl = gsap.timeline();
+        hoverTweenRef.current = tl;
+        
+        tl.to(hoverProgress, {
+          current: 0.45, // slightly more visible
+          duration: 0.4,
+          ease: "power2.out"
+        }).to(hoverProgress, {
+          current: 0,
+          duration: 0.4,
+          ease: "power2.in"
+        });
+        
+      }, 1800);
+      
+      return () => clearTimeout(teaserDelay);
+    }
+  }, [isInteractive]);
 
   // --- Full Transformation: Developer Badge Hover ---
   useEffect(() => {

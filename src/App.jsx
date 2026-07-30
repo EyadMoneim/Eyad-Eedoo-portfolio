@@ -1,564 +1,33 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import reactLogoSrc from "./assets/react.svg";
+import { AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import LoadingScreen from "./LoadingScreen";
-import blobsBg from "./assets/wallpaper.svg";
 import eyadSmallSrc from "./assets/eyad-small.avif";
-import signatureRaw from "./assets/signature.svg?raw";
 import laurelWreathSrc from "./assets/Laurel_Wreath.svg";
-import reactLogoSrc from "./assets/react.svg";
-import Logo from "./Logo";
-import "./App.css";
 import HeroSection from "./sections/HeroSection";
 import ThreeDissolveHero from "./ThreeDissolveHero";
 import ScrollVelocity from "./components/ScrollVelocity";
 import SplitSection from "./sections/SplitSection";
+import LoadingScreen from "./LoadingScreen";
+import "./App.css";
+import Navbar from "./components/nav/Navbar";
+import FullscreenMenu from "./components/nav/FullscreenMenu";
+import QuoteSection from "./components/quote/QuoteSection";
+import BackgroundBlobs from "./components/background/BackgroundBlobs";
+import SignatureLayer from "./components/background/SignatureLayer";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// =========================================
-// Parse signature SVG paths for Phase 2
-// =========================================
-const _sigParser = new DOMParser();
-const _sigDoc = _sigParser.parseFromString(signatureRaw, 'image/svg+xml');
-const _sigAllPaths = Array.from(_sigDoc.querySelectorAll('path'));
-const _sigSt0 = _sigAllPaths.filter(p => p.classList.contains('st0'));
-const _sigSt1 = _sigAllPaths.filter(p => p.classList.contains('st1'));
-const SIG_PATHS = {
-  main: [_sigSt0[0]].map(p => p?.getAttribute('d')).filter(Boolean),
-  underline: [_sigSt0[1]].map(p => p?.getAttribute('d')).filter(Boolean),
-  six: _sigSt0[2]?.getAttribute('d') || '',
-  dots: [_sigSt0[3], _sigSt0[4]].map(p => p?.getAttribute('d')).filter(Boolean),
-  highlights: _sigSt1.map(p => p?.getAttribute('d')).filter(Boolean),
-};
 
-// =========================================  
-// Color Palette (matching Lando Norris site)
-// =========================================
-const COLORS = {
-  darkGreen: "#282c20",
-  white: "#f4f4ed",
-  lime: "#d2ff00",
-  limeOff: "#b2c73a",
-  greenOffWhite1: "#dde1d2",
-  greenOffWhite2: "#b4b8a5",
-  black: "#111112",
-};
 
-// =========================================
-// Cubic Bezier Easing (matching the site)
-// =========================================
-const EASE_DEFAULT = [0.65, 0.05, 0, 1];
-const EASE_SMOOTH = [0.16, 1, 0.3, 1];
 
-// =========================================
-// Menu Images (Lando Norris menu images)
-// =========================================
-const MENU_IMAGES = [
-  {
-    src: "https://cdn.prod.website-files.com/67b5a02dc5d338960b17a7e9/67dae5835c0649927438ae19_ln4-menu-img-1.webp",
-    alt: "Lando with helmet",
-  },
-  {
-    src: "https://cdn.prod.website-files.com/67b5a02dc5d338960b17a7e9/67dae5829bee1b4a7b936935_ln4-menu-img-2.webp",
-    alt: "Lando celebrating",
-  },
-  {
-    src: "https://cdn.prod.website-files.com/67b5a02dc5d338960b17a7e9/67dae5827466101f6aca77eb_ln4-menu-img-3.webp",
-    alt: "McLaren F1 car",
-  },
-  {
-    src: "https://cdn.prod.website-files.com/67b5a02dc5d338960b17a7e9/67dae5824cc4245e1e6cf501_ln4-menu-img-5.webp",
-    alt: "Lando in F1 car",
-  },
-];
 
-// =========================================
-// Helmet SVG Icon (from Lando site)
-// =========================================
-const HelmetIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 97 50.1"
-    style={{ width: "5rem", height: "auto" }}
-    fill="currentColor"
-  >
-    <path d="M68.4 33.8c.1-.7.3-1.4.4-2.3 1.1-6.1.4-11.8-2-17-2.9-6.2-9.3-12.9-18.3-13.1-9.1 0-15.6 6.4-18.7 12.6-2.6 5.1-3.4 10.8-2.4 17 .1.9.3 1.6.4 2.3 0 .5.1.9.3 1.4.1.6.3 1.2.4 1.7v.2c.1.5.3 1 .4 1.5.3 1 .5 1.5.8 1.9 0 .2.2.4.3.7l.3.9v.3c0 .3.1.5.2.8 0 1.4.7 2.2 1.5 3.3.9 1.1 1.6 1.3 2.9 1.5.9.1 1.4.2 3 .6l2 .4c2.3.8 4.6 1.3 7.9 1.3h.4c3.1 0 5.2-.4 7.5-1.1s1.9-.4 1.9-.4c1.6-.3 2.2-.4 3.1-.5 1.3-.2 2-.3 3-1.5.9-1 1.5-1.8 1.6-3.2.1-.3.2-.5.3-.8V42c0-.4.2-.7.3-.9.1-.3.2-.5.3-.7.3-.5.5-.9.8-1.9.1-.5.3-1 .4-1.5v-.2c.1-.5.3-1.1.4-1.7.2-.4.3-.9.3-1.4Z" />
-  </svg>
-);
 
-// =========================================
-// Developer Badge
-// =========================================
-export const DeveloperBadge = () => (
-  <div className="developer-badge">
-    <img src={laurelWreathSrc} alt="Laurel Wreath" className="developer-badge-wreath" />
-    <img src={reactLogoSrc} alt="React Logo" className="developer-badge-react" />
-  </div>
-);
 
-// =========================================
-// Store Icon SVG
-// =========================================
-const StoreIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    style={{ width: "1.7rem", height: "1.7rem" }}
-  >
-    <path
-      fill="currentColor"
-      fillRule="evenodd"
-      d="M7.703 7a3.056 3.056 0 0 0-2.82 1.88c-.433 1.04-1.017 3.615-1.281 4.845-.074.34-.104.633-.08.896.078.88.35 1.3.606 1.516.267.227.673.363 1.267.363.653 0 1.26-.337 1.607-.89l1.645-2.632 2.187-3.645-.51-.85A3.056 3.056 0 0 0 7.704 7ZM12 7.39a5.056 5.056 0 0 0-8.963.721c-.52 1.249-1.143 4.038-1.39 5.194a4.988 4.988 0 0 0-.118 1.494c.111 1.24.54 2.214 1.305 2.863.753.639 1.687.838 2.561.838a3.895 3.895 0 0 0 3.303-1.83l1.65-2.64.01-.015L12 11.277l1.642 2.738.01.015 1.65 2.64a3.895 3.895 0 0 0 3.302 1.83c.983 0 2.005-.28 2.772-1.086.76-.799 1.124-1.96 1.124-3.414 0-.923-.35-2.266-.675-3.341a43.426 43.426 0 0 0-.815-2.422A5.056 5.056 0 0 0 12 7.39Zm1.166 1.943 2.186 3.645 1.645 2.631c.346.554.954.891 1.607.891.617 0 1.043-.17 1.323-.465.288-.302.573-.89.573-2.035 0-.584-.255-1.655-.59-2.764a41.348 41.348 0 0 0-.774-2.303 3.056 3.056 0 0 0-5.46-.45l-.51.85Z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
 
-// =========================================
-// Lando Norris Brand SVG
-// =========================================
-const LandoBrand = ({ color1 = "#c8cbbd", color2 = "#ebeee0" }) => (
-  <svg
-    width="138"
-    height="63"
-    viewBox="0 0 138 63"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ height: "3.75rem", width: "auto" }}
-  >
-    <path
-      fill={color1}
-      d="M122.638.174c8.968 0 14.659 6.985 14.659 15.737 0 8.795-5.691 15.736-14.659 15.736-8.967 0-14.658-6.985-14.658-15.736 0-8.752 5.691-15.737 14.658-15.737Zm4.182 30.265c4.613-1.293 7.329-8.88 4.958-17.158-2.328-8.106-8.752-13.193-13.322-11.9-4.57 1.294-7.286 8.968-4.914 17.246 2.328 8.105 8.708 13.106 13.278 11.813ZM88.191.821c13.495 0 18.496 7.027 18.496 14.874 0 9.614-6.381 15.305-17.116 15.305H78.577l-.56-1.207c1.724-1.854 1.724-1.854 1.724-3.492V5.52c0-1.639 0-1.639-1.724-3.536l.56-1.164h9.614Zm13.107 14.917c0-6.984-4.182-14.4-13.107-14.4-3.707 0-3.707 2.544-3.707 4.182V26.3c0 1.639.043 4.183 2.802 4.183 7.89 0 14.012-2.76 14.012-14.745ZM77.192.821l.604 1.207c-3.535 2.673-3.535 2.673-3.535 4.829V31h-1.983L55.636 7.547C53.74 4.917 53.74 4.7 53.74 9.444v15.52c0 2.156 0 2.156 3.363 4.829L56.498 31H50.29l-.603-1.207c3.535-2.673 3.535-2.673 3.535-4.829V6.857c0-2.156 0-2.156-3.535-4.829L50.29.821h6.338l15.305 21.384c1.81 2.5 1.81 2.5 1.81-1.983V6.857c0-2.156 0-2.156-3.362-4.829l.603-1.207h6.209ZM31.49.821h5.777l8.795 24.014c1.121 3.104 1.121 3.104 2.76 4.958L48.217 31h-7.07l-.604-1.207c1.293-1.81 1.293-1.81-.863-8.32-.776-2.329-1.552-3.493-3.104-3.493h-4.57l-2.586 2.414c-1.725 1.639-2.329 3.19-2.846 4.829-.69 2.242-.69 2.242 1.94 4.57L27.912 31h-5.519l-.603-1.207c3.276-2.414 3.276-2.414 4.44-5.519l6.467-17.158c.56-1.423.949-2.415-1.81-5.088L31.49.821Zm-1.725 18.582 2.027-1.94h4.656c1.552 0 1.336-1.337 1.078-2.07l-2.932-8.32c-.733-2.113-1.078-.95-1.423.043L29.12 18.152c-.776 2.07-.992 2.803.646 1.25ZM19.945 24.145l1.853.647L20.85 31H.716l-.56-1.164c1.767-1.94 1.767-1.94 1.767-3.708V5.693c0-1.768 0-1.768-1.767-3.708L.716.821h7.157l.56 1.164c-1.767 1.94-1.767 1.94-1.767 3.708v20.435c0 1.768 0 4.355 2.716 4.355 3.104 0 8.191-.431 10.563-6.338Z"
-    />
-    <path
-      fill={color2}
-      d="M125.417 62.186c-2.382 0-4.395-.357-6.039-1.072-1.619-.714-2.858-1.715-3.716-3.001-.834-1.31-1.25-2.811-1.25-4.502h6.503c0 .738.167 1.381.5 1.93.334.547.846.976 1.537 1.286.69.31 1.596.464 2.715.464.834 0 1.549-.095 2.144-.286.619-.19 1.096-.488 1.429-.893.334-.429.501-.977.501-1.644 0-.5-.096-.905-.286-1.215-.167-.31-.465-.571-.894-.786-.404-.214-.976-.405-1.715-.572a39.217 39.217 0 0 0-2.787-.5c-1.5-.238-2.823-.56-3.966-.965-1.143-.428-2.096-.952-2.859-1.572a5.935 5.935 0 0 1-1.715-2.215c-.381-.858-.571-1.858-.571-3.002 0-1.69.416-3.144 1.25-4.359.858-1.239 2.061-2.18 3.609-2.823 1.572-.667 3.442-1 5.61-1 2.073 0 3.871.333 5.396 1 1.524.643 2.703 1.549 3.537 2.716.834 1.167 1.263 2.525 1.286 4.073h-6.467c-.024-.738-.226-1.322-.608-1.75-.357-.453-.833-.775-1.429-.965a6.175 6.175 0 0 0-1.894-.286c-.738 0-1.381.095-1.929.286-.548.19-.977.476-1.286.857-.286.358-.429.834-.429 1.43 0 .595.155 1.072.464 1.429.334.333.929.62 1.787.857.857.239 2.084.477 3.68.715 1.072.167 2.12.393 3.145.679a9.72 9.72 0 0 1 2.858 1.286c.882.572 1.572 1.358 2.073 2.359.524 1 .786 2.298.786 3.894s-.417 3.014-1.251 4.252c-.81 1.215-2.025 2.168-3.644 2.859-1.62.69-3.645 1.036-6.075 1.036ZM105.813 61.83V35.78h6.396v26.05h-6.396ZM80.714 61.83V35.78h13.721c1.048 0 2.013.096 2.894.286.905.19 1.715.477 2.43.858.715.381 1.322.87 1.822 1.465a5.86 5.86 0 0 1 1.144 2.037c.286.762.429 1.631.429 2.608 0 1.596-.441 2.954-1.323 4.074-.857 1.095-2.024 1.834-3.501 2.215v.25c1.024.167 1.846.465 2.465.893.62.43 1.072.989 1.358 1.68.31.667.465 1.489.465 2.465v4.18c0 .477.011.978.035 1.502.048.5.191 1.012.429 1.536h-6.467c-.143-.31-.25-.726-.322-1.25a13.345 13.345 0 0 1-.107-1.787v-3.073c0-.667-.107-1.227-.322-1.68-.19-.452-.548-.81-1.072-1.071-.524-.262-1.274-.393-2.25-.393h-5.968v-5.039h6.289c1.358 0 2.31-.321 2.858-.964.572-.644.858-1.43.858-2.359 0-.595-.095-1.084-.286-1.465a2.17 2.17 0 0 0-.75-.965 3.202 3.202 0 0 0-1.18-.571 5.893 5.893 0 0 0-1.5-.179H87.11V61.83h-6.396ZM55.615 61.83V35.78h13.721c1.049 0 2.013.096 2.895.286.905.19 1.715.477 2.43.858.714.381 1.322.87 1.822 1.465.5.572.881 1.25 1.143 2.037.286.762.429 1.631.429 2.608 0 1.596-.44 2.954-1.322 4.074-.858 1.095-2.025 1.834-3.502 2.215v.25c1.024.167 1.846.465 2.466.893.619.43 1.072.989 1.357 1.68.31.667.465 1.489.465 2.465v4.18c0 .477.012.978.036 1.502.047.5.19 1.012.428 1.536h-6.467c-.143-.31-.25-.726-.322-1.25a13.328 13.328 0 0 1-.107-1.787v-3.073c0-.667-.107-1.227-.321-1.68-.191-.452-.548-.81-1.072-1.071-.524-.262-1.275-.393-2.252-.393h-5.967v-5.039h6.29c1.357 0 2.31-.321 2.858-.964.571-.644.857-1.43.857-2.359 0-.595-.095-1.084-.286-1.465a2.171 2.171 0 0 0-.75-.965 3.202 3.202 0 0 0-1.18-.571 5.893 5.893 0 0 0-1.5-.179h-5.753V61.83h-6.396ZM40.08 62.186c-2 0-3.811-.297-5.431-.893-1.596-.596-2.978-1.453-4.145-2.573-1.167-1.143-2.06-2.548-2.68-4.216-.62-1.667-.929-3.573-.929-5.717 0-2.144.31-4.038.93-5.681.618-1.668 1.512-3.062 2.679-4.181 1.167-1.144 2.549-2.013 4.145-2.609 1.62-.595 3.43-.893 5.431-.893 1.977 0 3.776.298 5.396.893 1.62.596 3.013 1.465 4.18 2.609 1.168 1.143 2.06 2.537 2.68 4.18.62 1.644.93 3.538.93 5.682 0 2.144-.31 4.05-.93 5.717-.62 1.668-1.512 3.073-2.68 4.216-1.167 1.12-2.56 1.977-4.18 2.573-1.62.596-3.419.893-5.396.893Zm0-5.467c1.334 0 2.501-.285 3.502-.857 1-.572 1.763-1.441 2.287-2.609.548-1.167.822-2.656.822-4.466 0-1.358-.155-2.525-.465-3.502-.31-1-.762-1.822-1.358-2.465a5.232 5.232 0 0 0-2.072-1.43c-.81-.333-1.715-.5-2.716-.5-1.334 0-2.501.286-3.502.858-.976.547-1.739 1.405-2.287 2.572-.547 1.168-.821 2.656-.821 4.467 0 1.358.154 2.549.464 3.573.334 1 .786 1.822 1.358 2.466a5.232 5.232 0 0 0 2.072 1.429c.81.31 1.716.464 2.716.464ZM1.02 61.83V35.78h7.79l9.576 16.973h.215l-.215-7.897v-9.075h6.146v26.048h-7.36L7.523 45.142h-.215l.25 7.218v9.47H1.021Z"
-    />
-  </svg>
-);
 
-// =========================================
-// 1. Text Logo (Top Left)
-// =========================================
-const TextLogo = ({ isMenuOpen, isScrolled, isPhase4 }) => {
-  let eyadColor = "#2D3126";
-  let moneimColor = "#2D3126";
 
-  if (isMenuOpen) {
-    eyadColor = "#f4f4ed";
-    moneimColor = "#f4f4ed";
-  } else if (isPhase4) {
-    eyadColor = "#2D3126";
-    moneimColor = "#2D3126";
-  } else if (isScrolled) {
-    eyadColor = "gray";
-    moneimColor = "#f4f4ed";
-  }
-
-  return (
-    <a
-      href="#home"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        pointerEvents: "auto",
-        textDecoration: "none",
-        lineHeight: 0.8,
-        zIndex: 100,
-      }}
-    >
-      <span style={{ 
-        color: eyadColor,
-        transition: "color 0.5s ease",
-        fontSize: "2.6rem", 
-        fontWeight: 500, 
-        letterSpacing: "0.05em", 
-        fontFamily: "'Playfair Display', serif" 
-      }}>
-        EYAD
-      </span>
-      <span style={{ 
-        color: moneimColor,
-        transition: "color 0.5s ease",
-        fontSize: "2.3rem", 
-        fontWeight: 900, 
-        letterSpacing: "-0.04em", 
-        fontFamily: "'Brier ', sans-serif",
-        marginTop: "0.2rem"
-      }}>
-        MONEIM
-      </span>
-    </a>
-  );
-};
-
-// =========================================
-// 1.5 Header Logo (Center Monogram)
-// =========================================
-const HeaderLogo = ({ isMenuOpen, isScrolled }) => {
-  const normalColor = isScrolled ? COLORS.lime : COLORS.darkGreen;
-  const hoverColor = isScrolled ? "gray" : COLORS.lime;
-
-  return (
-    <a
-      href="#home"
-      className="header-logo-link relative group flex items-center justify-center"
-      style={{
-        width: "5rem",
-        height: "3.75rem",
-        opacity: isMenuOpen ? 0 : 1,
-        pointerEvents: isMenuOpen ? "none" : "auto",
-        transition: "opacity 0.5s ease",
-      }}
-    >
-      {/* Primary Logo */}
-      <Logo
-        color={isMenuOpen ? COLORS.greenOffWhite1 : normalColor}
-        className="absolute inset-0 w-full h-full transition-all duration-500 ease-out group-hover:opacity-0"
-      />
-
-      {/* Hover Logo */}
-      <Logo
-        color={hoverColor}
-        className="absolute inset-0 w-full h-full transition-all duration-500 ease-out scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100"
-      />
-    </a>
-  );
-};
-
-// =========================================
-// 2. Store Button (Lime green, matching site)
-// =========================================
-const StoreButton = ({ isMenuOpen }) => (
-  <motion.a
-    href="#store"
-    className="store-btn"
-    initial="initial"
-    whileHover="hovered"
-    animate={{
-      opacity: isMenuOpen ? 0 : 1,
-      y: isMenuOpen ? -10 : 0,
-      scale: isMenuOpen ? 0.9 : 1,
-    }}
-    transition={{ duration: 0.75, ease: EASE_DEFAULT }}
-    style={{
-      pointerEvents: isMenuOpen ? "none" : "auto",
-    }}
-  >
-    <StoreIcon />
-    <span className="store-btn-text">
-      <HoverSplitText text="Eedoo" />
-    </span>
-  </motion.a>
-);
-
-// =========================================
-// 3. Hamburger / Close Button (animated)
-// =========================================
-const HamburgerButton = ({ isOpen, toggle }) => {
-  return (
-    <button
-      onClick={toggle}
-      className={`nav-ham ${isOpen ? "is-open" : ""}`}
-      title="Open / Close Menu"
-      aria-label={isOpen ? "Close menu" : "Open menu"}
-    >
-      <div className="nav-ham-lines">
-        <span className={`nav-ham-line nav-ham-line-1 ${isOpen ? "is-open" : ""}`} />
-        <span className={`nav-ham-line nav-ham-line-2 ${isOpen ? "is-open" : ""}`} />
-      </div>
-    </button>
-  );
-};
-
-// =========================================
-// 4. Menu Image Component (with color blend overlay)
-// =========================================
-const MenuImage = ({ src, alt, index, isOpen }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-    <motion.div
-      className="menu-img-wrapper"
-      initial={{ clipPath: "ellipse(120% 0% at 50% 20%)" }}
-      animate={
-        isOpen
-          ? { clipPath: "ellipse(120% 100% at 50% 20%)" }
-          : { clipPath: "ellipse(120% 0% at 50% 20%)" }
-      }
-      transition={{
-        duration: 1,
-        delay: isOpen ? 0.15 + index * 0.08 : 0,
-        ease: EASE_DEFAULT,
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Color image (shows on hover) */}
-      <img
-        src={src}
-        alt={alt}
-        className="menu-img-color"
-        style={{
-          opacity: isHovered ? 1 : 0,
-          transition: "opacity 0.75s cubic-bezier(0.65, 0.05, 0, 1)",
-        }}
-      />
-      {/* Blended darkened image (default) */}
-      <div className="menu-img-blend-stack">
-        <div className="menu-img-blend-saturation" />
-        <div className="menu-img-blend-darker" />
-        <div className="menu-img-blend-tint" />
-        <img src={src} alt={alt} className="menu-img-base" />
-      </div>
-    </motion.div>
-  );
-};
-
-// =========================================
-// 5. Strikethrough SVG for current link
-// =========================================
-const CurrentLinkSVG = ({ delay = 0.4 }) => {
-  const clipId = "current-link-clip";
-  return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox="0 0 412 26"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="nav-link-current-svg"
-    >
-      <defs>
-        <clipPath id={clipId}>
-          <motion.rect
-            x="-10"
-            y="-10"
-            width="432"
-            height="46"
-            initial={{ width: 0 }}
-            animate={{ 
-              width: 432, 
-              transition: { duration: 0.75, delay, ease: EASE_DEFAULT } 
-            }}
-            exit={{ 
-              width: 0, 
-              transition: { duration: 0.5, ease: EASE_DEFAULT } 
-            }}
-          />
-        </clipPath>
-      </defs>
-      <path
-        clipPath={`url(#${clipId})`}
-        d="M0 2h73.539c5.858 0 11.47 2.35 15.58 6.525l8.565 8.7a21.863 21.863 0 0 0 15.58 6.525h72.678c6.045 0 11.82-2.503 15.954-6.914l6.485-6.922A21.865 21.865 0 0 1 224.336 3h76.752a21.864 21.864 0 0 1 16.806 7.88l4.362 5.24A21.864 21.864 0 0 0 339.063 24H412"
-        stroke="currentColor"
-        strokeWidth="6"
-      />
-    </svg>
-  );
-};
-
-// =========================================
-// Hover Split Text Effect
-// =========================================
-const HoverSplitText = ({ text }) => {
-  const DURATION = 0.25;
-  const STAGGER = 0.025;
-
-  return (
-    <motion.span
-      initial="initial"
-      whileHover="hovered"
-      className="nav-link-text relative block overflow-hidden whitespace-nowrap"
-    >
-      <div>
-        {text.split("").map((char, i) => (
-          <motion.span
-            variants={{
-              initial: { y: 0 },
-              hovered: { y: "-100%" },
-            }}
-            transition={{
-              duration: DURATION,
-              ease: "easeInOut",
-              delay: STAGGER * i,
-            }}
-            className="inline-block"
-            style={{ whiteSpace: "pre" }}
-            key={i}
-          >
-            {char}
-          </motion.span>
-        ))}
-      </div>
-      <div className="absolute inset-0">
-        {text.split("").map((char, i) => (
-          <motion.span
-            variants={{
-              initial: { y: "100%" },
-              hovered: { y: 0 },
-            }}
-            transition={{
-              duration: DURATION,
-              ease: "easeInOut",
-              delay: STAGGER * i,
-            }}
-            className="inline-block"
-            style={{ whiteSpace: "pre" }}
-            key={i}
-          >
-            {char}
-          </motion.span>
-        ))}
-      </div>
-    </motion.span>
-  );
-};
-
-// =========================================
-// 6. Fullscreen Menu
-// =========================================
-const FullscreenMenu = ({ isOpen, currentPage }) => {
-  const menuLinks = [
-    { label: "Home", href: "#home" },
-    { label: "Eyad Moneim", href: "#eyad-moneim" },
-    { label: "Eedoo", href: "#eedoo" },
-  ];
-
-  const socialLinks = [
-    { label: "GitHub", href: "https://github.com/EyadMoneim" },
-    { label: "Linkedin", href: "https://www.linkedin.com/in/eyad-moneim-3041bb256/" },
-    { label: "Instagram", href: "https://www.instagram.com/eyadmoneim/?next=" },
-    { label: "Whatsapp", href: "http://wa.me/201009500977" },
-  ];
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="nav-menu-overlay"
-          initial={{ clipPath: "ellipse(120% 0% at 50% 20%)" }}
-          animate={{ clipPath: "ellipse(120% 100% at 50% 20%)" }}
-          exit={{ clipPath: "ellipse(120% 0% at 50% 20%)" }}
-          transition={{ duration: 0.9, ease: EASE_DEFAULT }}
-        >
-          {/* Background blob pattern */}
-          <div className="nav-menu-bg-blobs" />
-
-          <div className="nav-menu-content">
-            {/* LEFT: Image Grid */}
-            <div className="nav-menu-images">
-              <div className="nav-menu-images-track">
-                {/* Column 1 */}
-                <div className="nav-menu-images-col">
-                  <MenuImage
-                    src={MENU_IMAGES[0].src}
-                    alt={MENU_IMAGES[0].alt}
-                    index={0}
-                    isOpen={isOpen}
-                  />
-                  <MenuImage
-                    src={MENU_IMAGES[2].src}
-                    alt={MENU_IMAGES[2].alt}
-                    index={2}
-                    isOpen={isOpen}
-                  />
-                </div>
-                {/* Column 2 */}
-                <div className="nav-menu-images-col">
-                  <MenuImage
-                    src={MENU_IMAGES[1].src}
-                    alt={MENU_IMAGES[1].alt}
-                    index={1}
-                    isOpen={isOpen}
-                  />
-                  <MenuImage
-                    src={MENU_IMAGES[3].src}
-                    alt={MENU_IMAGES[3].alt}
-                    index={3}
-                    isOpen={isOpen}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT: Links + Social */}
-            <div className="nav-menu-links-section">
-              {/* Spacer for top padding */}
-              <div style={{ height: "1.25rem" }} />
-
-              {/* Navigation Links */}
-              <div className="nav-menu-links-col">
-                <div className="nav-menu-links-list">
-                  {menuLinks.map((link, i) => (
-                    <div key={link.label} className="nav-link-overflow-clip">
-                      <motion.a
-                        href={link.href}
-                        className={`nav-menu-link ${
-                          link.label === currentPage ? "is-current" : ""
-                        }`}
-                        initial={{ y: "110%", opacity: 0 }}
-                        animate={{ y: "0%", opacity: 1 }}
-                        exit={{ y: "110%", opacity: 0 }}
-                        transition={{
-                          duration: 0.8,
-                          delay: 0.2 + i * 0.06,
-                          ease: EASE_DEFAULT,
-                        }}
-                      >
-                        <HoverSplitText text={link.label} />
-                        {link.label === currentPage && <CurrentLinkSVG delay={0.4 + i * 0.06} />}
-                      </motion.a>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Helmet Icon + Since text */}
-                <motion.div
-                  className="nav-helmet-section"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.8, delay: 0.5, ease: EASE_DEFAULT }}
-                >
-                  <div className="nav-helmet-icon">
-                    <DeveloperBadge />
-                  </div>
-                  <div className="nav-helmet-text">developer since 2024</div>
-                </motion.div>
-              </div>
-
-              {/* Social Links */}
-              <motion.div
-                className="nav-social-section"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 15 }}
-                transition={{ duration: 0.8, delay: 0.55, ease: EASE_DEFAULT }}
-              >
-                <a href="mailto:eyad.moneim@gmail.com" className="nav-social-link business">
-                  business enquiries
-                </a>
-                <div className="nav-social-links-row">
-                  {socialLinks.map((s) => (
-                    <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="nav-social-link">
-                      {s.label}
-                    </a>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
 
 
 
@@ -633,7 +102,6 @@ const App = () => {
         const sigMainRect = sigEl?.querySelector('.sig-main-rect');
         const sigUnderlineRect = sigEl?.querySelector('.sig-underline-rect');
         const sigSixRect = sigEl?.querySelector('.sig-six-rect');
-        const sigLayerEl = signatureLayerRef.current;
 
         if (!groupEl) return;
 
@@ -659,7 +127,7 @@ const App = () => {
         const initSigClip = (rectEl, groupEl) => {
           if (!rectEl || !groupEl) return null;
           let box;
-          try { box = groupEl.getBBox(); } catch (e) { return null; }
+          try { box = groupEl.getBBox(); } catch { return null; }
           if (!box || box.width === 0) return null;
           gsap.set(rectEl, {
             attr: {
@@ -927,63 +395,33 @@ const App = () => {
       const bg = phase4BgRef.current;
       const quoteSection = quoteSectionRef.current;
       const devSig = developerSignaturePhase3Ref.current;
-      const sigLayer = signatureLayerRef.current;
 
-      // 1. Fade in white background overlay — scrubbed over the transition spacer
-      if (bg && transitionSpacerRef.current) {
-        gsap.fromTo(bg,
-          { opacity: 0 },
-          {
-            opacity: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: transitionSpacerRef.current,
-              start: 'top bottom',
-              end: 'bottom bottom',
-              scrub: true,
-            }
+      if (transitionSpacerRef.current) {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: transitionSpacerRef.current,
+            start: 'top bottom',
+            end: 'bottom bottom',
+            scrub: true,
           }
-        );
-      }
+        });
 
-      // 2. Slide the quote section UP out of view as user scrolls
-      if (quoteSection && transitionSpacerRef.current) {
-        gsap.fromTo(quoteSection,
-          { y: '0%' },
-          {
-            y: '-60vh',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: transitionSpacerRef.current,
-              start: 'top bottom',
-              end: 'bottom bottom',
-              scrub: true,
-            }
-          }
-        );
-      }
-
-      // 3. Slide devSig UP from its -65vh position so it goes up with the quote
-      if (devSig && transitionSpacerRef.current) {
-        gsap.fromTo(devSig,
-          { y: '-65vh' },
-          {
-            y: '-125vh',
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: transitionSpacerRef.current,
-              start: 'top bottom',
-              end: 'bottom bottom',
-              scrub: true,
-            }
-          }
-        );
+        // QuoteSection and devSig SLIDE UP and blur
+        if (quoteSection) {
+          tl.fromTo(quoteSection, { y: '0%', filter: 'blur(0px)' }, { y: '-100vh', filter: 'blur(15px)', ease: 'none', duration: 1 }, 0);
+        }
+        if (devSig) {
+          tl.fromTo(devSig, { y: '-65vh', opacity: 1, filter: 'blur(0px)' }, { y: '-165vh', opacity: 0, filter: 'blur(15px)', ease: 'none', immediateRender: false, duration: 1 }, 0);
+        }
+        // SplitSection FADES IN behind them (it has zIndex: 30, quoteSection is 35)
+        if (splitSectionRef.current) {
+          tl.fromTo(splitSectionRef.current, { opacity: 0, pointerEvents: 'none', filter: 'blur(15px)' }, { opacity: 1, pointerEvents: 'auto', filter: 'blur(0px)', ease: 'none', duration: 1 }, 0);
+        }
       }
 
       // 3. Track Phase 4 for navbar color
       ScrollTrigger.create({
-        trigger,
+        trigger: transitionSpacerRef.current,
         start: 'top 50%',
         end: 'bottom top',
         onToggle: (self) => setIsPhase4(self.isActive),
@@ -1007,27 +445,7 @@ const App = () => {
         <div style={{ position: "relative", width: "100%", minHeight: "100vh" }}>
           {/* ======= Z-0: DARK GREEN BACKGROUND + MARQUEE ======= */}
           <div className="scroll-reveal-bg" id="scroll-reveal-bg">
-            <motion.div
-              className="bg-blobs"
-              style={{ opacity: 0.1 }}
-              animate={{
-                x: [0, 30, -15, 0],
-                y: [0, -30, 20, 0],
-                scale: [1, 1.1, 0.95, 1],
-                rotate: [0, 2, -2, 0],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              <img
-                src={blobsBg}
-                alt="Background Blobs"
-                className="bg-blobs-img"
-              />
-            </motion.div>
+            <BackgroundBlobs style={{ opacity: 0.1 }} />
             <div id="scroll-velocity-group" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
               <ScrollVelocity
                 texts={['To get something you never had']}
@@ -1052,133 +470,34 @@ const App = () => {
             </div>
           </div>
 
-          {/* ======= PHASE 4: WHITE BG OVERLAY ======= */}
-          <div
-            ref={phase4BgRef}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              backgroundColor: '#f4f4ec',
-              opacity: 0,
-              pointerEvents: 'none',
-              zIndex: 40,
-            }}
-          >
-            <motion.div
-              style={{ position: 'absolute', inset: 0, opacity: 0.08 }}
-              animate={{ x: [0, 30, -15, 0], y: [0, -30, 20, 0], scale: [1, 1.1, 0.95, 1], rotate: [0, 2, -2, 0] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <img src={blobsBg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </motion.div>
-          </div>
+          {/* Phase 4 bg is now inside SplitSection directly to prevent empty spaces */}
 
           {/* ======= PHASE 3: DEVELOPER SIGNATURE ======= */}
-
-          {/* ======= PHASE 3: 4 QUOTE ROWS ======= */}
-          <div className="quote-section" ref={quoteSectionRef}>
-            <div className="quote-row" ref={quoteRow1Ref}>
-              <div className="quote-row-content">
-                <span className="message-text">TO GET SOMTHING YOU,</span>
-              </div>
-              <div className="block-revealer" style={{ backgroundColor: 'var(--color-white)' }} />
+          <div className="developer-signature-phase3" ref={developerSignaturePhase3Ref}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '4.5rem', height: '4.5rem', marginBottom: '0.2rem', filter: 'brightness(0) invert(1)' }}>
+              <img src={laurelWreathSrc} alt="Laurel Wreath" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img src={reactLogoSrc} alt="React Logo" style={{ position: 'absolute', width: '45%', height: '45%', objectFit: 'contain' }} />
             </div>
-            <div className="quote-row" ref={quoteRow2Ref}>
-              <div className="quote-row-content">
-                <span className="message-text">NEVER</span>
-                <span className="quote-text">HAD</span>
-              </div>
-              <div className="block-revealer" style={{ backgroundColor: 'var(--color-lime)' }} />
-            </div>
-            <div className="quote-row" ref={quoteRow3Ref}>
-              <div className="quote-row-content">
-                <span className="message-text">YOU HAD TO DO SOMTHING YOU,</span>
-              </div>
-              <div className="block-revealer" style={{ backgroundColor: 'var(--color-white)' }} />
-            </div>
-            <div className="quote-row" ref={quoteRow4Ref}>
-              <div className="quote-row-content">
-                <span className="message-text">NEVER</span>
-                <span className="quote-text">DID</span>
-              </div>
-              <div className="block-revealer" style={{ backgroundColor: 'var(--color-lime)' }} />
-            </div>
+            <span>DEVELOPER SINCE 2024</span>
           </div>
+          {/* ======= PHASE 3: 4 QUOTE ROWS ======= */}
+          <QuoteSection 
+            ref={quoteSectionRef}
+            quoteRow1Ref={quoteRow1Ref}
+            quoteRow2Ref={quoteRow2Ref}
+            quoteRow3Ref={quoteRow3Ref}
+            quoteRow4Ref={quoteRow4Ref}
+          />
 
           {/* ======= NAVBAR ======= */}
-          <nav className="nav-bar">
-            <div className="nav-inner relative flex justify-between items-center w-full">
-              {/* Left: Text Logo (Desktop) & Mobile Store Button */}
-              <div className="flex-shrink-0 flex items-center">
-                <div className="desktop-logo" style={{ width: "8rem" }}>
-                  <TextLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} isPhase4={isPhase4} />
-                </div>
-                <div className="mobile-logo">
-                  <StoreButton isMenuOpen={isMenuOpen} />
-                </div>
-              </div>
-
-              {/* Center: Brand Monogram Logo (Desktop) */}
-              <div className="desktop-logo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex-col items-center" style={{ opacity: isPhase3 ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: isPhase3 ? "none" : "auto" }}>
-                <HeaderLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
-                <div style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  opacity: (isScrolled && !isMenuOpen) ? 1 : 0,
-                  transition: "opacity 0.5s ease",
-                  pointerEvents: (isScrolled && !isMenuOpen) ? "auto" : "none",
-                  paddingTop: "0.08rem",
-                  whiteSpace: "nowrap"
-                }}>
-                  <span style={{ fontSize: "0.60rem", fontWeight: 800, letterSpacing: "0.3em", color: "#f4f4ed", textTransform: "uppercase" }}>
-                    MESSAGE FROM EYAD
-                  </span>
-                </div>
-              </div>
-
-              {/* Center: Mobile Logo Cluster */}
-              <div className={`mobile-logo absolute left-1/2 flex-col items-center pointer-events-auto ${isScrolled ? 'mobile-hide-scrolled' : ''}`} style={{ top: "5.5rem", transform: "translateX(-50%)", width: "max-content", textAlign: "center" }}>
-                <div style={{ 
-                  transform: isScrolled ? "scale(0.6) translateY(2.2rem)" : "scale(0.85) translateY(0)", 
-                  transformOrigin: "center top", 
-                  marginBottom: "-0.5rem",
-                  transition: "transform 0.5s ease" 
-                }}>
-                  <HeaderLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
-                </div>
-                <div style={{ opacity: isMenuOpen ? 0 : 1, pointerEvents: isMenuOpen ? "none" : "auto", transition: "opacity 0.5s ease", position: "relative" }}>
-                  
-                  {/* Default State (Not Scrolled) */}
-                  <div style={{ opacity: isScrolled ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: isScrolled ? "none" : "auto" }}>
-                    <div className="flex gap-1 items-baseline justify-center">
-                      <span style={{ fontSize: "1.4rem", fontWeight: 500, fontFamily: "'Playfair Display', serif", color: "#2D3126" }}>EYAD</span>
-                      <span style={{ fontSize: "1.3rem", fontWeight: 900, fontFamily: "'Brier ', sans-serif", color: "#2D3126" }}>MONEIM</span>
-                    </div>
-                    <span style={{ display: "block", fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.05em", marginTop: "0.15rem", color: "#2D3126" }}>DEVELOPER SINCE 2024</span>
-                  </div>
-
-                  {/* Scrolled State */}
-                  <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", opacity: isScrolled ? 1 : 0, transition: "opacity 0.5s ease", pointerEvents: isScrolled ? "auto" : "none" }}>
-                    <span style={{ fontSize: "0.65rem", fontWeight: 800, letterSpacing: "0.2em", color: "#f4f4ed", textTransform: "uppercase" }}>MESSAGE FROM EYAD</span>
-                  </div>
-                  
-                </div>
-              </div>
-
-              {/* Right: Store + Hamburger (Desktop) & Mobile Hamburger */}
-              <div className="flex items-center">
-                <div className="desktop-logo nav-btns">
-                  <StoreButton isMenuOpen={isMenuOpen} />
-                  <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen(!isMenuOpen)} />
-                </div>
-                <div className="mobile-logo">
-                  <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen(!isMenuOpen)} />
-                </div>
-              </div>
-            </div>
-          </nav>
+          {/* ======= NAVBAR ======= */}
+          <Navbar 
+            isMenuOpen={isMenuOpen} 
+            setIsMenuOpen={setIsMenuOpen} 
+            isScrolled={isScrolled} 
+            isPhase3={isPhase3} 
+            isPhase4={isPhase4} 
+          />
 
           {/* ======= FULLSCREEN MENU ======= */}
           <FullscreenMenu isOpen={isMenuOpen} currentPage="Home" />
@@ -1192,33 +511,19 @@ const App = () => {
             className="group-wallpaper"
             ref={groupWallpaperRef}
             style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 20,
+              backgroundColor: '#fcfcfa',
+              transformOrigin: 'center center',
+              overflow: 'hidden',
               filter: isMenuOpen ? "blur(12px)" : "none",
               opacity: isMenuOpen ? 0.3 : 1,
               transition: "filter 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
             {/* Wallpaper blobs (animated, centered) */}
-            <motion.div 
-              ref={bgBlobsRef} 
-              className="bg-blobs"
-              animate={{
-                x: [0, 30, -15, 0],
-                y: [0, -30, 20, 0],
-                scale: [1, 1.1, 0.95, 1],
-                rotate: [0, 2, -2, 0],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              <img
-                src={blobsBg}
-                alt="Background Blobs"
-                className="bg-blobs-img"
-              />
-            </motion.div>
+            <BackgroundBlobs ref={bgBlobsRef} />
             <div className="bg-gradient-overlay" />
 
             {/* Hero inner content */}
@@ -1241,49 +546,7 @@ const App = () => {
           </div>
 
           {/* SIGNATURE LAYER — lives outside group-wallpaper so it escapes the portrait frame */}
-          <div className="signature-layer" ref={signatureLayerRef}>
-            <svg
-              ref={signatureRef}
-              className="signature-overlay"
-              viewBox="0 0 841.9 595.3"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <clipPath id="sig-main-clip">
-                  <rect className="sig-main-rect" x="0" y="0" width="0" height="600" />
-                </clipPath>
-                <clipPath id="sig-underline-clip">
-                  <rect className="sig-underline-rect" x="0" y="0" width="0" height="600" />
-                </clipPath>
-                <clipPath id="sig-six-clip">
-                  <rect className="sig-six-rect" x="0" y="0" width="0" height="600" />
-                </clipPath>
-              </defs>
-
-              {/* Stage 1 — name body + dots + highlights */}
-              <g className="sig-main" clipPath="url(#sig-main-clip)">
-                {SIG_PATHS.main.map((d, i) => (
-                  <path key={`sig-main-${i}`} d={d} fill="#d3fd07" />
-                ))}
-                {SIG_PATHS.dots.map((d, i) => (
-                  <path key={`sig-dot-${i}`} d={d} fill="#d3fd07" />
-                ))}
-
-              </g>
-
-              {/* Stage 2 — underline stroke */}
-              <g className="sig-underline" clipPath="url(#sig-underline-clip)">
-                {SIG_PATHS.underline.map((d, i) => (
-                  <path key={`sig-underline-${i}`} d={d} fill="#d3fd07" />
-                ))}
-              </g>
-
-              {/* Stage 3 — number 6 */}
-              <g className="sig-six" clipPath="url(#sig-six-clip)">
-                <path d={SIG_PATHS.six} fill="#d2ff00" />
-              </g>
-            </svg>
-          </div>
+          <SignatureLayer ref={signatureLayerRef} signatureRef={signatureRef} />
 
           </div>{/* END message-with-eyad-group */}
 
@@ -1292,11 +555,10 @@ const App = () => {
           <div className="hero-scroll-section" ref={heroScrollSectionRef} style={{ height: "400vh" }} />
 
           {/* ======= TRANSITION SPACER ======= */}
-          {/* Empty scroll space for the green-to-white scrubbed transition */}
           <div ref={transitionSpacerRef} style={{ height: "150vh", width: "100%" }} />
 
           {/* ======= PHASE 4: SPLIT SECTION ======= */}
-          <SplitSection sectionRef={splitSectionRef} />
+          <SplitSection sectionRef={splitSectionRef} triggerRef={transitionSpacerRef} />
         </div>
       )}
     </>

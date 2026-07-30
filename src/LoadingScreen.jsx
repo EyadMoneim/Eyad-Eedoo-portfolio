@@ -28,7 +28,7 @@ const LoadingScreen = React.memo(({ onLoadingComplete }) => {
       {visible && (
         <motion.div
           key="loading-screen"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#D2FF00] overflow-hidden"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#CDB8FF] overflow-hidden"
           exit={{ opacity: 0 }}
           transition={{ duration: EXIT_DURATION, ease: easeInOutExp }}
         >
