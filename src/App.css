@@ -13,10 +13,10 @@
 :root {
   --color-dark-green: #131217;
   --color-white: #f4f4ed;
-  --color-lime: #CDB8FF;
-  --color-lime-off: #B08CF5;
-  --color-green-off-white-1: #C9C7D2;
-  --color-green-off-white-2: #8B67C2;
+  --color-lime: #cdb8ff;
+  --color-lime-off: #b08cf5;
+  --color-green-off-white-1: #c9c7d2;
+  --color-green-off-white-2: #8b67c2;
   --color-black: #070709;
   --gap: 1.25rem;
   --cubic-default: cubic-bezier(0.65, 0.05, 0, 1);
@@ -53,12 +53,12 @@ html {
 }
 
 ::selection {
-  background: #CDB8FF;
+  background: #cdb8ff;
   color: #070709;
 }
 
 ::-moz-selection {
-  background: #CDB8FF;
+  background: #cdb8ff;
   color: #070709;
 }
 
@@ -71,7 +71,10 @@ body {
   scrollbar-color: var(--color-dark-green) transparent;
 }
 
-img, svg, video, a {
+img,
+svg,
+video,
+a {
   -webkit-user-drag: none;
 }
 
@@ -347,7 +350,7 @@ img {
   position: absolute;
   inset: 0;
   opacity: 0.4;
-  background-color: #241B33;
+  background-color: #241b33;
   z-index: 3;
 }
 
@@ -673,11 +676,11 @@ img {
 
 /* Marquee text color variants */
 .scroll-text-green {
-  color: #B08CF5;
+  color: #b08cf5;
 }
 
 .scroll-text-white {
-  color: #C9C7D2;
+  color: #c9c7d2;
 }
 
 /* The grouped hero element that shrinks on scroll.
@@ -854,7 +857,9 @@ img {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   z-index: 1;
 }
 
@@ -875,7 +880,7 @@ img {
 
 .svg-arrow::before,
 .svg-arrow::after {
-  content: '';
+  content: "";
   position: absolute;
   background-color: #111112; /* Fill color */
 }
@@ -896,8 +901,8 @@ img {
 
 /* Right Arrow Fill Directions */
 .svg-arrow.right {
-  mask-image: url('./assets/arrow-right.svg');
-  -webkit-mask-image: url('./assets/arrow-right.svg');
+  mask-image: url("./assets/arrow-right.svg");
+  -webkit-mask-image: url("./assets/arrow-right.svg");
 }
 .svg-arrow.right::after,
 .svg-arrow.right::before {
@@ -907,8 +912,8 @@ img {
 
 /* Left Arrow Fill Directions */
 .svg-arrow.left {
-  mask-image: url('./assets/arrow-left.svg');
-  -webkit-mask-image: url('./assets/arrow-left.svg');
+  mask-image: url("./assets/arrow-left.svg");
+  -webkit-mask-image: url("./assets/arrow-left.svg");
 }
 .svg-arrow.left::after,
 .svg-arrow.left::before {

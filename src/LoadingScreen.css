@@ -1,0 +1,144 @@
+.eyad-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  font-family: "Inter", sans-serif;
+  background-color: #131217;
+  pointer-events: none;
+}
+
+.intro-reveal-shell {
+  position: fixed !important;
+  inset: 0;
+  z-index: 1000;
+  width: 100vw !important;
+  height: 100svh;
+  min-height: 100svh !important;
+  overflow: hidden;
+  pointer-events: none;
+  clip-path: polygon(0% 48%, 0% 48%, 0% 52%, 0% 52%);
+  will-change: clip-path;
+}
+
+.eyad-intro h1 {
+  margin: 0;
+  color: inherit;
+  font-family: "Inter", sans-serif;
+  font-size: 6rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.eyad-intro p {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.eyad-intro .preloader,
+.eyad-intro .split-overlay,
+.eyad-intro .tags-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100svh;
+}
+
+.eyad-intro .preloader,
+.eyad-intro .split-overlay {
+  background-color: #131217;
+  color: #c9c7d2;
+}
+
+.eyad-intro .preloader,
+.eyad-intro .tags-overlay {
+  z-index: 2;
+}
+
+.eyad-intro .split-overlay {
+  z-index: 1;
+}
+
+.eyad-intro .intro-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.eyad-intro .outro-title {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + 10rem);
+  color: #af83ff;
+  transform: translate(-50%, -50%);
+}
+
+.eyad-intro .tag {
+  position: absolute;
+  width: max-content;
+  overflow: hidden;
+  color: rgba(201, 199, 210, 0.42);
+}
+
+.eyad-intro .tag-1 {
+  top: 15%;
+  left: 15%;
+}
+
+.eyad-intro .tag-2 {
+  bottom: 15%;
+  left: 25%;
+}
+
+.eyad-intro .tag-3 {
+  right: 15%;
+  bottom: 30%;
+}
+
+.eyad-intro .intro-title .intro-char,
+.eyad-intro .outro-title .intro-char {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.eyad-intro .intro-title .intro-char span,
+.eyad-intro .outro-title .intro-char span,
+.eyad-intro .tag .intro-word {
+  position: relative;
+  display: inline-block;
+  transform: translateY(-100%);
+  will-change: transform;
+}
+
+.eyad-intro .intro-title .first-char {
+  transform-origin: top left;
+}
+
+@media (max-width: 62.5rem) {
+  .eyad-intro h1 {
+    font-size: 2.5rem;
+  }
+
+  .eyad-intro .outro-title {
+    left: calc(50% + 4rem);
+  }
+
+  .eyad-intro .intro-title .intro-char,
+  .eyad-intro .outro-title .intro-char {
+    margin-top: 0.5rem;
+  }
+}

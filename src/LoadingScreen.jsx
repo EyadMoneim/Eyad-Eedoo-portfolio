@@ -1,115 +1,262 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { memo, useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { CustomEase } from "gsap/CustomEase";
+import { SplitText } from "gsap/SplitText";
+import "./LoadingScreen.css";
 
-const INTRO_DURATION = 1.0;   // seconds for logo fade-in
-const EXIT_DELAY_MS  = 500;   // ms before exit begins
-const EXIT_DURATION  = 0.7;   // seconds for full screen fade-out
+gsap.registerPlugin(CustomEase, SplitText);
 
-const easeOutExpo  = [0.16, 1, 0.3, 1];
-const easeInOutExp = [0.7, 0, 0.3, 1];
+const LoadingScreen = memo(({ onLoadingComplete }) => {
+  const rootRef = useRef(null);
 
-const logoVariants = {
-  initial: { opacity: 0, scale: 0.8, filter: "blur(4px)" },
-  intro:   { opacity: 1, scale: 1,   filter: "blur(0px)" },
-  exit:    { opacity: 0, scale: 3,   filter: "blur(8px)" },
-};
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
 
-const LoadingScreen = React.memo(({ onLoadingComplete }) => {
-  const [visible, setVisible]   = useState(true);
-  const [exiting, setExiting]   = useState(false);
+    CustomEase.create("eyadIntroHop", ".8, 0, .3, 1");
 
-  useEffect(() => {
-    const t = setTimeout(() => setExiting(true), EXIT_DELAY_MS);
-    return () => clearTimeout(t);
-  }, []);
+    const splitInstances = [];
+    const splitTextElements = (
+      selector,
+      type = "words,chars",
+      addFirstChar = false,
+    ) => {
+      const elements = root.querySelectorAll(selector);
+
+      elements.forEach((element) => {
+        const splitText = new SplitText(element, {
+          type,
+          wordsClass: "intro-word",
+          charsClass: "intro-char",
+        });
+
+        splitInstances.push(splitText);
+
+        if (type.includes("chars")) {
+          splitText.chars.forEach((char, index) => {
+            const originalText = char.textContent;
+            char.innerHTML = `<span>${originalText}</span>`;
+
+            if (addFirstChar && index === 0) {
+              char.classList.add("first-char");
+            }
+          });
+        }
+      });
+    };
+
+    splitTextElements(".intro-title h1", "words, chars", true);
+    splitTextElements(".outro-title h1");
+    splitTextElements(".tag p", "words");
+
+    const isMobile = window.innerWidth <= 1000;
+    const firstCharFinalX = isMobile ? "4.85rem" : "10.85rem";
+    const firstCharPrepX = isMobile ? "5.75rem" : "12.75rem";
+    const firstCharFinalY = isMobile ? "-1rem" : "-2.75rem";
+    const outroFinalX = isMobile ? "-3rem" : "-8rem";
+    const outroFinalSize = isMobile ? "6rem" : "14rem";
+
+    const ctx = gsap.context(() => {
+      gsap.set(".intro-reveal-shell", {
+        clipPath: "polygon(0% 48%, 0% 48%, 0% 52%, 0% 52%)",
+      });
+
+      gsap.set(
+        [
+          ".split-overlay .intro-title .first-char span",
+          ".split-overlay .outro-title .intro-char span",
+        ],
+        { y: "0%" },
+      );
+
+      gsap.set(".split-overlay .intro-title .first-char", {
+        x: firstCharFinalX,
+        y: firstCharFinalY,
+        fontWeight: "900",
+        scale: 0.75,
+      });
+
+      gsap.set(".split-overlay .outro-title .intro-char", {
+        x: outroFinalX,
+        fontSize: outroFinalSize,
+        fontWeight: "500",
+      });
+
+      const tl = gsap.timeline({
+        defaults: { ease: "eyadIntroHop" },
+        onComplete: onLoadingComplete,
+      });
+      const tags = gsap.utils.toArray(".tag");
+
+      tl.to(
+        ".intro-reveal-shell",
+        {
+          clipPath: "polygon(0% 48%, 100% 48%, 100% 52%, 0% 52%)",
+          duration: 1,
+        },
+        5,
+      );
+
+      tags.forEach((tag, index) => {
+        tl.to(
+          tag.querySelectorAll("p .intro-word"),
+          {
+            y: "0%",
+            duration: 0.75,
+          },
+          0.5 + index * 0.1,
+        );
+      });
+
+      tl.to(
+        ".preloader .intro-title .intro-char span",
+        {
+          y: "0%",
+          duration: 0.75,
+          stagger: 0.05,
+        },
+        0.5,
+      )
+        .to(
+          ".preloader .intro-title .intro-char:not(.first-char) span",
+          {
+            y: "100%",
+            duration: 0.75,
+            stagger: 0.05,
+          },
+          2,
+        )
+        .to(
+          ".preloader .outro-title .intro-char span",
+          {
+            y: "0%",
+            duration: 0.75,
+            stagger: 0.075,
+          },
+          2.5,
+        )
+        .to(
+          ".preloader .intro-title .first-char",
+          {
+            x: firstCharPrepX,
+            duration: 1,
+          },
+          3.5,
+        )
+        .to(
+          ".preloader .outro-title .intro-char",
+          {
+            x: outroFinalX,
+            duration: 1,
+          },
+          3.5,
+        )
+        .to(
+          ".preloader .intro-title .first-char",
+          {
+            x: firstCharFinalX,
+            y: firstCharFinalY,
+            fontWeight: "900",
+            scale: 0.75,
+            duration: 0.75,
+          },
+          4.5,
+        )
+        .to(
+          ".preloader .outro-title .intro-char",
+          {
+            x: outroFinalX,
+            fontSize: outroFinalSize,
+            fontWeight: "500",
+            duration: 0.75,
+            onComplete: () => {
+              gsap.set(".preloader", {
+                clipPath: "polygon(0 0, 100% 0, 100% 50%, 0 50%)",
+              });
+              gsap.set(".split-overlay", {
+                clipPath: "polygon(0 50%, 100% 50%, 100% 100%, 0 100%)",
+              });
+            },
+          },
+          4.5,
+        );
+
+      tags.forEach((tag, index) => {
+        tl.to(
+          tag.querySelectorAll("p .intro-word"),
+          {
+            y: "100%",
+            duration: 0.75,
+          },
+          5.5 + index * 0.1,
+        );
+      });
+
+      tl.to(
+        [".preloader", ".split-overlay"],
+        {
+          y: (i) => (i === 0 ? "-50%" : "50%"),
+          duration: 1,
+        },
+        6,
+      )
+        .to(
+          ".intro-reveal-shell",
+          {
+            clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+            duration: 1,
+          },
+          6,
+        )
+        .to(
+          root,
+          {
+            autoAlpha: 0,
+            duration: 0.2,
+            ease: "power1.out",
+          },
+          6.85,
+        );
+    }, document);
+
+    return () => {
+      ctx.revert();
+      splitInstances.forEach((splitText) => splitText.revert());
+    };
+  }, [onLoadingComplete]);
 
   return (
-    <AnimatePresence onExitComplete={onLoadingComplete}>
-      {visible && (
-        <motion.div
-          key="loading-screen"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#CDB8FF] overflow-hidden"
-          exit={{ opacity: 0 }}
-          transition={{ duration: EXIT_DURATION, ease: easeInOutExp }}
-        >
-          <div className="relative w-48 h-48 flex items-center justify-center">
-            <motion.div
-              className="absolute inset-0 text-[#111112]"
-              variants={logoVariants}
-              initial="initial"
-              animate={exiting ? "exit" : "intro"}
-              transition={{
-                duration: exiting ? EXIT_DURATION : INTRO_DURATION,
-                ease:     exiting ? easeInOutExp  : easeOutExpo,
-              }}
-              onAnimationComplete={() => {
-                if (exiting) setVisible(false);
-              }}
-            >
-              <svg
-                viewBox="0 0 2128 1984"
-                className="w-full h-full"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <g
-                  transform="translate(0,1984) scale(0.1,-0.1)"
-                  fill="currentColor"
-                  stroke="none"
-                >
-                  <path d="M5840 15099 c-333 -20 -516 -71 -725 -204 -88 -56 -261 -234 -333
--343 -158 -237 -182 -315 -553 -1722 -17 -63 -61 -223 -99 -355 -38 -132 -89
--319 -115 -415 -149 -562 -145 -545 -298 -1105 -47 -170 -102 -373 -122 -450
--21 -77 -82 -304 -137 -505 -181 -664 -265 -972 -336 -1235 -39 -143 -120
--440 -180 -660 -61 -220 -142 -519 -181 -665 -39 -146 -109 -404 -156 -575
--242 -874 -239 -861 -239 -1085 0 -165 2 -180 28 -255 87 -253 259 -419 512
--494 39 -11 125 -25 190 -31 161 -13 4194 -13 4409 0 233 14 386 40 590 97
-281 80 532 220 797 447 297 253 545 694 706 1251 117 404 207 721 257 905 31
-113 85 304 120 425 35 121 84 301 110 400 25 99 61 232 80 295 58 199 85 311
-85 348 0 20 -27 149 -61 287 -170 697 -234 959 -285 1160 -68 266 -92 363
--283 1130 -180 727 -170 690 -181 679 -5 -5 -27 -77 -50 -159 -81 -300 -149
--556 -255 -955 -18 -69 -51 -190 -73 -270 -77 -279 -161 -588 -247 -910 -48
--179 -118 -440 -157 -580 -76 -275 -98 -358 -178 -665 -156 -603 -403 -1480
--446 -1585 -61 -149 -120 -244 -222 -352 -116 -123 -240 -198 -397 -238 -79
--21 -98 -21 -1445 -24 -751 -2 -1414 -1 -1474 2 l-108 5 6 51 c9 71 175 717
-316 1226 22 80 58 215 81 300 66 255 136 492 166 572 66 169 169 270 338 332
-21 7 350 12 1052 16 924 5 1024 7 1038 21 9 9 40 109 70 225 29 115 85 324
-125 464 40 140 89 320 110 400 48 184 85 313 105 370 9 25 24 82 34 128 19 81
-19 83 0 93 -13 6 -396 9 -1154 6 -624 -2 -1140 0 -1146 3 -11 7 72 350 179
-740 33 118 78 285 100 370 23 85 58 216 78 290 20 74 53 200 74 280 52 202 88
-314 121 388 67 149 197 286 332 351 161 78 61 74 1735 75 l1492 1 10 -30 c12
--39 239 -936 340 -1345 82 -329 351 -1400 709 -2820 421 -1669 524 -2070 541
--2114 4 -13 20 -76 35 -142 47 -216 50 -222 95 -234 41 -11 1564 -14 1608 -3
-32 8 45 38 92 214 45 167 88 314 197 679 39 129 105 354 147 500 41 146 100
-348 130 450 109 372 279 962 352 1220 41 146 101 351 134 455 32 105 82 273
-110 375 70 250 176 616 243 840 31 102 88 300 127 440 39 140 95 336 125 435
-29 99 72 245 95 325 110 382 164 506 265 605 76 75 181 129 282 144 106 16
-841 14 873 -2 50 -25 48 -45 -24 -324 -118 -454 -317 -1202 -413 -1553 -24
--91 -85 -320 -134 -510 -50 -190 -122 -462 -160 -605 -106 -392 -144 -534
--220 -830 -84 -324 -154 -587 -221 -830 -27 -99 -90 -335 -139 -525 -50 -190
--128 -482 -174 -650 -98 -360 -134 -496 -215 -805 -104 -398 -140 -536 -180
--675 -21 -74 -54 -198 -75 -275 -20 -77 -61 -230 -91 -340 -118 -435 -120
--441 -105 -459 12 -15 93 -16 897 -16 l883 0 25 22 c21 19 35 57 76 218 27
-107 68 262 90 343 38 142 132 502 170 657 11 41 44 167 75 280 31 113 89 333
-130 490 176 678 257 988 308 1180 31 113 86 322 122 465 37 143 89 346 117
-450 64 242 97 371 252 965 167 639 172 657 283 1070 52 195 106 396 118 445
-85 333 143 552 205 775 27 96 82 303 124 460 137 522 149 592 150 885 1 237
--13 341 -69 504 -101 297 -310 541 -598 698 -320 174 -566 213 -1363 213 -644
-0 -909 -23 -1189 -101 -337 -95 -563 -213 -840 -436 -171 -138 -321 -318 -453
--541 -152 -256 -184 -343 -382 -1017 -33 -115 -74 -255 -90 -310 -16 -55 -56
--197 -89 -315 -33 -118 -87 -307 -121 -420 -33 -113 -122 -419 -196 -680 -120
--421 -169 -591 -314 -1080 -37 -122 -38 -125 -66 -125 -28 0 -30 4 -61 100
--31 95 -146 542 -283 1105 -34 140 -79 318 -100 395 -21 77 -86 338 -145 580
--59 242 -158 647 -221 900 -62 253 -134 555 -159 670 -67 306 -103 405 -203
-560 -172 269 -451 484 -763 589 -211 71 -373 98 -678 116 -218 12 -3593 11
--3801 -1z" />
-                </g>
-              </svg>
-            </motion.div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="eyad-intro" ref={rootRef}>
+      <div className="preloader">
+        <div className="intro-title">
+          <h1>EYAD MONEIM</h1>
+        </div>
+        <div className="outro-title">
+          <h1>6</h1>
+        </div>
+      </div>
+
+      <div className="split-overlay">
+        <div className="intro-title">
+          <h1>EYAD MONEIM</h1>
+        </div>
+        <div className="outro-title">
+          <h1>6</h1>
+        </div>
+      </div>
+
+      <div className="tags-overlay">
+        <div className="tag tag-1">
+          <p>Creative Frontend</p>
+        </div>
+        <div className="tag tag-2">
+          <p>Motion Systems</p>
+        </div>
+        <div className="tag tag-3">
+          <p>Digital Detail</p>
+        </div>
+      </div>
+    </div>
   );
 });
 

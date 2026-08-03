@@ -59,9 +59,9 @@ const App = () => {
   const phase4BgRef = useRef(null);
   const quoteSectionRef = useRef(null);
 
-  // Lock body scroll when menu is open
+  // Lock body scroll when menu or intro is active
   useEffect(() => {
-    if (isMenuOpen) {
+    if (isMenuOpen || isLoading) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -69,7 +69,7 @@ const App = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isLoading]);
 
   // Prevent right-click (save as) and dragging globally
   useEffect(() => {
@@ -447,14 +447,10 @@ const App = () => {
 
   return (
     <>
-      <AnimatePresence mode="wait">
-        {isLoading && (
-          <LoadingScreen onLoadingComplete={() => setIsLoading(false)} />
-        )}
-      </AnimatePresence>
-
-      {!isLoading && (
-        <div style={{ position: "relative", width: "100%", minHeight: "100vh" }}>
+      <div
+        className={isLoading ? "intro-reveal-shell" : ""}
+        style={{ position: "relative", width: "100%", minHeight: "100vh" }}
+      >
           {/* ======= Z-0: DARK GREEN BACKGROUND + MARQUEE ======= */}
           <div className="scroll-reveal-bg" id="scroll-reveal-bg">
             <BackgroundBlobs style={{ opacity: 0.1 }} />
@@ -574,7 +570,12 @@ const App = () => {
           
           <Footer />
         </div>
-      )}
+
+      <AnimatePresence mode="wait">
+        {isLoading && (
+          <LoadingScreen onLoadingComplete={() => setIsLoading(false)} />
+        )}
+      </AnimatePresence>
     </>
   );
 };
