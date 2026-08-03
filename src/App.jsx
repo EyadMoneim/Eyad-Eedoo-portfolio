@@ -423,7 +423,11 @@ const App = () => {
         }
         // SplitSection FADES IN behind them (it has zIndex: 30, quoteSection is 35)
         if (splitSectionRef.current) {
-          tl.fromTo(splitSectionRef.current, { opacity: 0, pointerEvents: 'none', filter: 'blur(15px)' }, { opacity: 1, pointerEvents: 'auto', filter: 'blur(0px)', ease: 'none', duration: 1 }, 0);
+          gsap.set(splitSectionRef.current, { opacity: 0, pointerEvents: 'none', filter: 'blur(15px)' });
+          // Opacity fades in naturally over the full scroll duration
+          tl.to(splitSectionRef.current, { opacity: 1, pointerEvents: 'auto', ease: 'none', duration: 1 }, 0);
+          // Blur clears up much earlier (by 40% of the scroll) so it doesn't linger
+          tl.to(splitSectionRef.current, { filter: 'blur(0px)', ease: 'power2.out', duration: 0.4 }, 0);
         }
       }
 

@@ -133,13 +133,42 @@ void main() {
   float fullMix = smoothstep(threshold - edge, threshold + edge, fullNoise);
   
   // ============================================
-  // Combine both modes: full transform takes
+  // MODE 3: Auto Shoulder Reveal
+  // Shoulders automatically pulse the robot texture
+  // ============================================
+  vec2 aspectShoulder1 = vec2(0.25 * uAspect, 0.15);
+  vec2 aspectShoulder2 = vec2(0.75 * uAspect, 0.15);
+  
+  float distS1 = distance(aspectUv, aspectShoulder1);
+  float distS2 = distance(aspectUv, aspectShoulder2);
+  
+  // Smooth breathing pulse for the shoulders
+  float sPulse1 = (sin(uTime * 1.5) * 0.5 + 0.5);
+  float sPulse2 = (sin(uTime * 1.5 + 3.1415) * 0.5 + 0.5); // Alternating
+  
+  // Make it medium strength
+  float shoulderMaxRadius = 0.16; // slightly larger radius
+  float currentShoulderRad1 = shoulderMaxRadius * sPulse1;
+  float currentShoulderRad2 = shoulderMaxRadius * sPulse2;
+  
+  // Moderate noise influence for a bit more cohesion
+  float noisyBoundaryS1 = currentShoulderRad1 + (cursorNoise - 0.5) * 0.2;
+  float noisyBoundaryS2 = currentShoulderRad2 + (cursorNoise - 0.5) * 0.2;
+  
+  // Medium soft edges
+  float shoulderMix1 = 1.0 - smoothstep(noisyBoundaryS1 - 0.12, noisyBoundaryS1 + 0.08, distS1);
+  float shoulderMix2 = 1.0 - smoothstep(noisyBoundaryS2 - 0.12, noisyBoundaryS2 + 0.08, distS2);
+  
+  // Cap the maximum intensity higher (80%) so it's more visible
+  float autoShoulderMix = max(shoulderMix1, shoulderMix2) * 0.8;
+
+  // ============================================
+  // Combine all modes: full transform takes
   // natural priority via max(). When badge is
-  // active (fullMix→1), it overrides cursorMix
-  // everywhere. When badge is idle (fullMix=0),
-  // only cursor reveal matters.
+  // active (fullMix→1), it overrides everything.
   // ============================================
   float mixAmount = max(cursorMix, fullMix);
+  mixAmount = max(mixAmount, autoShoulderMix);
   
   // ============================================
   // Permanent Cyber Scratches (Explicit Rounded Geometry)
