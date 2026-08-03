@@ -1,0 +1,444 @@
+/* ================================================
+   FOOTER — Lando-Norris-inspired immersive layout
+   ================================================ */
+
+/* ── Outer wrapper (lime frame) ─────────────────── */
+.footer-container {
+  position: relative;
+  z-index: 40;
+  background: var(--color-lime);
+  padding: clamp(0.6rem, 1.2vw, 1.4rem);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Dark inner shell ────────────────────────────── */
+.footer-shell {
+  position: relative;
+  min-height: 100vh;
+  background: var(--color-dark-green);
+  border-radius: 1.6rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-white);
+}
+
+/* Contour background (BackgroundBlobs) */
+.footer-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.footer-bg > div,
+.footer-contours {
+  width: 100%;
+  height: 100%;
+}
+
+.footer-contours img {
+  width: 110%;
+  height: 110%;
+  object-fit: cover;
+  margin: -5%;
+}
+
+/* ── Brand lockup (small signature top-center) ──── */
+.footer-brand-lockup {
+  position: relative;
+  z-index: 2;
+  height: 120px;
+  pointer-events: none;
+}
+
+.footer-signature-top {
+  position: absolute;
+  left: 50%;
+  top: 130%;
+  transform: translate(-50%, -50%);
+  width: clamp(420px, 120vw, 600px); /* Large canvas to make the internal signature big */
+  opacity: 1;
+}
+
+/* ── Three-column content grid ──────────────────── */
+.footer-content-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 2.2fr 1fr;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  padding: 2rem 3.5rem 0;
+}
+
+/* Side columns */
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+/* Column header — "PAGES" / "FOLLOW ON" */
+.col-header {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  color: var(--color-green-off-white-1);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.col-header::before,
+.col-header::after {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 1px;
+  background: var(--color-green-off-white-1);
+  opacity: 0.45;
+}
+
+/* Link list */
+.footer-link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: -1rem;
+}
+
+.footer-link-list a {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.15rem, 1.8vw, 1.65rem);
+  font-weight: 900;
+  color: var(--color-white);
+  text-decoration: none;
+  text-transform: uppercase;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-block;
+}
+
+.footer-link-list a:hover {
+  color: var(--color-lime);
+  transform: scale(1.06);
+}
+
+.footer-link-list a.lime-link {
+  color: var(--color-lime);
+  margin-top: 0.85rem;
+}
+
+/* ── Center hero ────────────────────────────────── */
+.footer-col--center {
+  position: relative;
+}
+
+.footer-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 40vh;
+  justify-content: center;
+}
+
+/* Signature floating above heading */
+.footer-hero-signature {
+  position: absolute;
+  top: 8%;
+  right: 8%;
+  width: clamp(120px, 14vw, 240px);
+  transform: rotate(-14deg);
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 3;
+  filter: brightness(2) contrast(0.85);
+}
+
+/* Heading */
+.footer-hero-heading {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(3.2rem, 7.5vw, 9.5rem);
+  font-weight: 900;
+  color: var(--color-white);
+  line-height: 0.82;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: -0.045em;
+  position: relative;
+  z-index: 2;
+}
+
+.footer-hero-heading .hw {
+  color: var(--color-white);
+}
+
+.footer-hero-heading .hl {
+  color: var(--color-lime);
+}
+
+.footer-hero-heading .serif-italic {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Person / helmet */
+.footer-hero-person {
+  position: absolute;
+  bottom: -8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(200px, 32vw, 480px);
+  z-index: 4;
+  pointer-events: none;
+  object-fit: contain;
+  mask-image: linear-gradient(to top, transparent 0%, black 18%);
+  -webkit-mask-image: linear-gradient(to top, transparent 0%, black 18%);
+}
+
+/* ── Sponsor strip ──────────────────────────────── */
+.footer-sponsor-strip {
+  position: relative;
+  z-index: 5;
+  padding: 2rem 0 2.5rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+.footer-sponsor-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  gap: clamp(3rem, 5vw, 6rem);
+  padding-right: clamp(3rem, 5vw, 6rem);
+  animation: scroll-ticker 30s linear infinite;
+}
+
+.sponsor-mark {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 42px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.sponsor-mark img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(37%) sepia(4%) saturate(760%) hue-rotate(205deg) brightness(97%) contrast(92%);
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.sponsor-mark:hover img {
+  opacity: 1;
+}
+
+@keyframes scroll-ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Bottom legal bar (lime) ────────────────────── */
+.footer-legal-bar {
+  background: var(--color-lime);
+  color: var(--color-dark-green);
+  padding: 0.9rem 3.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  border-radius: 0 0 1.2rem 1.2rem;
+  position: relative;
+  z-index: 10;
+}
+
+.legal-left,
+.legal-right {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.legal-right a {
+  color: var(--color-dark-green);
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.legal-right a:hover {
+  opacity: 0.5;
+}
+
+/* Business enquiries pill */
+.business-btn {
+  background: var(--color-dark-green);
+  color: var(--color-lime);
+  padding: 0.55rem 1.6rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  transition: background 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
+  border: 2px solid var(--color-dark-green);
+}
+
+.business-btn:hover {
+  background: transparent;
+  color: var(--color-dark-green);
+  box-shadow: inset 0 0 0 2px var(--color-dark-green);
+}
+
+.business-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.business-btn:hover svg {
+  transform: translate(2px, -2px);
+}
+
+/* ================================================
+   RESPONSIVE
+   ================================================ */
+
+/* ── Tablet (768–1024) ────────────────────────────── */
+@media (max-width: 1024px) {
+  .footer-content-grid {
+    grid-template-columns: 1fr 2.4fr 1fr;
+    padding: 2rem 2rem 0;
+  }
+
+  .footer-hero-heading {
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+  }
+
+  .footer-hero-person {
+    width: min(58vw, 420px);
+  }
+
+  .footer-hero-signature {
+    width: clamp(80px, 12vw, 160px);
+  }
+
+  .footer-legal-bar {
+    padding: 0.9rem 2rem;
+  }
+}
+
+/* ── Mobile (<768) ────────────────────────────────── */
+@media (max-width: 767px) {
+  .footer-container {
+    padding: 0.5rem;
+  }
+
+  .footer-shell {
+    min-height: 115vh;
+    border-radius: 1.2rem;
+  }
+
+  .footer-content-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 2rem 1.5rem 0;
+    text-align: center;
+  }
+
+  /* Center hero first */
+  .footer-col--center {
+    order: -1;
+  }
+
+  .footer-hero {
+    min-height: 25vh;
+  }
+
+  .footer-hero-heading {
+    font-size: clamp(2.4rem, 10vw, 4.2rem);
+  }
+
+  .footer-hero-person {
+    width: clamp(160px, 55vw, 300px);
+    bottom: -5%;
+  }
+
+  .footer-hero-signature {
+    width: clamp(70px, 22vw, 120px);
+    top: 5%;
+    right: 2%;
+  }
+
+  /* Side columns side-by-side below hero */
+  .footer-col--left,
+  .footer-col--right {
+    order: 1;
+  }
+
+  .footer-link-list a {
+    font-size: clamp(1rem, 5vw, 1.35rem);
+  }
+
+  /* Sponsor strip */
+  .footer-sponsor-strip {
+    padding: 1.5rem 0 2rem;
+  }
+
+  .footer-sponsor-track {
+    gap: 2.5rem;
+    padding-left: 2.5rem;
+  }
+
+  .sponsor-mark {
+    height: 32px;
+  }
+
+  /* Legal bar stacks */
+  .footer-legal-bar {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.2rem 1rem;
+    text-align: center;
+    border-radius: 0 0 0.8rem 0.8rem;
+  }
+
+  .legal-left,
+  .legal-right {
+    justify-content: center;
+  }
+}
+
+/* ── Large desktop (>1440) ─────────────────────── */
+@media (min-width: 1441px) {
+  .footer-content-grid {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 3rem 5rem 0;
+  }
+
+  .footer-hero-person {
+    width: min(28vw, 520px);
+  }
+}

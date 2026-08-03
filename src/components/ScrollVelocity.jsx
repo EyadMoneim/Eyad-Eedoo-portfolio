@@ -25,32 +25,18 @@ function useElementWidth(ref) {
   return width;
 }
 
-export const ScrollVelocity = ({
+
+function VelocityText({
+  children,
+  baseVelocity = 100,
   scrollContainerRef,
-  texts = [],
-  velocity = 100,
   className = '',
-  damping = 50,
-  stiffness = 400,
   numCopies = 6,
-  velocityMapping = { input: [0, 1000], output: [0, 5] },
   parallaxClassName = 'parallax',
   scrollerClassName = 'scroller',
   parallaxStyle,
   scrollerStyle
-}) => {
-  function VelocityText({
-    children,
-    baseVelocity = velocity,
-    scrollContainerRef,
-    className = '',
-    numCopies,
-
-    parallaxClassName,
-    scrollerClassName,
-    parallaxStyle,
-    scrollerStyle
-  }) {
+}) {
     const baseX = useMotionValue(0);
     const scrollOptions = scrollContainerRef ? { container: scrollContainerRef } : {};
     useScroll(scrollOptions);
@@ -92,6 +78,20 @@ export const ScrollVelocity = ({
     );
   }
 
+export const ScrollVelocity = ({
+  scrollContainerRef,
+  texts = [],
+  velocity = 100,
+  className = '',
+  damping = 50,
+  stiffness = 400,
+  numCopies = 6,
+  velocityMapping = { input: [0, 1000], output: [0, 5] },
+  parallaxClassName = 'parallax',
+  scrollerClassName = 'scroller',
+  parallaxStyle,
+  scrollerStyle
+}) => {
   return (
     <section>
       {texts.map((text, index) => (

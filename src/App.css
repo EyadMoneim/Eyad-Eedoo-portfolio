@@ -71,6 +71,15 @@ body {
   scrollbar-color: var(--color-dark-green) transparent;
 }
 
+img, svg, video, a {
+  -webkit-user-drag: none;
+}
+
+img {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* ================================================
    NAVBAR
    ================================================ */

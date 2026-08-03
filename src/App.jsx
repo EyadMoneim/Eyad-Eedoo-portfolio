@@ -10,6 +10,7 @@ import ThreeDissolveHero from "./ThreeDissolveHero";
 import ScrollVelocity from "./components/ScrollVelocity";
 import SplitSection from "./sections/SplitSection";
 import LoadingScreen from "./LoadingScreen";
+import Footer from "./components/footer/Footer";
 import "./App.css";
 import Navbar from "./components/nav/Navbar";
 import FullscreenMenu from "./components/nav/FullscreenMenu";
@@ -18,15 +19,6 @@ import BackgroundBlobs from "./components/background/BackgroundBlobs";
 import SignatureLayer from "./components/background/SignatureLayer";
 
 gsap.registerPlugin(ScrollTrigger);
-
-
-
-
-
-
-
-
-
 
 
 
@@ -78,6 +70,20 @@ const App = () => {
       document.body.style.overflow = "";
     };
   }, [isMenuOpen]);
+
+  // Prevent right-click (save as) and dragging globally
+  useEffect(() => {
+    const handleContextMenu = (e) => e.preventDefault();
+    const handleDragStart = (e) => e.preventDefault();
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("dragstart", handleDragStart);
+
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("dragstart", handleDragStart);
+    };
+  }, []);
 
   // =========================================
   // GSAP ScrollTrigger — Hero Shrink Animation
@@ -408,12 +414,12 @@ const App = () => {
           }
         });
 
-        // QuoteSection and devSig SLIDE UP and blur
+        // QuoteSection and devSig SLIDE UP and blur using non-conflicting properties
         if (quoteSection) {
-          tl.fromTo(quoteSection, { y: '0%', filter: 'blur(0px)' }, { y: '-100vh', filter: 'blur(15px)', ease: 'none', duration: 1 }, 0);
+          tl.to(quoteSection, { yPercent: -100, filter: 'blur(15px)', ease: 'none', duration: 1 }, 0);
         }
         if (devSig) {
-          tl.fromTo(devSig, { y: '-65vh', opacity: 1, filter: 'blur(0px)' }, { y: '-165vh', opacity: 0, filter: 'blur(15px)', ease: 'none', immediateRender: false, duration: 1 }, 0);
+          tl.to(devSig, { marginBottom: '100vh', opacity: 0, filter: 'blur(15px)', ease: 'none', duration: 1 }, 0);
         }
         // SplitSection FADES IN behind them (it has zIndex: 30, quoteSection is 35)
         if (splitSectionRef.current) {
@@ -561,6 +567,8 @@ const App = () => {
 
           {/* ======= PHASE 4: SPLIT SECTION ======= */}
           <SplitSection sectionRef={splitSectionRef} triggerRef={transitionSpacerRef} />
+          
+          <Footer />
         </div>
       )}
     </>

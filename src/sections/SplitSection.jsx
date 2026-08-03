@@ -244,7 +244,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
                   lineHeight: 1.4,
                   fontFamily: "'Inter', sans-serif",
                 }}>
-                  Innovative projects, robust
+                  My playground of code, AI experiments,
                 </span>
               </div>
             </div>
@@ -261,7 +261,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
                   lineHeight: 1.4,
                   fontFamily: "'Inter', sans-serif",
                 }}>
-                  architectures, and deep-dives
+                  questionable ideas and projects
                 </span>
               </div>
             </div>
@@ -278,7 +278,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
                   lineHeight: 1.4,
                   fontFamily: "'Inter', sans-serif",
                 }}>
-                  into modern tech stacks.
+                  that somehow made it to production.
                 </span>
               </div>
             </div>
@@ -374,7 +374,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
                   lineHeight: 1.4,
                   fontFamily: "'Inter', sans-serif",
                 }}>
-                  Creative campaigns, UI/UX
+                  Adventures, unexpected stories,
                 </span>
               </div>
             </div>
@@ -391,7 +391,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
                   lineHeight: 1.4,
                   fontFamily: "'Inter', sans-serif",
                 }}>
-                  designs, and engaging digital
+                  great people and a suspicious amount of
                 </span>
               </div>
             </div>
@@ -408,7 +408,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
                   lineHeight: 1.4,
                   fontFamily: "'Inter', sans-serif",
                 }}>
-                  experiences.
+                  “how did I end up here?” moments.
                 </span>
               </div>
             </div>
