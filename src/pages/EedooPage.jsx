@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useEedooTransition } from '../components/transitions/EedooTransition';
 import Navbar from '../components/nav/Navbar';
 import FullscreenMenu from '../components/nav/FullscreenMenu';
+import RobotHero from '../components/Robot3D';
 
 const EedooPage = () => {
   const { navigateWithTransition } = useEedooTransition();
@@ -45,6 +46,11 @@ const EedooPage = () => {
         isScrolled={isScrolled}
       />
       <FullscreenMenu isOpen={isMenuOpen} currentPage="Eedoo" />
+      
+      {/* 3D Robot Hero Section */}
+      <div style={{ width: '100%', height: '100vh', position: 'relative', zIndex: 1 }}>
+        <RobotHero />
+      </div>
     </div>
   );
 };
