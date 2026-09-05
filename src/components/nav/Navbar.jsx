@@ -1,9 +1,18 @@
+import { Link, useLocation } from "react-router-dom";
 import TextLogo from "./TextLogo";
 import HeaderLogo from "./HeaderLogo";
 import StoreButton from "./StoreButton";
 import HamburgerButton from "./HamburgerButton";
 
 export default function Navbar({ isMenuOpen, setIsMenuOpen, isScrolled, isPhase3, isPhase4 }) {
+  const location = useLocation();
+
+  const handleMobileClick = (e) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
   return (
     <nav className="nav-bar">
       <div className="nav-inner relative flex justify-between items-center w-full">
@@ -51,11 +60,13 @@ export default function Navbar({ isMenuOpen, setIsMenuOpen, isScrolled, isPhase3
             
             {/* Default State (Not Scrolled) */}
             <div style={{ opacity: isScrolled ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: isScrolled ? "none" : "auto" }}>
-              <div className="flex gap-1 items-baseline justify-center">
-                <span style={{ fontSize: "1.4rem", fontWeight: 500, fontFamily: "'Playfair Display', serif", color: "#2D3126" }}>EYAD</span>
-                <span style={{ fontSize: "1.3rem", fontWeight: 900, fontFamily: "'Brier ', sans-serif", color: "#2D3126" }}>MONEIM</span>
-              </div>
-              <span style={{ display: "block", fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.05em", marginTop: "0.15rem", color: "#2D3126" }}>DEVELOPER SINCE 2024</span>
+              <Link to="/" onClick={handleMobileClick} style={{ textDecoration: "none", display: "block" }}>
+                <div className="flex gap-1 items-baseline justify-center">
+                  <span style={{ fontSize: "1.4rem", fontWeight: 500, fontFamily: "'Playfair Display', serif", color: "#2D3126" }}>EYAD</span>
+                  <span style={{ fontSize: "1.3rem", fontWeight: 900, fontFamily: "'Brier ', sans-serif", color: "#2D3126" }}>MONEIM</span>
+                </div>
+                <span style={{ display: "block", fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.05em", marginTop: "0.15rem", color: "#2D3126" }}>DEVELOPER SINCE 2024</span>
+              </Link>
             </div>
 
             {/* Scrolled State */}

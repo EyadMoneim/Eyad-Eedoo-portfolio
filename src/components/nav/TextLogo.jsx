@@ -1,4 +1,7 @@
+import { Link, useLocation } from "react-router-dom";
+
 export default function TextLogo({ isMenuOpen, isScrolled, isPhase4 }) {
+  const location = useLocation();
   let eyadColor = "#2D3126";
   let moneimColor = "#2D3126";
 
@@ -13,9 +16,17 @@ export default function TextLogo({ isMenuOpen, isScrolled, isPhase4 }) {
     moneimColor = "#f4f4ed";
   }
 
+  const handleClick = (e) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
-    <a
-      href="#home"
+    <Link
+      to="/"
+      onClick={handleClick}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -23,6 +34,7 @@ export default function TextLogo({ isMenuOpen, isScrolled, isPhase4 }) {
         textDecoration: "none",
         lineHeight: 0.8,
         zIndex: 100,
+        cursor: "pointer",
       }}
     >
       <span style={{ 
@@ -46,6 +58,6 @@ export default function TextLogo({ isMenuOpen, isScrolled, isPhase4 }) {
       }}>
         MONEIM
       </span>
-    </a>
+    </Link>
   );
 }

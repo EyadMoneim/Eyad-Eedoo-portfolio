@@ -17,19 +17,24 @@ export default function SmoothScroll({ children }) {
       touchMultiplier: 2,
     });
 
+    window.lenis = lenis;
+
     // Synchronize ScrollTrigger with Lenis' scroll updates
     lenis.on('scroll', ScrollTrigger.update);
 
     // Add lenis.raf to GSAP's ticker
-    gsap.ticker.add((time) => {
+    const updateTicker = (time) => {
       lenis.raf(time * 1000);
-    });
+    };
+    gsap.ticker.add(updateTicker);
 
     // Disable GSAP lag smoothing for perfect sync
     gsap.ticker.lagSmoothing(0);
 
     return () => {
+      gsap.ticker.remove(updateTicker);
       lenis.destroy();
+      delete window.lenis;
     };
   }, []);
 

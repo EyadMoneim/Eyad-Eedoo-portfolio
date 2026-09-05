@@ -273,8 +273,8 @@ img {
 .nav-menu-images {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   max-height: 100%;
   height: calc(100vh - var(--gap) * 2);
   position: relative;

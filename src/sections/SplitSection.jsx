@@ -10,8 +10,12 @@ import CurvedArrowIcon from '../components/icons/CurvedArrowIcon';
 import BackgroundBlobs from '../components/background/BackgroundBlobs';
 import arrowLeft from '../assets/arrow-left.svg';
 import arrowRight from '../assets/arrow-right.svg';
+import { useEedooTransition } from '../components/transitions/EedooTransition';
+import { useEyadTransition } from '../components/transitions/EyadTransition';
 
 const SplitSection = ({ sectionRef, triggerRef }) => {
+  const { navigateWithTransition: navigateToEedoo } = useEedooTransition();
+  const { navigateWithTransition: navigateToEyad } = useEyadTransition();
   const leftImgRef = useRef(null);
   const rightImgRef = useRef(null);
   const leftContentRef = useRef(null);
@@ -178,7 +182,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="left" data-step="1" style={{ position: 'relative', width: 'max-content' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-5%', bottom: '-5%', left: '-5%', right: '-5%',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 {/* Background "EEDOO" – big black letters */}
@@ -207,7 +211,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-5%', bottom: '-5%', left: '-10%', right: '-10%',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 {/* Overlapping "tech-guy" */}
@@ -234,7 +238,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="left" data-step="2" style={{ position: 'relative', width: 'max-content', marginBottom: '4px' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 <span style={{ 
@@ -251,7 +255,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="left" data-step="2" style={{ position: 'relative', width: 'max-content', marginBottom: '4px' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 <span style={{ 
@@ -268,7 +272,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="left" data-step="2" style={{ position: 'relative', width: 'max-content' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 <span style={{ 
@@ -284,7 +288,11 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             </div>
           </div>
 
-          <button className="split-button" style={{ alignSelf: 'flex-end', marginTop: '2.5rem' }}>
+          <button 
+            className="split-button" 
+            style={{ alignSelf: 'flex-end', marginTop: '2.5rem', pointerEvents: 'auto', cursor: 'pointer' }}
+            onClick={() => navigateToEedoo('/eedoo')}
+          >
             <div className="svg-arrow left"></div>
           </button>
         </div>
@@ -322,7 +330,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="right" data-step="1" style={{ position: 'relative', width: 'max-content' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-5%', bottom: '-5%', left: '-5%', right: '-5%',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 <div className="split-title-sub" style={{ 
@@ -341,7 +349,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="right" data-step="1" style={{ position: 'relative', width: 'max-content' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-5%', bottom: '-5%', left: '-5%', right: '-5%',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 <div className="split-title-main" style={{ 
@@ -364,7 +372,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="right" data-step="2" style={{ position: 'relative', width: 'max-content', marginBottom: '4px' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 <span style={{ 
@@ -381,7 +389,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="right" data-step="2" style={{ position: 'relative', width: 'max-content', marginBottom: '4px' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 <span style={{ 
@@ -398,7 +406,7 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             <div className="split-reveal-group" data-direction="right" data-step="2" style={{ position: 'relative', width: 'max-content' }}>
               <div className="split-block-revealer" style={{
                 position: 'absolute', top: '-2px', bottom: '-2px', left: '-5px', right: '-5px',
-                backgroundColor: '#2a2d22', zIndex: 10
+                backgroundColor: '#212622', zIndex: 10
               }}></div>
               <div className="split-reveal-content">
                 <span style={{ 
@@ -414,7 +422,11 @@ const SplitSection = ({ sectionRef, triggerRef }) => {
             </div>
           </div>
 
-          <button className="split-button" style={{ alignSelf: 'flex-start', marginTop: '2.5rem' }}>
+          <button 
+            className="split-button" 
+            style={{ alignSelf: 'flex-start', marginTop: '2.5rem', pointerEvents: 'auto', cursor: 'pointer' }}
+            onClick={() => navigateToEyad('/eyad')}
+          >
             <div className="svg-arrow right"></div>
           </button>
         </div>

@@ -26,14 +26,16 @@ import restApiIconLogo from '../../assets/tech-logos/rest-api-icon.svg';
 import tailwindCssLogo from '../../assets/tech-logos/tailwind-css.svg';
 import threejsLogo from '../../assets/tech-logos/threejs.svg';
 import typescriptLogo from '../../assets/tech-logos/typescript.svg';
+import { useEedooTransition } from '../transitions/EedooTransition';
+import { useEyadTransition } from '../transitions/EyadTransition';
 
 gsap.registerPlugin(ScrollTrigger);
 
 /* ── Structured data ────────────────────────────────── */
 const pageLinks = [
-  { label: 'HOME', href: '#' },
-  { label: 'EYAD MONEIM', href: '#' },
-  { label: 'EEDOO', href: '#' },
+  { label: 'HOME', href: '/' },
+  { label: 'EYAD MONEIM', href: '/eyad' },
+  { label: 'EEDOO', href: '/eedoo' },
 ];
 
 const socialLinks = [
@@ -52,6 +54,8 @@ const sponsorLogos = [
 /* ── Component ──────────────────────────────────────── */
 const Footer = () => {
   const footerRef = useRef(null);
+  const { navigateWithTransition: navigateToEedoo } = useEedooTransition();
+  const { navigateWithTransition: navigateToEyad } = useEyadTransition();
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -113,7 +117,21 @@ const Footer = () => {
                 <li key={l.label} className="footer-reveal-group" style={{ position: 'relative', width: 'max-content' }}>
                   <div className="footer-block-revealer" style={{ position: 'absolute', top: 0, bottom: 0, left: '-4px', right: '-4px', backgroundColor: '#b084ff', zIndex: 10 }} />
                   <div className="footer-reveal-content">
-                    <a href={l.href}><HoverSplitText text={l.label} /></a>
+                    <a 
+                      href={l.href}
+                      onClick={(e) => {
+                        if (l.href.startsWith('/')) {
+                          e.preventDefault();
+                          if (l.href === '/eedoo' || l.href === '/') {
+                            navigateToEedoo(l.href);
+                          } else if (l.href === '/eyad') {
+                            navigateToEyad(l.href);
+                          }
+                        }
+                      }}
+                    >
+                      <HoverSplitText text={l.label} />
+                    </a>
                   </div>
                 </li>
               ))}

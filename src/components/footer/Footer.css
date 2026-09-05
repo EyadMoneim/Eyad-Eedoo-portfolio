@@ -239,7 +239,7 @@
   height: 100%;
   width: auto;
   object-fit: contain;
-  filter: brightness(0) saturate(100%) invert(37%) sepia(4%) saturate(760%) hue-rotate(205deg) brightness(97%) contrast(92%);
+  filter: brightness(0) saturate(100%) invert(54%) sepia(18%) saturate(1458%) hue-rotate(218deg) brightness(105%) contrast(101%);
   opacity: 0.8;
   transition: opacity 0.3s ease;
 }
