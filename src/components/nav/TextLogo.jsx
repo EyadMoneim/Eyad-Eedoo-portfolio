@@ -2,15 +2,16 @@ import { Link, useLocation } from "react-router-dom";
 
 export default function TextLogo({ isMenuOpen, isScrolled, isPhase4 }) {
   const location = useLocation();
-  let eyadColor = "#2D3126";
-  let moneimColor = "#2D3126";
+  const isEedooPage = location.pathname === "/eedoo";
+  
+  let eyadColor = isEedooPage ? "#f4f4ed" : "#2D3126";
+  let moneimColor = isEedooPage ? "#f4f4ed" : "#2D3126";
 
   if (isMenuOpen) {
     eyadColor = "#f4f4ed";
     moneimColor = "#f4f4ed";
   } else if (isPhase4) {
-    eyadColor = "#2D3126";
-    moneimColor = "#2D3126";
+    eyadColor = isEedooPage ? "#f4f4ed" : "#2D3126";
   } else if (isScrolled) {
     eyadColor = "gray";
     moneimColor = "#f4f4ed";
