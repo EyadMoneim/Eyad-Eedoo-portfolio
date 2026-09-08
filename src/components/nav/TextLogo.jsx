@@ -4,14 +4,14 @@ export default function TextLogo({ isMenuOpen, isScrolled, isPhase4 }) {
   const location = useLocation();
   const isEedooPage = location.pathname === "/eedoo";
   
-  let eyadColor = isEedooPage ? "#f4f4ed" : "#2D3126";
-  let moneimColor = isEedooPage ? "#f4f4ed" : "#2D3126";
+  let eyadColor = isEedooPage ? "#7f7f7f" : "#2D3126";
+  let moneimColor = isEedooPage ? "#f5f4ee" : "#2D3126";
 
   if (isMenuOpen) {
     eyadColor = "#f4f4ed";
     moneimColor = "#f4f4ed";
   } else if (isPhase4) {
-    eyadColor = isEedooPage ? "#f4f4ed" : "#2D3126";
+    eyadColor = isEedooPage ? "#7f7f7f" : "#2D3126";
   } else if (isScrolled) {
     eyadColor = "gray";
     moneimColor = "#f4f4ed";

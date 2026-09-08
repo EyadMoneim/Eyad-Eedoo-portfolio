@@ -4,8 +4,9 @@ import { COLORS } from "../../constants/colors";
 
 export default function HeaderLogo({ isMenuOpen, isScrolled }) {
   const location = useLocation();
-  const normalColor = isScrolled ? COLORS.lime : COLORS.darkGreen;
-  const hoverColor = isScrolled ? "gray" : COLORS.lime;
+  const isEedoo = location.pathname === "/eedoo";
+  const normalColor = isEedoo ? "#c7b4fa" : (isScrolled ? COLORS.lime : COLORS.darkGreen);
+  const hoverColor = isEedoo ? "#7f7f7f" : (isScrolled ? "gray" : COLORS.lime);
 
   const handleClick = (e) => {
     if (location.pathname === "/") {

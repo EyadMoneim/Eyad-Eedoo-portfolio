@@ -62,8 +62,8 @@ export default function Navbar({ isMenuOpen, setIsMenuOpen, isScrolled, isPhase3
             <div style={{ opacity: isScrolled ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: isScrolled ? "none" : "auto" }}>
               <Link to="/" onClick={handleMobileClick} style={{ textDecoration: "none", display: "block" }}>
                 <div className="flex gap-1 items-baseline justify-center">
-                  <span style={{ fontSize: "1.4rem", fontWeight: 500, fontFamily: "'Playfair Display', serif", color: location.pathname === "/eedoo" ? "#f4f4ed" : "#2D3126" }}>EYAD</span>
-                  <span style={{ fontSize: "1.3rem", fontWeight: 900, fontFamily: "'Brier ', sans-serif", color: location.pathname === "/eedoo" ? "#f4f4ed" : "#2D3126" }}>MONEIM</span>
+                  <span style={{ fontSize: "1.4rem", fontWeight: 500, fontFamily: "'Playfair Display', serif", color: location.pathname === "/eedoo" ? "#7f7f7f" : "#2D3126" }}>EYAD</span>
+                  <span style={{ fontSize: "1.3rem", fontWeight: 900, fontFamily: "'Brier ', sans-serif", color: location.pathname === "/eedoo" ? "#f5f4ee" : "#2D3126" }}>MONEIM</span>
                 </div>
                 <span style={{ display: "block", fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.05em", marginTop: "0.15rem", color: location.pathname === "/eedoo" ? "#f4f4ed" : "#2D3126" }}>DEVELOPER SINCE 2024</span>
               </Link>
