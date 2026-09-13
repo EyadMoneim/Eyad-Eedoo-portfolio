@@ -29,21 +29,6 @@ export default function Navbar({ isMenuOpen, setIsMenuOpen, isScrolled, isPhase3
         {/* Center: Brand Monogram Logo (Desktop) */}
         <div className="desktop-logo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex-col items-center" style={{ opacity: isPhase3 ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: isPhase3 ? "none" : "auto" }}>
           <HeaderLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            opacity: (isScrolled && !isMenuOpen) ? 1 : 0,
-            transition: "opacity 0.5s ease",
-            pointerEvents: (isScrolled && !isMenuOpen) ? "auto" : "none",
-            paddingTop: "0.08rem",
-            whiteSpace: "nowrap"
-          }}>
-            <span style={{ fontSize: "0.60rem", fontWeight: 800, letterSpacing: "0.3em", color: "#f4f4ed", textTransform: "uppercase" }}>
-              MESSAGE FROM EYAD
-            </span>
-          </div>
         </div>
 
         {/* Center: Mobile Logo Cluster */}
@@ -69,11 +54,6 @@ export default function Navbar({ isMenuOpen, setIsMenuOpen, isScrolled, isPhase3
               </Link>
             </div>
 
-            {/* Scrolled State */}
-            <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", opacity: isScrolled ? 1 : 0, transition: "opacity 0.5s ease", pointerEvents: isScrolled ? "auto" : "none" }}>
-              <span style={{ fontSize: "0.65rem", fontWeight: 800, letterSpacing: "0.2em", color: "#f4f4ed", textTransform: "uppercase" }}>MESSAGE FROM EYAD</span>
-            </div>
-            
           </div>
         </div>
 

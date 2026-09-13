@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Caveat:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -1299,3 +1299,157 @@ img {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* ================================================
+   ORBIT CARDS (EedooHeadScene floating cards)
+   ================================================ */
+.orbit-card {
+  background: rgba(7, 7, 11, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 44, 77, 0.5);
+  border-radius: 14px;
+  padding: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.orbit-card:hover {
+  border-color: rgba(141, 118, 201, 0.6);
+  background: rgba(26, 23, 38, 0.7);
+  box-shadow: 0 0 20px rgba(141, 118, 201, 0.15);
+}
+/* ================================================
+   ESTABLISH CONNECTION ANIMATIONS
+   ================================================ */
+/* Signal dot pulse */
+@keyframes signalPulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  50% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+.animate-signal-pulse {
+  animation: signalPulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+.animate-signal-pulse-fast {
+  animation: signalPulse 0.4s cubic-bezier(0.16, 1, 0.3, 1) ease-out;
+}
+
+/* Signal node orbit rings */
+@keyframes orbitSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes orbitSpinReverse {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to { transform: translate(-50%, -50%) rotate(0deg); }
+}
+.animate-orbit-spin {
+  animation: orbitSpin 10s linear infinite;
+}
+.animate-orbit-spin-reverse {
+  animation: orbitSpinReverse 12s linear infinite;
+}
+.animate-orbit-spin-slow {
+  animation: orbitSpin 15s linear infinite;
+}
+
+/* ================================================
+   ESTABLISH CONNECTION — Animations
+   ================================================ */
+
+/* Signal dot pulse — expanding ring effect */
+@keyframes signalPulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  50% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+/* Signal node orbit rings — smooth rotation */
+@keyframes orbitSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes orbitSpinReverse {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+/* Portal clip-path transition */
+.portal-reveal {
+  clip-path: circle(var(--portal-radius, 0%) at 50% 50%);
+  will-change: clip-path;
+}
+
+/* Connection line draw */
+@keyframes lineDrawIn {
+  from { stroke-dashoffset: 400; }
+  to { stroke-dashoffset: 0; }
+}
+.animate-line-draw {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: lineDrawIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Terminal cursor blink */
+@keyframes terminalBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Terminal line appear animation */
+.terminal-line-appear {
+  animation: terminalLineIn 0.3s ease-out forwards;
+}
+
+@keyframes terminalLineIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Signal dot hover effect */
+.signal-dot:hover {
+  box-shadow: 0 0 30px rgba(177, 154, 232, 0.8), 0 0 60px rgba(177, 154, 232, 0.4) !important;
+}
+
+/* Signal orbit ring hover speed increase */
+.signal-orbit-ring {
+  transition: animation-duration 0.3s ease;
+}
+
+/* Meet EEDOO grid responsive */
+@media (max-width: 1024px) {
+  .meet-eedoo-grid > div {
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+    text-align: center;
+  }
+  .meet-eedoo-grid > div > div:first-child {
+    align-items: center;
+  }
+  .meet-eedoo-grid > div > div:first-child p {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .meet-eedoo-grid > div > div:nth-child(2) {
+    height: 300px !important;
+  }
+}
+
+/* CTA arrow pulse */
+@keyframes ctaArrowPulse {
+  0%, 100% { transform: translateX(0); opacity: 0.6; }
+  50% { transform: translateX(4px); opacity: 1; }
+}
+
+

@@ -6,7 +6,7 @@ import * as THREE from 'three';
 /* ================================================
    COLOR PALETTE  (Step 2)
    ================================================ */
-const ROBOT_COLORS = {
+export const ROBOT_COLORS = {
   voidBlack:   '#07070B',
   panelBlack:  '#0B0A10',
   armBlack:    '#1A1726',
@@ -22,7 +22,7 @@ const ROBOT_COLORS = {
 /* ================================================
    REUSABLE MATERIALS  (Step 2)
    ================================================ */
-function useRobotMaterials() {
+export function useRobotMaterials() {
   return useMemo(() => ({
     outerArmor: {
       color: ROBOT_COLORS.deepPurple,
@@ -89,14 +89,14 @@ function useRobotMaterials() {
 /* ================================================
    DETAIL HELPERS  (Step 10)
    ================================================ */
-const Bolt = ({ position, rotation = [Math.PI / 2, 0, 0] }) => (
+export const Bolt = ({ position, rotation = [Math.PI / 2, 0, 0] }) => (
   <mesh position={position} rotation={rotation}>
     <cylinderGeometry args={[0.035, 0.035, 0.018, 16]} />
     <meshStandardMaterial color={ROBOT_COLORS.armorPurple} metalness={0.8} roughness={0.3} />
   </mesh>
 );
 
-const PanelSeam = ({ position, args = [0.6, 0.015, 0.012], rotation = [0, 0, 0] }) => (
+export const PanelSeam = ({ position, args = [0.6, 0.015, 0.012], rotation = [0, 0, 0] }) => (
   <mesh position={position} rotation={rotation}>
     <boxGeometry args={args} />
     <meshStandardMaterial color={ROBOT_COLORS.armorPurple} metalness={0.5} roughness={0.5} opacity={0.6} transparent />
@@ -106,7 +106,7 @@ const PanelSeam = ({ position, args = [0.6, 0.015, 0.012], rotation = [0, 0, 0] 
 /* ================================================
    ROBOT EYES  (Step 4 + Expressions)
    ================================================ */
-const RobotEyes = ({ eyesRef, expression = 'default' }) => {
+export const RobotEyes = ({ eyesRef, expression = 'default' }) => {
   const mats = useRobotMaterials();
 
   let content = null;
@@ -292,7 +292,7 @@ const RobotEyes = ({ eyesRef, expression = 'default' }) => {
 /* ================================================
    EAR / SENSOR MODULES
    ================================================ */
-const RobotEarModule = ({ side }) => {
+export const RobotEarModule = ({ side }) => {
   const mats = useRobotMaterials();
   return (
     <group position={[side * 0.78, 0.05, 0]} rotation={[0, 0, Math.PI / 2]}>
@@ -320,7 +320,7 @@ const RobotEarModule = ({ side }) => {
 /* ================================================
    ROBOT HEAD  (Step 3)
    ================================================ */
-const RobotHead = ({ headRef, eyesRef, expression, onChestClick, activePanel, tooltipState, setActivePanel, setTooltipState }) => {
+export const RobotHead = ({ headRef, eyesRef, expression, onChestClick, activePanel, tooltipState, setActivePanel, setTooltipState }) => {
   const mats = useRobotMaterials();
 
   return (
@@ -731,7 +731,7 @@ const RobotArm = ({ side, armRef }) => {
 /* ================================================
    ROBOT LIGHTING  (Step 12)
    ================================================ */
-const RobotLighting = () => (
+export const RobotLighting = () => (
   <>
     {/* Ambient */}
     <ambientLight intensity={0.3} />
@@ -804,7 +804,9 @@ const ResponsiveRobot = ({ children, activePanel }) => {
 /* ================================================
    MAIN ROBOT ASSEMBLY  (Steps 3-11)
    ================================================ */
-const Robot = ({ expression, onChestClick, activePanel, tooltipState, setActivePanel, setTooltipState }) => {
+const Robot = ({ expression, scrollExpression, scrollHeadTarget, onChestClick, activePanel, tooltipState, setActivePanel, setTooltipState }) => {
+  // scrollExpression overrides internal expression when set
+  const activeExpression = scrollExpression || expression;
   const headRef = useRef();
   const eyesRef = useRef();
   const leftArmRef = useRef();
@@ -826,8 +828,15 @@ const Robot = ({ expression, onChestClick, activePanel, tooltipState, setActiveP
 
     /* -- Head tracking (Step 11) -- */
     if (headRef.current) {
-      const headTargetX = (globalMouse.current.y * Math.PI) / 10;
-      const headTargetY = (globalMouse.current.x * Math.PI) / 8;
+      let headTargetX, headTargetY;
+      if (scrollHeadTarget) {
+        // When scroll-driven, head looks toward the signal (center of screen)
+        headTargetX = scrollHeadTarget.y * 0.15;
+        headTargetY = scrollHeadTarget.x * 0.15;
+      } else {
+        headTargetX = (globalMouse.current.y * Math.PI) / 10;
+        headTargetY = (globalMouse.current.x * Math.PI) / 8;
+      }
       headRef.current.rotation.x = THREE.MathUtils.lerp(
         headRef.current.rotation.x, -headTargetX, 0.08
       );
@@ -878,7 +887,7 @@ const Robot = ({ expression, onChestClick, activePanel, tooltipState, setActiveP
           <RobotHead 
             headRef={headRef} 
             eyesRef={eyesRef} 
-            expression={expression} 
+            expression={activeExpression} 
             onChestClick={onChestClick} 
             activePanel={activePanel}
             tooltipState={tooltipState}
@@ -890,7 +899,7 @@ const Robot = ({ expression, onChestClick, activePanel, tooltipState, setActiveP
           <RobotNeck />
 
           {/* Torso */}
-          <RobotTorso barRefs={barRefs} onChestClick={onChestClick} expression={expression} />
+          <RobotTorso barRefs={barRefs} onChestClick={onChestClick} expression={activeExpression} />
 
           {/* Shoulders (inside torso position context) */}
           <group position={[0, -2.1, 0]}>
@@ -910,7 +919,7 @@ const Robot = ({ expression, onChestClick, activePanel, tooltipState, setActiveP
 /* ================================================
    HERO WRAPPER  (Steps 12-13)
    ================================================ */
-export default function RobotHero() {
+export default function RobotHero({ scrollExpression, scrollHeadTarget }) {
   const [expression, setExpression] = useState('default');
   const [isTyping, setIsTyping] = useState(false);
   const [activePanel, setActivePanel] = useState(null);
@@ -1027,7 +1036,9 @@ export default function RobotHero() {
         <Canvas camera={{ position: [0, 0, 8], fov: 45 }} style={{ pointerEvents: 'auto' }}>
           <RobotLighting />
           <Robot 
-            expression={expression} 
+            expression={expression}
+            scrollExpression={scrollExpression}
+            scrollHeadTarget={scrollHeadTarget}
             onChestClick={() => setActivePanel(prev => prev ? null : 'expressions')} 
             activePanel={activePanel}
             tooltipState={tooltipState}

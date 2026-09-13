@@ -1,15 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/nav/Navbar';
 import FullscreenMenu from '../components/nav/FullscreenMenu';
 import RobotHero from '../components/Robot3D';
+import Footer from '../components/footer/Footer';
+import EedooAboutSection from '../components/sections/EedooAboutSection';
 import wallpaperPattern from '../assets/wallpaper.svg';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const EedooPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const heroRef = useRef(null);
+
+  // Scroll expression state (unused now, but passed to RobotHero)
+  const [scrollExpression, setScrollExpression] = useState(null);
+  const [scrollHeadTarget, setScrollHeadTarget] = useState(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -53,12 +61,7 @@ const EedooPage = () => {
       width: '100%',
       minHeight: '100vh',
       backgroundColor: '#0B0A10',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
       position: 'relative',
-      overflow: 'hidden'
     }}>
       <Navbar 
         isMenuOpen={isMenuOpen} 
@@ -68,12 +71,16 @@ const EedooPage = () => {
       <FullscreenMenu isOpen={isMenuOpen} currentPage="Eedoo" />
       
       {/* 3D Robot Hero Section */}
-      <div style={{ 
-        width: '100%', 
-        height: '100vh', 
-        position: 'relative', 
-        zIndex: 1
-      }}>
+      <div 
+        ref={heroRef}
+        style={{ 
+          width: '100%', 
+          height: '100vh', 
+          position: 'sticky',
+          top: 0,
+          zIndex: 1
+        }}
+      >
         {/* Animated Background Pattern */}
         <motion.div 
           className="eedoo-pattern-bg"
@@ -93,7 +100,14 @@ const EedooPage = () => {
             ease: "easeInOut",
           }}
         ></motion.div>
-        <RobotHero />
+        <RobotHero 
+          scrollExpression={scrollExpression}
+          scrollHeadTarget={scrollHeadTarget}
+        />
+      </div>
+      <div style={{ position: 'relative', zIndex: 10, backgroundColor: '#0B0A10', marginTop: '-5px', paddingTop: '5px' }}>
+        <EedooAboutSection />
+        <Footer />
       </div>
     </div>
   );
