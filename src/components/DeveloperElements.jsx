@@ -18,7 +18,7 @@ function AnimatedEntrance({ children, delay = 0 }) {
   useFrame((state, delta) => {
     if (groupRef.current) {
       if (state.clock.elapsedTime > delay) {
-        groupRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), delta * 8);
+        groupRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), Math.min(delta * 8, 1));
       } else {
         groupRef.current.scale.set(0, 0, 0);
       }

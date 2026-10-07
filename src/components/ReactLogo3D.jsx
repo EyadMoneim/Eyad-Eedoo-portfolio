@@ -28,7 +28,7 @@ function Model({ url, color = '#8b67c3' }) {
       modelRef.current.rotation.y = (t * 0.5) + (1 - Math.exp(-t * 3.5)) * 8;
       
       if (modelRef.current.scale.x < 0.799) {
-        modelRef.current.scale.lerp(new THREE.Vector3(0.8, 0.8, 0.8), delta * 6);
+        modelRef.current.scale.lerp(new THREE.Vector3(0.8, 0.8, 0.8), Math.min(delta * 6, 1));
       }
     }
   });
