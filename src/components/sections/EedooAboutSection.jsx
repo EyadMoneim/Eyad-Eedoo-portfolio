@@ -27,7 +27,7 @@ const EedooAboutSection = () => {
           particleOpacity={0.80}
           orbitOpacity={0.25}
           hue={-23}
-          scale={0.82}
+          scale={0.6}
           haloOpacity={0.18}
         />
       </div>

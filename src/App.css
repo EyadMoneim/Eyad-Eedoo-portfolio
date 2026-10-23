@@ -50,7 +50,7 @@
 /* Chat Custom Scrollbar */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #8D76C9 transparent;
+  scrollbar-color: #8d76c9 transparent;
 }
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
@@ -59,11 +59,11 @@
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #8D76C9;
+  background: #8d76c9;
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #B19AE8;
+  background: #b19ae8;
 }
 .custom-scrollbar::-webkit-scrollbar-button {
   display: none !important;
@@ -79,18 +79,23 @@
   overflow: hidden;
   background: linear-gradient(135deg, #a088dd, #8d76c9);
   color: #07070b;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 0 15px rgba(141, 118, 201, 0.3);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    0 0 15px rgba(141, 118, 201, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tech-btn-primary:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 8px 25px rgba(141, 118, 201, 0.6);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    0 8px 25px rgba(141, 118, 201, 0.6);
 }
 
-.tech-btn-primary::after, .tech-btn-secondary::after {
-  content: '';
+.tech-btn-primary::after,
+.tech-btn-secondary::after {
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -101,14 +106,25 @@
 }
 
 .tech-btn-primary::after {
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
 }
 
 .tech-btn-secondary::after {
-  background: linear-gradient(to right, transparent, rgba(141, 118, 201, 0.2), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(141, 118, 201, 0.2),
+    transparent
+  );
 }
 
-.tech-btn-primary:hover::after, .tech-btn-secondary:hover::after {
+.tech-btn-primary:hover::after,
+.tech-btn-secondary:hover::after {
   animation: buttonShine 0.7s ease-out forwards;
 }
 
@@ -127,17 +143,29 @@
   border-color: #8d76c9;
   color: #f4f4ed;
   transform: translateY(-3px) scale(1.02);
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(141, 118, 201, 0.2);
+  box-shadow:
+    inset 0 0 10px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(141, 118, 201, 0.2);
 }
 
 @keyframes buttonShine {
-  0% { left: -100%; }
-  100% { left: 200%; }
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
 }
 
 @keyframes slideUpFade {
-  0% { opacity: 0; transform: translateY(15px) scale(0.95); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .anim-slide-up-1 {
@@ -1178,15 +1206,17 @@ img {
   display: flex;
   align-items: center;
   color: #fff;
-  font-family: 'Inter', sans-serif;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(141, 118, 201, 0.2);
+  font-family: "Inter", sans-serif;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(141, 118, 201, 0.2);
   user-select: none;
   transform: translate(30px, -60px);
 }
 
 /* Tooltip connecting line */
 .robot-tooltip::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -40px;
   top: 50%;
@@ -1196,15 +1226,15 @@ img {
   box-shadow: 0 0 10px rgba(177, 154, 232, 0.8);
 }
 .robot-tooltip::after {
-  content: '';
+  content: "";
   position: absolute;
   left: -44px;
   top: calc(50% - 4px);
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #B19AE8;
-  box-shadow: 0 0 10px #B19AE8;
+  background: #b19ae8;
+  box-shadow: 0 0 10px #b19ae8;
 }
 
 .tooltip-content {
@@ -1235,7 +1265,11 @@ img {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(141, 118, 201, 0.4), rgba(89, 68, 127, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(141, 118, 201, 0.4),
+    rgba(89, 68, 127, 0.2)
+  );
   border: 1px solid rgba(177, 154, 232, 0.5);
   display: flex;
   justify-content: center;
@@ -1246,7 +1280,11 @@ img {
 }
 
 .tooltip-btn:hover {
-  background: linear-gradient(135deg, rgba(141, 118, 201, 0.6), rgba(89, 68, 127, 0.4));
+  background: linear-gradient(
+    135deg,
+    rgba(141, 118, 201, 0.6),
+    rgba(89, 68, 127, 0.4)
+  );
   box-shadow: 0 0 20px rgba(141, 118, 201, 0.6);
 }
 
@@ -1263,25 +1301,34 @@ img {
 .tooltip-click-text {
   font-size: 0.3rem;
   letter-spacing: 2px;
-  color: #B19AE8;
+  color: #b19ae8;
   margin-bottom: 5px;
 }
 
 .tooltip-click-arrow {
   width: 30px;
   height: 30px;
-  stroke: #B19AE8;
+  stroke: #b19ae8;
   stroke-width: 2;
   fill: none;
   stroke-linecap: round;
 }
 
 @keyframes custom-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
-.float-anim-1 { animation: custom-float 4s ease-in-out infinite; }
-.float-anim-2 { animation: custom-float 4.5s ease-in-out infinite 1.5s; }
+.float-anim-1 {
+  animation: custom-float 4s ease-in-out infinite;
+}
+.float-anim-2 {
+  animation: custom-float 4.5s ease-in-out infinite 1.5s;
+}
 
 @keyframes line-dash {
   to {
@@ -1324,9 +1371,18 @@ img {
    ================================================ */
 /* Signal dot pulse */
 @keyframes signalPulse {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-  50% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
-  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
 }
 .animate-signal-pulse {
   animation: signalPulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
@@ -1337,12 +1393,20 @@ img {
 
 /* Signal node orbit rings */
 @keyframes orbitSpin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 @keyframes orbitSpinReverse {
-  from { transform: translate(-50%, -50%) rotate(360deg); }
-  to { transform: translate(-50%, -50%) rotate(0deg); }
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
 }
 .animate-orbit-spin {
   animation: orbitSpin 10s linear infinite;
@@ -1360,20 +1424,37 @@ img {
 
 /* Signal dot pulse — expanding ring effect */
 @keyframes signalPulse {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-  50% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
-  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(3.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
 }
 
 /* Signal node orbit rings — smooth rotation */
 @keyframes orbitSpin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 @keyframes orbitSpinReverse {
-  from { transform: translate(-50%, -50%) rotate(360deg); }
-  to { transform: translate(-50%, -50%) rotate(0deg); }
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
 }
 
 /* Portal clip-path transition */
@@ -1384,8 +1465,12 @@ img {
 
 /* Connection line draw */
 @keyframes lineDrawIn {
-  from { stroke-dashoffset: 400; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 .animate-line-draw {
   stroke-dasharray: 400;
@@ -1395,8 +1480,13 @@ img {
 
 /* Terminal cursor blink */
 @keyframes terminalBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* Terminal line appear animation */
@@ -1417,7 +1507,9 @@ img {
 
 /* Signal dot hover effect */
 .signal-dot:hover {
-  box-shadow: 0 0 30px rgba(177, 154, 232, 0.8), 0 0 60px rgba(177, 154, 232, 0.4) !important;
+  box-shadow:
+    0 0 30px rgba(177, 154, 232, 0.8),
+    0 0 60px rgba(177, 154, 232, 0.4) !important;
 }
 
 /* Signal orbit ring hover speed increase */
@@ -1448,8 +1540,13 @@ img {
 
 /* CTA arrow pulse */
 @keyframes ctaArrowPulse {
-  0%, 100% { transform: translateX(0); opacity: 0.6; }
-  50% { transform: translateX(4px); opacity: 1; }
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(4px);
+    opacity: 1;
+  }
 }
-
-

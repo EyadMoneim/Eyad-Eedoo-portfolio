@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export const ORBITAL_SPHERE_DEFAULTS = { speed: 1, particleSize: 0.015, particleOpacity: 0.8, orbitOpacity: 0.25, scale: 1, haloOpacity: 0.2, hue: 0 };
+export const ORBITAL_SPHERE_DEFAULTS = { speed: 1, particleSize: 0.015, particleOpacity: 0.8, orbitOpacity: 0.25, scale: 1, haloOpacity: 0.2, hue: 0, positionX: 0, positionY: 0, positionZ: -2 };
 
 export function createOrbitalSphereRenderer(canvas, getOptions) {
   const scene = new THREE.Scene();
@@ -137,15 +137,18 @@ export function createOrbitalSphereRenderer(canvas, getOptions) {
       camera.updateProjectionMatrix(); 
       renderer.setSize(width, height, false);
       const options = getOptions();
+      const posX = options.positionX !== undefined ? options.positionX : 0;
+      const posY = options.positionY !== undefined ? options.positionY : 0;
+      const posZ = options.positionZ !== undefined ? options.positionZ : -2;
+      networkGroup.position.set(posX, posY, posZ);
+
       if (width >= 1024) { 
-        networkGroup.position.set(2.5, 0, -2); 
-        responsiveScale = 1.15; 
+        responsiveScale = 0.85; 
         camera.position.z = 5.5; 
       }
       else { 
-        networkGroup.position.set(0, -1, -3); 
-        responsiveScale = 1; 
-        camera.position.z = 6.5; 
+        responsiveScale = 0.75; 
+        camera.position.z = 6.0; 
       }
       networkGroup.scale.setScalar(responsiveScale * options.scale);
     },
