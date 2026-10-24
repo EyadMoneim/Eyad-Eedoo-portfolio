@@ -78,7 +78,8 @@ const EedooPage = () => {
           height: '100vh', 
           position: 'sticky',
           top: 0,
-          zIndex: 1
+          zIndex: 1,
+          backgroundColor: '#0B0A10'
         }}
       >
         {/* Animated Background Pattern */}
@@ -105,7 +106,7 @@ const EedooPage = () => {
           scrollHeadTarget={scrollHeadTarget}
         />
       </div>
-      <div style={{ position: 'relative', zIndex: 10, backgroundColor: '#0B0A10', marginTop: '-5px', paddingTop: '5px' }}>
+      <div style={{ position: 'relative', zIndex: 10, backgroundColor: '#030303', marginTop: '-5px', paddingTop: '5px' }}>
         <EedooAboutSection />
         <Footer />
       </div>

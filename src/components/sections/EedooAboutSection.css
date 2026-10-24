@@ -1,0 +1,334 @@
+/* ================================================================
+   EEDOO ABOUT SECTION — Scroll-Driven Orbital Experience
+   ================================================================ */
+
+/* ── Section container ─────────────────────────── */
+.eedoo-about {
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  background-color: #030303;
+}
+
+/* ── Pinned wrapper (viewport-sized, pinned by GSAP) */
+.eedoo-about__pin-wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #030303;
+}
+
+/* ── Orbit layer — positioned to the right across all stages ────── */
+.eedoo-about__orbit-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transform: translate3d(25vw, 0, 0);
+}
+
+@media (max-width: 1439px) and (min-width: 1024px) {
+  .eedoo-about__orbit-layer {
+    transform: translate3d(23vw, 0, 0);
+  }
+}
+
+@media (max-width: 1023px) and (min-width: 768px) {
+  .eedoo-about__orbit-layer {
+    transform: translate3d(14vw, 0, 0);
+  }
+}
+
+@media (max-width: 767px) {
+  .eedoo-about__orbit-layer {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ── Content layer — stacked panels over orbit ──── */
+.eedoo-about__content-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Content panel (absolute, fills viewport) ───── */
+.eedoo-about__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(2rem, 6vw, 6rem);
+  pointer-events: none; /* Let clicks pass through empty areas to the 3D orbit */
+  will-change: transform, opacity;
+}
+
+/* Left-aligned content (About, Projects) */
+.eedoo-about__panel--left {
+  justify-content: flex-start;
+}
+
+/* Right-aligned content (Tech Stack) */
+.eedoo-about__panel--right {
+  justify-content: flex-end;
+}
+
+/* Inner wrapper constrains content width */
+.eedoo-about__panel-inner {
+  max-width: min(520px, 40vw);
+  color: #e8e4f0;
+  pointer-events: auto; /* Only actual text/buttons intercept clicks */
+  position: relative;
+  z-index: 2;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+
+
+
+
+/* ── Stage number label ─────────────────────────── */
+.eedoo-about__stage-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(167, 139, 250, 0.65);
+  margin-bottom: 1.25rem;
+}
+
+.eedoo-about__stage-label::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: rgba(167, 139, 250, 0.4);
+}
+
+/* ── Typography ─────────────────────────────────── */
+.eedoo-about__heading {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: #f4f4ed;
+  margin: 0 0 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.eedoo-about__heading em {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 500;
+  color: #c084fc;
+}
+
+.eedoo-about__body {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.85rem, 1vw, 0.95rem);
+  font-weight: 400;
+  line-height: 1.7;
+  color: rgba(201, 199, 210, 0.85);
+  margin: 0 0 1.25rem;
+}
+
+.eedoo-about__body strong {
+  color: #ddd6fe;
+  font-weight: 500;
+}
+
+/* ── Subtle link / button ───────────────────────── */
+.eedoo-about__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a78bfa;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s ease, gap 0.3s ease;
+}
+
+.eedoo-about__link:hover,
+.eedoo-about__link:focus-visible {
+  color: #c4b5fd;
+  gap: 0.75rem;
+}
+
+.eedoo-about__link svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.3s ease;
+}
+
+.eedoo-about__link:hover svg {
+  transform: translateX(2px);
+}
+
+/* ── Tech stack grid ────────────────────────────── */
+.eedoo-about__tech-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.eedoo-about__tech-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  background: rgba(139, 92, 246, 0.04);
+  transition: all 0.3s ease;
+}
+
+.eedoo-about__tech-item:hover {
+  border-color: rgba(167, 139, 250, 0.3);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.eedoo-about__tech-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.75;
+  filter: brightness(1.3) saturate(0.8);
+}
+
+.eedoo-about__tech-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: rgba(201, 199, 210, 0.9);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ── Project card ───────────────────────────────── */
+.eedoo-about__project {
+  width: 100%;
+}
+
+.eedoo-about__project-preview {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 10px;
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  overflow: hidden;
+  margin-bottom: 1rem;
+  background: rgba(11, 10, 16, 0.6);
+}
+
+.eedoo-about__project-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: opacity 0.4s ease, transform 0.6s ease;
+}
+
+.eedoo-about__project-preview:hover img {
+  opacity: 1;
+  transform: scale(1.03);
+}
+
+.eedoo-about__project-title {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 600;
+  color: #f4f4ed;
+  margin: 0 0 0.4rem;
+}
+
+.eedoo-about__project-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgba(201, 199, 210, 0.8);
+  margin: 0 0 0.85rem;
+}
+
+/* Project navigation dots */
+.eedoo-about__project-dots {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.eedoo-about__project-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.25);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.eedoo-about__project-dot--active {
+  background: #a78bfa;
+  transform: scale(1.4);
+}
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .eedoo-about__panel {
+    padding: 0 clamp(1rem, 4vw, 2rem);
+    align-items: flex-end;
+    padding-bottom: 3rem;
+  }
+
+  .eedoo-about__panel--left > *:first-child,
+  .eedoo-about__panel--right > *:first-child {
+    max-width: 100%;
+  }
+
+  .eedoo-about__nav-nodes {
+    right: 0.5rem;
+    gap: 1.25rem;
+  }
+
+  .eedoo-about__nav-node {
+    width: 10px;
+    height: 10px;
+  }
+
+  .eedoo-about__nav-tooltip {
+    display: none;
+  }
+
+  .eedoo-about__tech-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Reduced motion ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .eedoo-about__panel,
+  .eedoo-about__tech-item,
+  .eedoo-about__nav-node,
+  .eedoo-about__project-preview img,
+  .eedoo-about__link {
+    transition: none !important;
+  }
+}

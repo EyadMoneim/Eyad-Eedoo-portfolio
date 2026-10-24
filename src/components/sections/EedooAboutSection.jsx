@@ -1,45 +1,325 @@
-import React from 'react';
+import React, { useRef, useState, useLayoutEffect, useCallback, useEffect } from 'react';
 import { OrbitalSphereBackground } from '../../shaders/orbital-sphere/OrbitalSphereBackground';
-import { motion } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import './EedooAboutSection.css';
 
+// Tech logos
+import reactLogo from '../../assets/tech-logos/react.svg';
+import javascriptLogo from '../../assets/tech-logos/javascript.svg';
+import threejsLogo from '../../assets/tech-logos/threejs.svg';
+import gsapLogo from '../../assets/tech-logos/gsap.svg';
+import cssLogo from '../../assets/tech-logos/css.svg';
+import htmlLogo from '../../assets/tech-logos/html.svg';
+import nextjsLogo from '../../assets/tech-logos/nextjs.svg';
+import typescriptLogo from '../../assets/tech-logos/typescript.svg';
+import pythonLogo from '../../assets/tech-logos/python.svg';
+import nodeJsLogo from '../../assets/tech-logos/node-js.svg';
+import tailwindCssLogo from '../../assets/tech-logos/tailwind-css.svg';
+import cppLogo from '../../assets/tech-logos/c++.svg';
+
+// Project images
+import eyadRobot from '../../assets/eyad-robot.avif';
+import leftSide from '../../assets/left-side.avif';
+
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── Data ──────────────────────────────────────────────── */
+const TECH_STACK = [
+  { name: 'React', icon: reactLogo },
+  { name: 'JavaScript', icon: javascriptLogo },
+  { name: 'Three.js', icon: threejsLogo },
+  { name: 'GSAP', icon: gsapLogo },
+  { name: 'Next.js', icon: nextjsLogo },
+  { name: 'TypeScript', icon: typescriptLogo },
+  { name: 'Node.js', icon: nodeJsLogo },
+  { name: 'Python', icon: pythonLogo },
+  { name: 'CSS', icon: cssLogo },
+  { name: 'HTML', icon: htmlLogo },
+  { name: 'Tailwind', icon: tailwindCssLogo },
+  { name: 'C++', icon: cppLogo },
+];
+
+const PROJECTS = [
+  {
+    title: 'Eedoo — AI Assistant',
+    desc: 'An interactive 3D robot assistant built with React Three Fiber, complete with facial expressions, drag-to-spin interaction, and a conversational chat interface.',
+    image: eyadRobot,
+    href: '/eedoo',
+  },
+  {
+    title: 'Eyad Moneim — Portfolio',
+    desc: 'A creative developer portfolio featuring scroll-driven GSAP animations, split-panel layouts, custom transitions, and cinematic hero sections.',
+    image: leftSide,
+    href: '/eyad',
+  },
+];
+
+/* ── Component ─────────────────────────────────────────── */
 const EedooAboutSection = () => {
+  const sectionRef = useRef(null);
+  const pinWrapRef = useRef(null);
+  const orbitLayerRef = useRef(null);
+  const content1Ref = useRef(null);
+  const content2Ref = useRef(null);
+  const content3Ref = useRef(null);
+
+  const [activeStage, setActiveStage] = useState(0);
+  const [activeProject, setActiveProject] = useState(0);
+
+  // Scroll-to-stage on button click
+  const scrollToStage = useCallback((index) => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const sectionTop = section.getBoundingClientRect().top + window.pageYOffset;
+    const sectionHeight = section.offsetHeight;
+    // Each stage occupies ~1/3 of the pin duration
+    const stageOffset = (sectionHeight - window.innerHeight) * (index / 3);
+    window.scrollTo({
+      top: sectionTop + stageOffset + 50,
+      behavior: 'smooth',
+    });
+  }, []);
+
+  // GSAP ScrollTrigger — pin the orbit, animate content in/out
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const pinWrap = pinWrapRef.current;
+    if (!section || !pinWrap) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const moveY = prefersReduced ? 0 : 50;
+
+    const isWideDesktop = window.innerWidth >= 1440;
+    const isDesktop = window.innerWidth >= 1024;
+    const isTablet = window.innerWidth >= 768;
+    const startX = prefersReduced
+      ? 0
+      : (isWideDesktop ? '25vw' : (isDesktop ? '23vw' : (isTablet ? '14vw' : 0)));
+
+    const ctx = gsap.context(() => {
+      // Initial states: all content hidden with autoAlpha (sets visibility: hidden)
+      gsap.set(content1Ref.current, { autoAlpha: 0, y: moveY });
+      gsap.set(content2Ref.current, { autoAlpha: 0, y: moveY });
+      gsap.set(content3Ref.current, { autoAlpha: 0, y: moveY });
+
+      // Initial orbit position: keep on the right for all stages
+      if (startX !== 0 && orbitLayerRef.current) {
+        gsap.set(orbitLayerRef.current, { x: startX });
+      }
+
+      // Master timeline pinned to section, scrubbed by scroll
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: '+=300%',
+          pin: pinWrap,
+          scrub: 0.8,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            const p = self.progress;
+            if (p < 0.33) setActiveStage(0);
+            else if (p < 0.66) setActiveStage(1);
+            else setActiveStage(2);
+          },
+        },
+      });
+
+      // ── Stage 1: About Me ──────────────────────────
+      // Fade in (0% → 5%)
+      tl.to(content1Ref.current, {
+        autoAlpha: 1, y: 0, duration: 0.05, ease: 'power2.out',
+      }, 0);
+      // Hold (5% → 25%)
+      // Fade out (25% → 33%)
+      tl.to(content1Ref.current, {
+        autoAlpha: 0, y: -moveY * 0.6, duration: 0.08, ease: 'power2.in',
+      }, 0.25);
+
+      // ── Stage 2: Tech Stack ────────────────────────
+      // Fade in (33% → 40%)
+      tl.to(content2Ref.current, {
+        autoAlpha: 1, y: 0, duration: 0.07, ease: 'power2.out',
+      }, 0.33);
+      // Hold (40% → 58%)
+      // Fade out (58% → 66%)
+      tl.to(content2Ref.current, {
+        autoAlpha: 0, y: -moveY * 0.6, duration: 0.08, ease: 'power2.in',
+      }, 0.58);
+
+      // ── Stage 3: Projects ──────────────────────────
+      // Fade in (66% → 73%)
+      tl.to(content3Ref.current, {
+        autoAlpha: 1, y: 0, duration: 0.07, ease: 'power2.out',
+      }, 0.66);
+      // Hold (73% → 95%)
+      // Fade out (95% → 100%)
+      tl.to(content3Ref.current, {
+        autoAlpha: 0, y: -moveY * 0.4, duration: 0.05, ease: 'power2.in',
+      }, 0.95);
+
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <motion.section 
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      style={{
-        width: '100%',
-        minHeight: '100vh',
-        backgroundColor: '#0B0A10',
-        padding: '250px 5% 100px',
-        position: 'relative',
-        zIndex: 10,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
+    <section
+      ref={sectionRef}
+      className="eedoo-about"
+      aria-label="About Eyad Moneim"
     >
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <OrbitalSphereBackground
-          speed={2.16}
-          particleSize={0.019}
-          particleOpacity={0.80}
-          orbitOpacity={0.25}
-          hue={-23}
-          scale={0.6}
-          haloOpacity={0.18}
-        />
+      {/* Pinned wrapper — this entire viewport-sized container stays pinned */}
+      <div ref={pinWrapRef} className="eedoo-about__pin-wrap">
+
+        {/* Persistent Orbit Background */}
+        <div ref={orbitLayerRef} className="eedoo-about__orbit-layer">
+          <OrbitalSphereBackground
+            speed={2.16}
+            particleSize={0.019}
+            particleOpacity={0.80}
+            orbitOpacity={0.25}
+            hue={-23}
+            scale={0.6}
+            haloOpacity={0.18}
+          />
+        </div>
+
+        {/* Content layers — only one visible at a time */}
+        <div className="eedoo-about__content-layer">
+
+          {/* Stage 01 — About Me (left side) */}
+          <div
+            ref={content1Ref}
+            className="eedoo-about__panel eedoo-about__panel--left"
+          >
+            <div 
+              className="eedoo-about__panel-inner"
+              style={{ pointerEvents: activeStage === 0 ? 'auto' : 'none' }}
+            >
+              <div className="eedoo-about__stage-label">01 — About</div>
+              <h2 className="eedoo-about__heading">
+                Creative <em>Developer</em><br />
+                & CS Student
+              </h2>
+              <p className="eedoo-about__body">
+                I'm <strong>Eyad Moneim</strong>, a Computer Science student 
+                passionate about building experiences that live at the intersection 
+                of <strong>design and engineering</strong>. I specialize in crafting 
+                interactive web experiences, 3D visualizations, and AI-powered 
+                interfaces that push the boundaries of what's possible in the browser.
+              </p>
+              <p className="eedoo-about__body">
+                Every project is an opportunity to blend <strong>creative vision</strong> with 
+                technical precision — from real-time WebGL rendering to scroll-driven 
+                narratives that feel alive.
+              </p>
+              <button
+                className="eedoo-about__link"
+                onClick={() => scrollToStage(1)}
+                type="button"
+              >
+                Explore my stack
+                <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M1 6h10M7 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Stage 02 — Tech Stack (left side) */}
+          <div
+            ref={content2Ref}
+            className="eedoo-about__panel eedoo-about__panel--left"
+          >
+            <div 
+              className="eedoo-about__panel-inner"
+              style={{ pointerEvents: activeStage === 1 ? 'auto' : 'none' }}
+            >
+              <div className="eedoo-about__stage-label">02 — Stack</div>
+              <h2 className="eedoo-about__heading">
+                Tools I <em>Build</em> With
+              </h2>
+              <p className="eedoo-about__body">
+                A curated selection of technologies I use to bring ideas to life — 
+                from interactive frontends to intelligent backends.
+              </p>
+              <div className="eedoo-about__tech-grid">
+                {TECH_STACK.map((tech) => (
+                  <div key={tech.name} className="eedoo-about__tech-item">
+                    <img
+                      src={tech.icon}
+                      alt=""
+                      className="eedoo-about__tech-icon"
+                      loading="lazy"
+                    />
+                    <span className="eedoo-about__tech-name">{tech.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Stage 03 — Projects (left side) */}
+          <div
+            ref={content3Ref}
+            className="eedoo-about__panel eedoo-about__panel--left"
+          >
+            <div 
+              className="eedoo-about__panel-inner"
+              style={{ pointerEvents: activeStage === 2 ? 'auto' : 'none' }}
+            >
+              <div className="eedoo-about__stage-label">03 — Work</div>
+              <h2 className="eedoo-about__heading">
+                Featured <em>Projects</em>
+              </h2>
+
+              {/* Project dots */}
+              <div className="eedoo-about__project-dots">
+                {PROJECTS.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`eedoo-about__project-dot ${i === activeProject ? 'eedoo-about__project-dot--active' : ''}`}
+                    onClick={() => setActiveProject(i)}
+                    aria-label={`View project ${i + 1}`}
+                    type="button"
+                  />
+                ))}
+              </div>
+
+              <div className="eedoo-about__project">
+                <div className="eedoo-about__project-preview">
+                  <img
+                    src={PROJECTS[activeProject].image}
+                    alt={PROJECTS[activeProject].title}
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="eedoo-about__project-title">
+                  {PROJECTS[activeProject].title}
+                </h3>
+                <p className="eedoo-about__project-desc">
+                  {PROJECTS[activeProject].desc}
+                </p>
+                {PROJECTS[activeProject].href && (
+                  <a
+                    href={PROJECTS[activeProject].href}
+                    className="eedoo-about__link"
+                  >
+                    View Project
+                    <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M1 11L11 1M11 1H3M11 1V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-      
-      {/* 
-        This is an empty container for the About Section. 
-        You can start adding your content, titles, and layout here. 
-      */}
-      <div style={{ flex: 1, position: 'relative', zIndex: 1, pointerEvents: 'none' }}>
-        {/* Your content goes here */}
-      </div>
-    </motion.section>
+    </section>
   );
 };
 
