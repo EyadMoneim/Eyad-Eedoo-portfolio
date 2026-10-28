@@ -9,14 +9,16 @@ import reactLogo from '../../assets/tech-logos/react.svg';
 import javascriptLogo from '../../assets/tech-logos/javascript.svg';
 import threejsLogo from '../../assets/tech-logos/threejs.svg';
 import gsapLogo from '../../assets/tech-logos/gsap.svg';
-import cssLogo from '../../assets/tech-logos/css.svg';
-import htmlLogo from '../../assets/tech-logos/html.svg';
 import nextjsLogo from '../../assets/tech-logos/nextjs.svg';
 import typescriptLogo from '../../assets/tech-logos/typescript.svg';
 import pythonLogo from '../../assets/tech-logos/python.svg';
 import nodeJsLogo from '../../assets/tech-logos/node-js.svg';
 import tailwindCssLogo from '../../assets/tech-logos/tailwind-css.svg';
 import cppLogo from '../../assets/tech-logos/c++.svg';
+import figmaLogo from '../../assets/tech-logos/figma.svg';
+import swaggerLogo from '../../assets/tech-logos/rest-api-icon.svg';
+import javaLogo from '../../assets/tech-logos/java.svg';
+import animeJsLogo from '../../assets/tech-logos/animedotjs.svg';
 
 // Project images
 import eyadRobot from '../../assets/eyad-robot.avif';
@@ -25,19 +27,27 @@ import leftSide from '../../assets/left-side.avif';
 gsap.registerPlugin(ScrollTrigger);
 
 /* ── Data ──────────────────────────────────────────────── */
-const TECH_STACK = [
-  { name: 'React', icon: reactLogo },
-  { name: 'JavaScript', icon: javascriptLogo },
-  { name: 'Three.js', icon: threejsLogo },
-  { name: 'GSAP', icon: gsapLogo },
-  { name: 'Next.js', icon: nextjsLogo },
-  { name: 'TypeScript', icon: typescriptLogo },
-  { name: 'Node.js', icon: nodeJsLogo },
-  { name: 'Python', icon: pythonLogo },
-  { name: 'CSS', icon: cssLogo },
-  { name: 'HTML', icon: htmlLogo },
-  { name: 'Tailwind', icon: tailwindCssLogo },
-  { name: 'C++', icon: cppLogo },
+const TECH_ORBITS = [
+  { category: 'Tools', size: 'inner', direction: 'cw', duration: 42, technologies: [
+    { name: 'Figma', icon: figmaLogo },
+    { name: 'Swagger', icon: swaggerLogo },
+    { name: 'GSAP', icon: gsapLogo },
+    { name: 'Anime.js', icon: animeJsLogo },
+  ] },
+  { category: 'Back-end', size: 'middle', direction: 'ccw', duration: 34, technologies: [
+    { name: 'Node.js', icon: nodeJsLogo },
+    { name: 'Python', icon: pythonLogo },
+    { name: 'Java', icon: javaLogo },
+    { name: 'C++', icon: cppLogo },
+  ] },
+  { category: 'Front-end', size: 'outer', direction: 'cw', duration: 26, technologies: [
+    { name: 'React', icon: reactLogo },
+    { name: 'JavaScript', icon: javascriptLogo },
+    { name: 'TypeScript', icon: typescriptLogo },
+    { name: 'Next.js', icon: nextjsLogo },
+    { name: 'Three.js', icon: threejsLogo },
+    { name: 'Tailwind CSS', icon: tailwindCssLogo },
+  ] },
 ];
 
 const PROJECTS = [
@@ -63,9 +73,7 @@ const EedooAboutSection = () => {
   const orbitTransformRef = useRef({ x: 0, y: 0, scale: 0.57 });
   const orbitFadeRef = useRef(null);
   const content1Ref = useRef(null);
-  const content2Ref = useRef(null);
   const content3Ref = useRef(null);
-  const orbitItemsRef = useRef([]);
 
   const [activeStage, setActiveStage] = useState(0);
   const [activeProject, setActiveProject] = useState(0);
@@ -103,9 +111,10 @@ const EedooAboutSection = () => {
     const ctx = gsap.context(() => {
       // Initial states: all content hidden with autoAlpha (sets visibility: hidden)
       gsap.set(content1Ref.current, { autoAlpha: 0, y: moveY });
-      gsap.set(content2Ref.current, { autoAlpha: 0, y: moveY });
       gsap.set(content3Ref.current, { autoAlpha: 0, y: moveY });
       gsap.set(orbitFadeRef.current, { autoAlpha: 0 });
+      const orbitLogoItems = section.querySelectorAll('.eedoo-about__tech-orbit-position');
+      gsap.set(orbitLogoItems, { autoAlpha: 0 });
 
       // Keep the globe beside the About copy, then bring it to the bottom-center
       // as the visitor scrolls into the stack section.
@@ -133,50 +142,39 @@ const EedooAboutSection = () => {
       tl.to(orbitTransformRef.current, {
         x: 0,
         y: window.innerHeight * 0.37,
-        scale: 1,
-        duration: 0.3,
+        scale: 1.15,
+        duration: 0.21,
         ease: 'power1.inOut',
-      }, 0.22);
+      }, 0.12);
       tl.to(orbitLogosRef.current, {
         x: 0,
         y: '37vh',
-        scale: 1,
-        duration: 0.3,
-        ease: 'power1.inOut',
-      }, 0.22);
-      tl.to(orbitItemsRef.current, {
+        scale: 1.15,
         autoAlpha: 1,
-        duration: 0.2,
-        stagger: 0.025,
+        duration: 0.21,
+        ease: 'power1.inOut',
+      }, 0.12);
+      tl.to(orbitLogoItems, {
+        autoAlpha: 1,
+        duration: 0.14,
+        stagger: 0.006,
         ease: 'power1.out',
-      }, 0.3);
+      }, 0.12);
       tl.to(orbitFadeRef.current, {
         autoAlpha: 1,
         duration: 0.2,
         ease: 'power1.out',
-      }, 0.3);
+      }, 0.12);
 
       // ── Stage 1: About Me ──────────────────────────
       // Fade in (0% → 5%)
       tl.to(content1Ref.current, {
         autoAlpha: 1, y: 0, duration: 0.05, ease: 'power2.out',
       }, 0);
-      // Hold (5% → 25%)
-      // Fade out (25% → 33%)
+      // Start fading the About copy almost immediately after scroll begins.
       tl.to(content1Ref.current, {
         autoAlpha: 0, y: -moveY * 0.6, duration: 0.08, ease: 'power2.in',
-      }, 0.25);
-
-      // ── Stage 2: Tech Stack ────────────────────────
-      // Fade in (33% → 40%)
-      tl.to(content2Ref.current, {
-        autoAlpha: 1, y: 0, duration: 0.07, ease: 'power2.out',
-      }, 0.33);
-      // Hold (40% → 58%)
-      // Fade out (58% → 66%)
-      tl.to(content2Ref.current, {
-        autoAlpha: 0, y: -moveY * 0.6, duration: 0.08, ease: 'power2.in',
-      }, 0.58);
+      }, 0.15);
 
       // ── Stage 3: Projects ──────────────────────────
       // Fade in (66% → 73%)
@@ -215,15 +213,33 @@ const EedooAboutSection = () => {
             scale={1.05}
             haloOpacity={0.18}
           />
-          <div ref={orbitLogosRef} className="eedoo-about__orbit-logos" aria-label="Technologies in my stack">
-            {TECH_STACK.slice(0, 8).map((tech, index) => (
+          <div ref={orbitLogosRef} className="eedoo-about__orbit-tracks" aria-label="Orbiting technology logos">
+            {TECH_ORBITS.map((orbit) => (
               <div
-                key={tech.name}
-                ref={(node) => { orbitItemsRef.current[index] = node; }}
-                className={`eedoo-about__orbit-logo eedoo-about__orbit-logo--${index + 1}`}
-                title={tech.name}
+                key={orbit.category}
+                className={`eedoo-about__tech-orbit eedoo-about__tech-orbit--${orbit.size} eedoo-about__tech-orbit--${orbit.direction}`}
+                style={{ '--orbit-duration': `${orbit.duration}s` }}
+                aria-label={orbit.category}
               >
-                <img src={tech.icon} alt={tech.name} />
+                {orbit.technologies.map((tech, index) => {
+                  const angle = (360 / orbit.technologies.length) * index;
+                  return (
+                    <div
+                      key={tech.name}
+                      className="eedoo-about__tech-orbit-position"
+                      style={{ '--logo-angle': `${angle}deg`, '--counter-angle': `${-angle}deg` }}
+                      title={tech.name}
+                    >
+                      <div className="eedoo-about__tech-orbit-badge">
+                        <img
+                          src={tech.icon}
+                          alt={tech.name}
+                          className={tech.name === 'Figma' ? 'eedoo-about__tech-orbit-logo--figma' : ''}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -270,39 +286,6 @@ const EedooAboutSection = () => {
                   <path d="M1 6h10M7 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-            </div>
-          </div>
-
-          {/* Stage 02 — Tech Stack (left side) */}
-          <div
-            ref={content2Ref}
-            className="eedoo-about__panel eedoo-about__panel--left"
-          >
-            <div 
-              className="eedoo-about__panel-inner"
-              style={{ pointerEvents: activeStage === 1 ? 'auto' : 'none' }}
-            >
-              <div className="eedoo-about__stage-label">02 — Stack</div>
-              <h2 className="eedoo-about__heading">
-                Tools I <em>Build</em> With
-              </h2>
-              <p className="eedoo-about__body">
-                A curated selection of technologies I use to bring ideas to life — 
-                from interactive frontends to intelligent backends.
-              </p>
-              <div className="eedoo-about__tech-grid">
-                {TECH_STACK.map((tech) => (
-                  <div key={tech.name} className="eedoo-about__tech-item">
-                    <img
-                      src={tech.icon}
-                      alt=""
-                      className="eedoo-about__tech-icon"
-                      loading="lazy"
-                    />
-                    <span className="eedoo-about__tech-name">{tech.name}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 

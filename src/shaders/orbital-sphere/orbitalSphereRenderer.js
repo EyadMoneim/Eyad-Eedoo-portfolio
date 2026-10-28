@@ -61,6 +61,9 @@ export function createOrbitalSphereRenderer(canvas, getOptions) {
       const nodeGeometry = new THREE.SphereGeometry(0.025, 16, 16), nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xd946ef }), node = new THREE.Mesh(nodeGeometry, nodeMaterial);
       const angle = Math.random() * Math.PI * 2;
       node.position.set(Math.cos(angle) * orbitRadius, Math.sin(angle) * orbitRadius, 0);
+      // The orbiting tech marks are rendered as real logos in the page layer.
+      // Keep the fine orbit path, but remove this generic satellite dot.
+      node.visible = false;
       line.add(node);
 
       const haloGeometry = new THREE.SphereGeometry(0.08, 16, 16), haloMaterial = new THREE.MeshBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending }), halo = new THREE.Mesh(haloGeometry, haloMaterial);
@@ -250,6 +253,11 @@ export function createOrbitalSphereRenderer(canvas, getOptions) {
   outerOrbitsGroup.add(node2_3);
   outerOrbitNodes.push({ group: node2_3, radius: orbit2Radius, angle: (205 * Math.PI) / 180, speed: -0.00035 });
 
+  // The CSS orbit carries the programming-language logos, replacing these
+  // generic satellite dots. The two native rings stay visible and the CSS adds
+  // one more track for the third tool category.
+  outerOrbitNodes.forEach(({ group }) => { group.visible = false; });
+
   // Interaction Logic (Drag to Spin)
   let isDragging = false;
   let previousMousePosition = { x: 0, y: 0 };
@@ -352,11 +360,11 @@ export function createOrbitalSphereRenderer(canvas, getOptions) {
         responsiveScale = 0.85;
         // Leave enough camera headroom for the outermost rings at their full
         // scroll-grown scale so they don't clip at the top of the WebGL canvas.
-        camera.position.z = 7.5;
+        camera.position.z = 8.8;
       }
       else {
         responsiveScale = 0.75;
-        camera.position.z = 7.5;
+        camera.position.z = 8.8;
       }
       networkGroup.scale.setScalar(responsiveScale * options.scale);
       outerOrbitsGroup.scale.setScalar(responsiveScale * options.scale);
