@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { createOrbitalSphereRenderer, ORBITAL_SPHERE_DEFAULTS } from "./orbitalSphereRenderer";
 import "../threeui.css";
 
-export function OrbitalSphereBackground({ className = "", ...props }) {
+export function OrbitalSphereBackground({ className = "", transformRef, ...props }) {
   const hostRef = useRef(null);
   const canvasRef = useRef(null);
   const optionsRef = useRef({ ...ORBITAL_SPHERE_DEFAULTS, ...props }); 
@@ -19,10 +19,10 @@ export function OrbitalSphereBackground({ className = "", ...props }) {
     const resize = () => { 
       const bounds = host.getBoundingClientRect(); 
       renderer.resize(bounds.width, bounds.height); 
-      renderer.render(); 
+      renderer.render(transformRef?.current); 
     }; 
     const tick = () => { 
-      renderer.render(); 
+      renderer.render(transformRef?.current); 
       frame = visible && !document.hidden ? requestAnimationFrame(tick) : 0; 
     };
     const resizeObserver = new ResizeObserver(resize);

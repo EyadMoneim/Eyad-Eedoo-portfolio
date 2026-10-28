@@ -59,10 +59,13 @@ const PROJECTS = [
 const EedooAboutSection = () => {
   const sectionRef = useRef(null);
   const pinWrapRef = useRef(null);
-  const orbitLayerRef = useRef(null);
+  const orbitLogosRef = useRef(null);
+  const orbitTransformRef = useRef({ x: 0, y: 0, scale: 0.57 });
+  const orbitFadeRef = useRef(null);
   const content1Ref = useRef(null);
   const content2Ref = useRef(null);
   const content3Ref = useRef(null);
+  const orbitItemsRef = useRef([]);
 
   const [activeStage, setActiveStage] = useState(0);
   const [activeProject, setActiveProject] = useState(0);
@@ -95,18 +98,19 @@ const EedooAboutSection = () => {
     const isTablet = window.innerWidth >= 768;
     const startX = prefersReduced
       ? 0
-      : (isWideDesktop ? '25vw' : (isDesktop ? '23vw' : (isTablet ? '14vw' : 0)));
+      : window.innerWidth * (isWideDesktop ? 0.25 : (isDesktop ? 0.23 : (isTablet ? 0.14 : 0)));
 
     const ctx = gsap.context(() => {
       // Initial states: all content hidden with autoAlpha (sets visibility: hidden)
       gsap.set(content1Ref.current, { autoAlpha: 0, y: moveY });
       gsap.set(content2Ref.current, { autoAlpha: 0, y: moveY });
       gsap.set(content3Ref.current, { autoAlpha: 0, y: moveY });
+      gsap.set(orbitFadeRef.current, { autoAlpha: 0 });
 
-      // Initial orbit position: keep on the right for all stages
-      if (startX !== 0 && orbitLayerRef.current) {
-        gsap.set(orbitLayerRef.current, { x: startX });
-      }
+      // Keep the globe beside the About copy, then bring it to the bottom-center
+      // as the visitor scrolls into the stack section.
+      gsap.set(orbitTransformRef.current, { x: startX, y: 0, scale: 0.57 });
+      gsap.set(orbitLogosRef.current, { x: startX, y: 0, scale: 0.57 });
 
       // Master timeline pinned to section, scrubbed by scroll
       const tl = gsap.timeline({
@@ -115,7 +119,7 @@ const EedooAboutSection = () => {
           start: 'top top',
           end: '+=300%',
           pin: pinWrap,
-          scrub: 0.8,
+          scrub: true,
           anticipatePin: 1,
           onUpdate: (self) => {
             const p = self.progress;
@@ -125,6 +129,32 @@ const EedooAboutSection = () => {
           },
         },
       });
+
+      tl.to(orbitTransformRef.current, {
+        x: 0,
+        y: window.innerHeight * 0.37,
+        scale: 1,
+        duration: 0.3,
+        ease: 'power1.inOut',
+      }, 0.22);
+      tl.to(orbitLogosRef.current, {
+        x: 0,
+        y: '37vh',
+        scale: 1,
+        duration: 0.3,
+        ease: 'power1.inOut',
+      }, 0.22);
+      tl.to(orbitItemsRef.current, {
+        autoAlpha: 1,
+        duration: 0.2,
+        stagger: 0.025,
+        ease: 'power1.out',
+      }, 0.3);
+      tl.to(orbitFadeRef.current, {
+        autoAlpha: 1,
+        duration: 0.2,
+        ease: 'power1.out',
+      }, 0.3);
 
       // ── Stage 1: About Me ──────────────────────────
       // Fade in (0% → 5%)
@@ -174,17 +204,32 @@ const EedooAboutSection = () => {
       <div ref={pinWrapRef} className="eedoo-about__pin-wrap">
 
         {/* Persistent Orbit Background */}
-        <div ref={orbitLayerRef} className="eedoo-about__orbit-layer">
+        <div className="eedoo-about__orbit-layer">
           <OrbitalSphereBackground
+            transformRef={orbitTransformRef}
             speed={2.16}
             particleSize={0.019}
             particleOpacity={0.80}
             orbitOpacity={0.25}
             hue={-23}
-            scale={0.6}
+            scale={1.05}
             haloOpacity={0.18}
           />
+          <div ref={orbitLogosRef} className="eedoo-about__orbit-logos" aria-label="Technologies in my stack">
+            {TECH_STACK.slice(0, 8).map((tech, index) => (
+              <div
+                key={tech.name}
+                ref={(node) => { orbitItemsRef.current[index] = node; }}
+                className={`eedoo-about__orbit-logo eedoo-about__orbit-logo--${index + 1}`}
+                title={tech.name}
+              >
+                <img src={tech.icon} alt={tech.name} />
+              </div>
+            ))}
+          </div>
         </div>
+
+        <div ref={orbitFadeRef} className="eedoo-about__orbit-fade" aria-hidden="true" />
 
         {/* Content layers — only one visible at a time */}
         <div className="eedoo-about__content-layer">

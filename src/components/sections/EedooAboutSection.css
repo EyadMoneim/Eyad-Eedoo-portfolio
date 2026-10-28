@@ -19,38 +19,88 @@
   background-color: #030303;
 }
 
-/* ── Orbit layer — positioned to the right across all stages ────── */
+/* ── Orbit layer — shifts from the About layout into a bottom-center stack view ── */
 .eedoo-about__orbit-layer {
   position: absolute;
   inset: 0;
   z-index: 0;
-  transform: translate3d(25vw, 0, 0);
+  transform-origin: 50% 50%;
+  will-change: transform;
 }
 
-@media (max-width: 1439px) and (min-width: 1024px) {
-  .eedoo-about__orbit-layer {
-    transform: translate3d(23vw, 0, 0);
-  }
-}
-
-@media (max-width: 1023px) and (min-width: 768px) {
-  .eedoo-about__orbit-layer {
-    transform: translate3d(14vw, 0, 0);
-  }
-}
-
-@media (max-width: 767px) {
-  .eedoo-about__orbit-layer {
-    transform: translate3d(0, 0, 0);
-  }
+.eedoo-about__orbit-fade {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30%;
+  opacity: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(3, 3, 3, 0.7) 48%, #030303 100%);
+  pointer-events: none;
 }
 
 /* ── Content layer — stacked panels over orbit ──── */
 .eedoo-about__content-layer {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
+}
+
+.eedoo-about__orbit-logos {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(76vw, 1180px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(112, 135, 255, 0.34);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: eedoo-orbit-spin 42s linear infinite;
+}
+
+.eedoo-about__orbit-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(34px, 4vw, 52px);
+  height: clamp(34px, 4vw, 52px);
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(139, 125, 255, 0.45);
+  border-radius: 50%;
+  background: rgba(8, 8, 16, 0.92);
+  box-shadow: 0 0 20px rgba(115, 102, 255, 0.2);
+  transform: translate(-50%, -50%);
+  animation: eedoo-orbit-counter 42s linear infinite;
+}
+
+.eedoo-about__orbit-logo img { width: 52%; height: 52%; object-fit: contain; }
+.eedoo-about__orbit-logo--1 { transform: translate(-50%, -50%) translateY(-32vw); }
+.eedoo-about__orbit-logo--2 { transform: translate(-50%, -50%) translate(22.6vw, -22.6vw); }
+.eedoo-about__orbit-logo--3 { transform: translate(-50%, -50%) translateX(32vw); }
+.eedoo-about__orbit-logo--4 { transform: translate(-50%, -50%) translate(22.6vw, 22.6vw); }
+.eedoo-about__orbit-logo--5 { transform: translate(-50%, -50%) translateY(32vw); }
+.eedoo-about__orbit-logo--6 { transform: translate(-50%, -50%) translate(-22.6vw, 22.6vw); }
+.eedoo-about__orbit-logo--7 { transform: translate(-50%, -50%) translateX(-32vw); }
+.eedoo-about__orbit-logo--8 { transform: translate(-50%, -50%) translate(-22.6vw, -22.6vw); }
+
+@keyframes eedoo-orbit-spin { to { rotate: 360deg; } }
+@keyframes eedoo-orbit-counter { to { rotate: -360deg; } }
+
+@media (max-width: 767px) {
+  .eedoo-about__orbit-logos { width: 108vw; }
+  .eedoo-about__orbit-logo--1 { transform: translate(-50%, -50%) translateY(-44vw); }
+  .eedoo-about__orbit-logo--2 { transform: translate(-50%, -50%) translate(31vw, -31vw); }
+  .eedoo-about__orbit-logo--3 { transform: translate(-50%, -50%) translateX(44vw); }
+  .eedoo-about__orbit-logo--4 { transform: translate(-50%, -50%) translate(31vw, 31vw); }
+  .eedoo-about__orbit-logo--5 { transform: translate(-50%, -50%) translateY(44vw); }
+  .eedoo-about__orbit-logo--6 { transform: translate(-50%, -50%) translate(-31vw, 31vw); }
+  .eedoo-about__orbit-logo--7 { transform: translate(-50%, -50%) translateX(-44vw); }
+  .eedoo-about__orbit-logo--8 { transform: translate(-50%, -50%) translate(-31vw, -31vw); }
 }
 
 /* ── Content panel (absolute, fills viewport) ───── */

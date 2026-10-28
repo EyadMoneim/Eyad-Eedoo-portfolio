@@ -41,6 +41,7 @@ export function createOrbitalSphereRenderer(canvas, getOptions) {
   const orbitMaterial = new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending });
   const orbitGeometries = [], nodeGeometries = [], nodeMaterials = [], haloMaterials = [];
   let responsiveScale = 1;
+  let viewportHeight = 1;
 
   for (let index = 0; index < 6; index += 1) {
     const geometry = new THREE.BufferGeometry(), points = [], orbitRadius = radius * (1.08 + Math.random() * 0.2);
@@ -336,6 +337,7 @@ export function createOrbitalSphereRenderer(canvas, getOptions) {
 
   return {
     resize(width, height) {
+      viewportHeight = Math.max(1, height);
       camera.aspect = width / Math.max(1, height);
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
@@ -348,23 +350,38 @@ export function createOrbitalSphereRenderer(canvas, getOptions) {
 
       if (width >= 1024) {
         responsiveScale = 0.85;
-        camera.position.z = 5.5;
+        // Leave enough camera headroom for the outermost rings at their full
+        // scroll-grown scale so they don't clip at the top of the WebGL canvas.
+        camera.position.z = 7.5;
       }
       else {
         responsiveScale = 0.75;
-        camera.position.z = 6.0;
+        camera.position.z = 7.5;
       }
       networkGroup.scale.setScalar(responsiveScale * options.scale);
       outerOrbitsGroup.scale.setScalar(responsiveScale * options.scale);
     },
-    render() {
+    render(transform = {}) {
       const options = getOptions();
       particleMaterial.size = options.particleSize;
       particleMaterial.opacity = options.particleOpacity;
       orbitMaterial.opacity = options.orbitOpacity;
       haloMaterials.forEach((material) => material.opacity = options.haloOpacity);
-      networkGroup.scale.setScalar(responsiveScale * options.scale);
-      outerOrbitsGroup.scale.setScalar(responsiveScale * options.scale);
+      const posX = options.positionX ?? 0;
+      const posY = options.positionY ?? 0;
+      const posZ = options.positionZ ?? -2;
+      const viewHeight = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.position.z - posZ);
+      const pixelsToWorld = viewHeight / viewportHeight;
+      const groupX = posX + (transform.x ?? 0) * pixelsToWorld;
+      const groupY = posY - (transform.y ?? 0) * pixelsToWorld;
+      const groupScale = responsiveScale * options.scale * (transform.scale ?? 1);
+
+      // Move the scene inside its fixed canvas. Translating the canvas itself
+      // clips the top of the orbits before the viewport fade can soften them.
+      networkGroup.position.set(groupX, groupY, posZ);
+      outerOrbitsGroup.position.set(groupX, groupY, posZ);
+      networkGroup.scale.setScalar(groupScale);
+      outerOrbitsGroup.scale.setScalar(groupScale);
 
       // Outer orbit opacities & subtle halo pulse
       outerOrbitMaterials.forEach((mat) => {
