@@ -851,7 +851,7 @@ img {
   pointer-events: none;
 }
 
-/* Signature SVG overlay — draws on scroll (Phase 2) */
+/* Animated handwritten name over the portrait (Phase 2) */
 .signature-layer {
   position: fixed;
   inset: 0;
@@ -866,19 +866,18 @@ img {
 }
 
 .signature-overlay {
-  width: min(1800px, 220vw);
-  max-width: none;
-  flex-shrink: 0;
+  display: block;
+  width: auto;
+  max-width: min(86vw, 720px);
   height: auto;
+  flex-shrink: 0;
   transform: rotate(-5deg) translate(2%, -3%);
   overflow: visible;
 }
 
 @media (max-width: 991px) {
   .signature-overlay {
-    width: 260vw;
-    max-width: none;
-    transform: rotate(-5deg) translate(2%, -3%);
+    max-width: 88vw;
   }
 }
 

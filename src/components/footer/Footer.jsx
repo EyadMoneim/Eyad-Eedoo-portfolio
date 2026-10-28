@@ -4,9 +4,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import BackgroundBlobs from '../background/BackgroundBlobs';
 import Magnetic from './Magnetic';
 import HoverSplitText from '../nav/HoverSplitText';
-import signatureSvg from '../../assets/signature.svg';
 import personImg from '../../assets/eyad-human.avif';
 import './Footer.css';
+import { Signature } from '../ui/signature';
 
 import angularLogo from '../../assets/tech-logos/angular.svg';
 import animedotjsLogo from '../../assets/tech-logos/animedotjs.svg';
@@ -26,6 +26,8 @@ import restApiIconLogo from '../../assets/tech-logos/rest-api-icon.svg';
 import tailwindCssLogo from '../../assets/tech-logos/tailwind-css.svg';
 import threejsLogo from '../../assets/tech-logos/threejs.svg';
 import typescriptLogo from '../../assets/tech-logos/typescript.svg';
+import githubLogo from '../../assets/tech-logos/github.svg';
+import postgresqlLOGO from '../../assets/tech-logos/postgresql.svg';
 import { useEedooTransition } from '../transitions/EedooTransition';
 import { useEyadTransition } from '../transitions/EyadTransition';
 
@@ -45,10 +47,10 @@ const socialLinks = [
 ];
 
 const sponsorLogos = [
-  angularLogo, animedotjsLogo, cppLogo, cssLogo, gsapLogo, htmlLogo,
-  huggingFaceLogo, javaLogo, javascriptLogo, neonLogo, nextjsLogo,
-  nodeJsLogo, pythonLogo, reactLogo, restApiIconLogo, tailwindCssLogo,
-  threejsLogo, typescriptLogo
+  angularLogo, animedotjsLogo, cppLogo, postgresqlLOGO, cssLogo, gsapLogo, htmlLogo,
+  huggingFaceLogo , javaLogo, javascriptLogo, neonLogo, nextjsLogo,
+  nodeJsLogo, pythonLogo ,restApiIconLogo, tailwindCssLogo,
+  threejsLogo, typescriptLogo, githubLogo 
 ];
 
 /* ── Component ──────────────────────────────────────── */
@@ -103,7 +105,18 @@ const Footer = () => {
 
         {/* ─ Brand lockup (optional top signature) ─ */}
         <div className="footer-brand-lockup" aria-hidden="true">
-          <img src={signatureSvg} alt="" className="footer-signature-top" />
+          <Signature
+            text="Eyadmoneim"
+            color="#CDB8FF"
+            fontSize={90}
+            strokeWidth={0.8}
+            duration={1}
+            delay={2}
+            inView
+            once
+            fontUrl="/fonts/bastliga-one.regular.otf"
+            className="footer-signature-top"
+          />
         </div>
 
         {/* ─ Three-column grid ─ */}
@@ -159,7 +172,7 @@ const Footer = () => {
 
           {/* Right — socials */}
           <nav className="footer-col footer-col--right" aria-label="Social links">
-            <span className="col-header">LET'S CONNECT</span>
+            <span className="col-header">LET'S CONTACT</span>
             <ul className="footer-link-list">
               {socialLinks.map((l) => (
                 <li key={l.label} className="footer-reveal-group" style={{ position: 'relative', width: 'max-content' }}>

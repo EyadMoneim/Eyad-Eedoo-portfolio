@@ -68,12 +68,11 @@
   border: 1px solid rgba(112, 135, 255, 0.34);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  animation: var(--orbit-duration) linear infinite;
 }
 
-.eedoo-about__tech-orbit--outer { width: 112%; height: 112%; animation-name: eedoo-orbit-cw; }
-.eedoo-about__tech-orbit--middle { width: 93%; height: 93%; border: 0; animation-name: eedoo-orbit-ccw; }
-.eedoo-about__tech-orbit--inner { width: 70%; height: 70%; border: 0; animation-name: eedoo-orbit-cw; }
+.eedoo-about__tech-orbit--outer { width: 112%; height: 112%; }
+.eedoo-about__tech-orbit--middle { width: 93%; height: 93%; border: 0; }
+.eedoo-about__tech-orbit--inner { width: 70%; height: 70%; border: 0; }
 
 .eedoo-about__tech-orbit-position {
   position: absolute;
@@ -83,6 +82,21 @@
   height: 50%;
   transform: rotate(var(--logo-angle));
   transform-origin: bottom center;
+  animation-duration: var(--orbit-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.eedoo-about__tech-orbit--cw .eedoo-about__tech-orbit-position { animation-name: eedoo-icon-orbit-cw; }
+.eedoo-about__tech-orbit--ccw .eedoo-about__tech-orbit-position { animation-name: eedoo-icon-orbit-ccw; }
+
+@keyframes eedoo-icon-orbit-cw {
+  from { transform: rotate(var(--logo-angle)); }
+  to { transform: rotate(calc(var(--logo-angle) + 360deg)); }
+}
+@keyframes eedoo-icon-orbit-ccw {
+  from { transform: rotate(var(--logo-angle)); }
+  to { transform: rotate(calc(var(--logo-angle) - 360deg)); }
 }
 
 .eedoo-about__tech-orbit-badge {
@@ -116,12 +130,6 @@
   animation: eedoo-counter-cw var(--orbit-duration) linear infinite;
 }
 
-@keyframes eedoo-orbit-cw {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-@keyframes eedoo-orbit-ccw {
-  to { transform: translate(-50%, -50%) rotate(-360deg); }
-}
 @keyframes eedoo-counter-ccw {
   from { transform: translate(-50%, -50%) rotate(var(--counter-angle)); }
   to { transform: translate(-50%, -50%) rotate(calc(var(--counter-angle) - 360deg)); }
@@ -186,7 +194,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(167, 139, 250, 0.65);
-  margin-bottom: 1.25rem;
+  margin-bottom: clamp(0.6rem, 1.2vh, 1rem);
 }
 
 .eedoo-about__stage-label::before {
@@ -200,11 +208,11 @@
 /* ── Typography ─────────────────────────────────── */
 .eedoo-about__heading {
   font-family: 'Inter', sans-serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.75rem);
+  font-size: clamp(1.75rem, 3.2vw, 2.6rem);
   font-weight: 700;
   line-height: 1.15;
   color: #f4f4ed;
-  margin: 0 0 1.25rem;
+  margin: 0 0 clamp(0.75rem, 1.4vh, 1.15rem);
   letter-spacing: -0.02em;
 }
 
@@ -217,16 +225,21 @@
 
 .eedoo-about__body {
   font-family: 'Inter', sans-serif;
-  font-size: clamp(0.85rem, 1vw, 0.95rem);
+  font-size: clamp(0.82rem, 0.95vw, 0.92rem);
   font-weight: 400;
-  line-height: 1.7;
+  line-height: 1.6;
   color: rgba(201, 199, 210, 0.85);
-  margin: 0 0 1.25rem;
+  margin: 0 0 clamp(0.5rem, 1vh, 0.85rem);
 }
 
 .eedoo-about__body strong {
   color: #ddd6fe;
   font-weight: 500;
+}
+
+.eedoo-about__body em {
+  font-style: italic;
+  color: #c084fc;
 }
 
 /* ── Subtle link / button ───────────────────────── */

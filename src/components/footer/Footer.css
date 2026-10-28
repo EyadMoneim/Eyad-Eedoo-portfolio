@@ -56,9 +56,11 @@
 .footer-signature-top {
   position: absolute;
   left: 50%;
-  top: 130%;
-  transform: translate(-50%, -50%);
-  width: clamp(420px, 120vw, 600px); /* Large canvas to make the internal signature big */
+  top: 140%;
+  transform: translate(-60%, -50%);
+  width: auto;
+  max-width: min(80vw, 280px);
+  height: auto;
   opacity: 1;
 }
 
@@ -442,3 +444,4 @@
     width: min(28vw, 520px);
   }
 }
+

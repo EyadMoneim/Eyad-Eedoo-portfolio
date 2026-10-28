@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from '../components/nav/Navbar';
 import FullscreenMenu from '../components/nav/FullscreenMenu';
 import RobotHero from '../components/Robot3D';
@@ -7,10 +9,14 @@ import EedooAboutSection from '../components/sections/EedooAboutSection';
 import wallpaperPattern from '../assets/wallpaper.svg';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
+gsap.registerPlugin(ScrollTrigger);
+
 const EedooPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isFooterReached, setIsFooterReached] = useState(false);
   const heroRef = useRef(null);
+  const footerRef = useRef(null);
 
   // Scroll expression state (unused now, but passed to RobotHero)
   const [scrollExpression, setScrollExpression] = useState(null);
@@ -20,9 +26,30 @@ const EedooPage = () => {
     window.scrollTo(0, 0);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+      if (footerRef.current) {
+        const rect = footerRef.current.getBoundingClientRect();
+        setIsFooterReached(rect.top <= window.innerHeight * 0.75);
+      }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    handleScroll();
+
+    let st = null;
+    if (footerRef.current) {
+      st = ScrollTrigger.create({
+        trigger: footerRef.current,
+        start: 'top 75%',
+        end: 'bottom top',
+        onToggle: (self) => setIsFooterReached(self.isActive),
+      });
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (st) st.kill();
+    };
   }, []);
 
   useEffect(() => {
@@ -67,6 +94,7 @@ const EedooPage = () => {
         isMenuOpen={isMenuOpen} 
         setIsMenuOpen={setIsMenuOpen} 
         isScrolled={isScrolled}
+        hideCenterLogo={isFooterReached}
       />
       <FullscreenMenu isOpen={isMenuOpen} currentPage="Eedoo" />
       
@@ -108,7 +136,9 @@ const EedooPage = () => {
       </div>
       <div style={{ position: 'relative', zIndex: 10, backgroundColor: '#030303', marginTop: '-5px', paddingTop: '5px' }}>
         <EedooAboutSection />
-        <Footer />
+        <div ref={footerRef}>
+          <Footer />
+        </div>
       </div>
     </div>
   );

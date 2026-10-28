@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { isInitialAppLoad } from "../App";
 import reactLogoSrc from "../assets/react.svg";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, useMotionValue } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import eyadSmallSrc from "../assets/eyad-small.avif";
@@ -17,7 +17,7 @@ import Navbar from "../components/nav/Navbar";
 import FullscreenMenu from "../components/nav/FullscreenMenu";
 import QuoteSection from "../components/quote/QuoteSection";
 import BackgroundBlobs from "../components/background/BackgroundBlobs";
-import SignatureLayer from "../components/background/SignatureLayer";
+import SignatureLayer, { SIGNATURE_DRAW_TOTAL } from "../components/background/SignatureLayer";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,6 +37,7 @@ const HomePage = () => {
   const [isPhase3, setIsPhase3] = useState(false);
   const [isPhase4, setIsPhase4] = useState(false);
   const [isRobotActive, setIsRobotActive] = useState(false);
+  const signatureProgress = useMotionValue(0);
 
 
   // Refs for GSAP ScrollTrigger
@@ -45,8 +46,6 @@ const HomePage = () => {
   const eyadSmallRef = useRef(null);
   const threeDissolveRef = useRef(null);
   const bgBlobsRef = useRef(null);
-  const signatureRef = useRef(null);
-  const signatureLayerRef = useRef(null);
 
   // Phase 3 Refs
   const messageWithEyadGroupRef = useRef(null);
@@ -104,14 +103,6 @@ const HomePage = () => {
         const threeDissolveEl = threeDissolveRef.current;
         const bgBlobsEl = bgBlobsRef.current;
         const nextProjectEl = document.querySelector('.next-project-card');
-        const sigEl = signatureRef.current;
-        const sigMainGroup = sigEl?.querySelector('.sig-main');
-        const sigUnderlineGroup = sigEl?.querySelector('.sig-underline');
-        const sigSixGroup = sigEl?.querySelector('.sig-six');
-        const sigMainRect = sigEl?.querySelector('.sig-main-rect');
-        const sigUnderlineRect = sigEl?.querySelector('.sig-underline-rect');
-        const sigSixRect = sigEl?.querySelector('.sig-six-rect');
-
         if (!groupEl) return;
 
         // Kill any previously created timeline/scrolltrigger before rebuilding
@@ -127,30 +118,11 @@ const HomePage = () => {
 
         // Reset elements back to their initial state before recalculating
         gsap.set(groupEl, { scale: 1, clipPath: 'inset(0px 0px 0px 0px round 0px)' });
+        signatureProgress.set(0);
         if (eyadSmallEl) gsap.set(eyadSmallEl, { opacity: 0 });
         if (threeDissolveEl) gsap.set(threeDissolveEl, { opacity: 1 });
         if (bgBlobsEl) gsap.set(bgBlobsEl, { opacity: 1 });
         if (nextProjectEl) gsap.set(nextProjectEl, { autoAlpha: 1, y: 0 });
-
-        const SIG_PAD = 10;
-        const initSigClip = (rectEl, groupEl) => {
-          if (!rectEl || !groupEl) return null;
-          let box;
-          try { box = groupEl.getBBox(); } catch { return null; }
-          if (!box || box.width === 0) return null;
-          gsap.set(rectEl, {
-            attr: {
-              x: box.x - SIG_PAD,
-              y: box.y - SIG_PAD,
-              height: box.height + SIG_PAD * 2,
-              width: 0,
-            },
-          });
-          return box;
-        };
-        const sigMainBox = initSigClip(sigMainRect, sigMainGroup);
-        const sigUnderlineBox = initSigClip(sigUnderlineRect, sigUnderlineGroup);
-        const sigSixBox = initSigClip(sigSixRect, sigSixGroup);
 
         // Calculate scale and clipPath values
         const vw = window.innerWidth;
@@ -260,33 +232,18 @@ const HomePage = () => {
           );
         }
 
-        // 4. Signature build-up effect (Phase 2)
-        // Stage 1 — E.Moneim name writes in
-        if (sigMainRect && sigMainBox) {
-          tl.to(
-            sigMainRect,
-            { attr: { width: sigMainBox.width + SIG_PAD * 2 }, duration: 0.85, ease: 'none' },
-            1.9
-          );
-        }
-
-        // Stage 2 — underline draws after name
-        if (sigUnderlineRect && sigUnderlineBox) {
-          tl.to(
-            sigUnderlineRect,
-            { attr: { width: sigUnderlineBox.width + SIG_PAD * 2 }, duration: 0.35, ease: 'none' },
-            2.05
-          );
-        }
-
-        // Stage 3 — number 6 writes in (same wipe technique, no scale/fade/pop)
-        if (sigSixRect && sigSixBox) {
-          tl.to(
-            sigSixRect,
-            { attr: { width: sigSixBox.width + SIG_PAD * 2 }, duration: 0.45, ease: 'none' },
-            2.4
-          );
-        }
+        // Draw the signature from the same scroll timeline as the portrait reveal.
+        const signatureProgressTween = { value: 0 };
+        tl.to(
+          signatureProgressTween,
+          {
+            value: 1,
+            duration: SIGNATURE_DRAW_TOTAL,
+            ease: 'none',
+            onUpdate: () => signatureProgress.set(signatureProgressTween.value),
+          },
+          1.3
+        );
 
         // Fade in developer signature at the bottom
         if (developerSignaturePhase3Ref.current) {
@@ -296,7 +253,7 @@ const HomePage = () => {
         // ----------------------------------------------------
         // PHASE 3: Move everything up, quote rows reveal
         // ----------------------------------------------------
-        const phase3Start = 3.5;
+        const phase3Start = 3.6;
 
         // Move the entire Phase 2 package UP out of view
         if (messageWithEyadGroupRef.current) {
@@ -557,7 +514,7 @@ const HomePage = () => {
           </div>
 
           {/* SIGNATURE LAYER — lives outside group-wallpaper so it escapes the portrait frame */}
-          <SignatureLayer ref={signatureLayerRef} signatureRef={signatureRef} />
+          <SignatureLayer progress={signatureProgress} />
 
           </div>{/* END message-with-eyad-group */}
 

@@ -4,8 +4,9 @@ import HeaderLogo from "./HeaderLogo";
 import StoreButton from "./StoreButton";
 import HamburgerButton from "./HamburgerButton";
 
-export default function Navbar({ isMenuOpen, setIsMenuOpen, isScrolled, isPhase3, isPhase4 }) {
+export default function Navbar({ isMenuOpen, setIsMenuOpen, isScrolled, isPhase3, isPhase4, hideCenterLogo }) {
   const location = useLocation();
+  const shouldHideCenterLogo = isPhase3 || hideCenterLogo;
 
   const handleMobileClick = (e) => {
     if (location.pathname === "/") {
@@ -27,12 +28,20 @@ export default function Navbar({ isMenuOpen, setIsMenuOpen, isScrolled, isPhase3
         </div>
 
         {/* Center: Brand Monogram Logo (Desktop) */}
-        <div className="desktop-logo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex-col items-center" style={{ opacity: isPhase3 ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: isPhase3 ? "none" : "auto" }}>
+        <div className="desktop-logo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex-col items-center" style={{ opacity: shouldHideCenterLogo ? 0 : 1, transition: "opacity 0.5s ease", pointerEvents: shouldHideCenterLogo ? "none" : "auto" }}>
           <HeaderLogo isMenuOpen={isMenuOpen} isScrolled={isScrolled} />
         </div>
 
         {/* Center: Mobile Logo Cluster */}
-        <div className={`mobile-logo absolute left-1/2 flex-col items-center pointer-events-auto ${isScrolled ? 'mobile-hide-scrolled' : ''}`} style={{ top: "5.5rem", transform: "translateX(-50%)", width: "max-content", textAlign: "center" }}>
+        <div className={`mobile-logo absolute left-1/2 flex-col items-center pointer-events-auto ${isScrolled ? 'mobile-hide-scrolled' : ''}`} style={{ 
+          top: "5.5rem", 
+          transform: "translateX(-50%)", 
+          width: "max-content", 
+          textAlign: "center",
+          opacity: shouldHideCenterLogo ? 0 : 1,
+          pointerEvents: shouldHideCenterLogo ? "none" : "auto",
+          transition: "opacity 0.5s ease"
+        }}>
           <div style={{ 
             transform: isScrolled ? "scale(0.6) translateY(2.2rem)" : "scale(0.85) translateY(0)", 
             transformOrigin: "center top", 

@@ -166,8 +166,8 @@ const EedooAboutSection = () => {
       }, 0.12);
       tl.to(orbitLogoItems, {
         autoAlpha: 1,
-        duration: 0.14,
-        stagger: 0.006,
+        duration: 0.12,
+        stagger: 0.003,
         ease: 'power1.out',
       }, 0.12);
       tl.to(orbitFadeRef.current, {
@@ -271,20 +271,25 @@ const EedooAboutSection = () => {
             >
               <div className="eedoo-about__stage-label">01 — About</div>
               <h2 className="eedoo-about__heading">
-                Creative <em>Developer</em><br />
-                & CS Student
+                Human with <em>ideas.</em><br />
+                AI with <em>attitude.</em>
               </h2>
               <p className="eedoo-about__body">
-                I'm <strong>Eyad Moneim</strong>, a Computer Science student 
-                passionate about building experiences that live at the intersection 
-                of <strong>design and engineering</strong>. I specialize in crafting 
-                interactive web experiences, 3D visualizations, and AI-powered 
-                interfaces that push the boundaries of what's possible in the browser.
+                I'm <strong>Eyad</strong>. The human behind the screen, the questionable ideas, and the occasional <strong>3 AM experiments</strong>.
               </p>
               <p className="eedoo-about__body">
-                Every project is an opportunity to blend <strong>creative vision</strong> with 
-                technical precision — from real-time WebGL rendering to scroll-driven 
-                narratives that feel alive.
+                I build <strong>interactive experiences</strong>, play with <strong>3D</strong>, and make the browser do things it probably wasn't designed for.
+              </p>
+              <p className="eedoo-about__body">
+                <strong>Frontend?</strong> That's my playground.<br />
+                <strong>Creative coding?</strong> That's where things get interesting.<br />
+                <strong>AI?</strong> Let's just say we get along pretty well.
+              </p>
+              <p className="eedoo-about__body">
+                I like turning random <em>&ldquo;what if?&rdquo;</em> moments into things you can actually <strong>click, explore, and experience</strong>.
+              </p>
+              <p className="eedoo-about__body">
+                I bring the ideas. I handle the execution. <strong>EEDOO</strong> takes the credit.
               </p>
               <button
                 className="eedoo-about__link"
