@@ -19,6 +19,11 @@ import figmaLogo from '../../assets/tech-logos/figma.svg';
 import swaggerLogo from '../../assets/tech-logos/rest-api-icon.svg';
 import javaLogo from '../../assets/tech-logos/java.svg';
 import animeJsLogo from '../../assets/tech-logos/animedotjs.svg';
+import angularLogo from '../../assets/tech-logos/angular.svg';
+import cssLogo from '../../assets/tech-logos/css.svg';
+import htmlLogo from '../../assets/tech-logos/html.svg';
+import neonLogo from '../../assets/tech-logos/neon.svg';
+import huggingFaceLogo from '../../assets/tech-logos/hugging-face.svg';
 
 // Project images
 import eyadRobot from '../../assets/eyad-robot.avif';
@@ -33,12 +38,14 @@ const TECH_ORBITS = [
     { name: 'Swagger', icon: swaggerLogo },
     { name: 'GSAP', icon: gsapLogo },
     { name: 'Anime.js', icon: animeJsLogo },
+    { name: 'Hugging Face', icon: huggingFaceLogo },
   ] },
   { category: 'Back-end', size: 'middle', direction: 'ccw', duration: 34, technologies: [
     { name: 'Node.js', icon: nodeJsLogo },
     { name: 'Python', icon: pythonLogo },
     { name: 'Java', icon: javaLogo },
     { name: 'C++', icon: cppLogo },
+    { name: 'Neon', icon: neonLogo },
   ] },
   { category: 'Front-end', size: 'outer', direction: 'cw', duration: 26, technologies: [
     { name: 'React', icon: reactLogo },
@@ -47,6 +54,9 @@ const TECH_ORBITS = [
     { name: 'Next.js', icon: nextjsLogo },
     { name: 'Three.js', icon: threejsLogo },
     { name: 'Tailwind CSS', icon: tailwindCssLogo },
+    { name: 'Angular', icon: angularLogo },
+    { name: 'HTML', icon: htmlLogo },
+    { name: 'CSS', icon: cssLogo },
   ] },
 ];
 
