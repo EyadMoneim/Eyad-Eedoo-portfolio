@@ -1,4 +1,4 @@
-import React, { useRef, useState, useLayoutEffect, useCallback, useEffect } from 'react';
+import React, { useRef, useState, useLayoutEffect, useCallback } from 'react';
 import { OrbitalSphereBackground } from '../../shaders/orbital-sphere/OrbitalSphereBackground';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -24,10 +24,6 @@ import cssLogo from '../../assets/tech-logos/css.svg';
 import htmlLogo from '../../assets/tech-logos/html.svg';
 import neonLogo from '../../assets/tech-logos/neon.svg';
 import huggingFaceLogo from '../../assets/tech-logos/hugging-face.svg';
-
-// Project images
-import eyadRobot from '../../assets/eyad-robot.avif';
-import leftSide from '../../assets/left-side.avif';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -64,14 +60,26 @@ const PROJECTS = [
   {
     title: 'Eedoo — AI Assistant',
     desc: 'An interactive 3D robot assistant built with React Three Fiber, complete with facial expressions, drag-to-spin interaction, and a conversational chat interface.',
-    image: eyadRobot,
     href: '/eedoo',
+    kind: 'AI / INTERACTIVE',
+  },
+  {
+    title: 'Eedoo — 3D Robot',
+    desc: 'A character-led 3D experience with expressive reactions, an orbiting view, and a playful interface built around the Eedoo robot.',
+    href: '/eedoo',
+    kind: '3D / REACT THREE FIBER',
   },
   {
     title: 'Eyad Moneim — Portfolio',
     desc: 'A creative developer portfolio featuring scroll-driven GSAP animations, split-panel layouts, custom transitions, and cinematic hero sections.',
-    image: leftSide,
     href: '/eyad',
+    kind: 'PORTFOLIO / CREATIVE CODE',
+  },
+  {
+    title: 'Scroll-driven Stories',
+    desc: 'A motion-focused portfolio experience where scroll reveals, layered scenes, and custom transitions bring the work to life.',
+    href: '/eyad',
+    kind: 'MOTION / GSAP',
   },
 ];
 
@@ -84,6 +92,8 @@ const EedooAboutSection = () => {
   const orbitFadeRef = useRef(null);
   const content1Ref = useRef(null);
   const content3Ref = useRef(null);
+  const aboutHighlightRef = useRef(null);
+  const projectConnectionsRef = useRef(null);
 
   const [activeStage, setActiveStage] = useState(0);
   const [activeProject, setActiveProject] = useState(0);
@@ -94,7 +104,7 @@ const EedooAboutSection = () => {
     if (!section) return;
     const sectionTop = section.getBoundingClientRect().top + window.pageYOffset;
     const sectionHeight = section.offsetHeight;
-    // Each stage occupies ~1/3 of the pin duration
+    // Each stage occupies ~1/3 of the pin duration.
     const stageOffset = (sectionHeight - window.innerHeight) * (index / 3);
     window.scrollTo({
       top: sectionTop + stageOffset + 50,
@@ -109,7 +119,7 @@ const EedooAboutSection = () => {
     if (!section || !pinWrap) return;
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const moveY = prefersReduced ? 0 : 50;
+    const moveY = prefersReduced ? 0 : 36;
 
     const isWideDesktop = window.innerWidth >= 1440;
     const isDesktop = window.innerWidth >= 1024;
@@ -123,11 +133,14 @@ const EedooAboutSection = () => {
       gsap.set(content1Ref.current, { autoAlpha: 0, y: moveY });
       gsap.set(content3Ref.current, { autoAlpha: 0, y: moveY });
       gsap.set(orbitFadeRef.current, { autoAlpha: 0 });
+      gsap.set(projectConnectionsRef.current, { autoAlpha: 0 });
+      if (aboutHighlightRef.current) gsap.set(aboutHighlightRef.current, { strokeDashoffset: 1 });
+      gsap.set(content3Ref.current?.querySelectorAll('.eedoo-about__project-card'), { autoAlpha: 0 });
       const orbitLogoItems = section.querySelectorAll('.eedoo-about__tech-orbit-position');
       gsap.set(orbitLogoItems, { autoAlpha: 0 });
 
-      // Keep the globe beside the About copy, then bring it to the bottom-center
-      // as the visitor scrolls into the stack section.
+      // Start beside the About copy, reveal the cropped stack orbit, then
+      // return the clean sphere to center behind the project grid.
       gsap.set(orbitTransformRef.current, { x: startX, y: 0, scale: 0.57 });
       gsap.set(orbitLogosRef.current, { x: startX, y: 0, scale: 0.57 });
 
@@ -142,8 +155,8 @@ const EedooAboutSection = () => {
           anticipatePin: 1,
           onUpdate: (self) => {
             const p = self.progress;
-            if (p < 0.33) setActiveStage(0);
-            else if (p < 0.66) setActiveStage(1);
+            if (p < 0.31) setActiveStage(0);
+            else if (p < 0.70) setActiveStage(1);
             else setActiveStage(2);
           },
         },
@@ -153,49 +166,97 @@ const EedooAboutSection = () => {
         x: 0,
         y: window.innerHeight * 0.37,
         scale: 1.15,
-        duration: 0.21,
+        duration: 0.16,
         ease: 'power1.inOut',
-      }, 0.12);
+      }, 0.27);
       tl.to(orbitLogosRef.current, {
         x: 0,
         y: '37vh',
         scale: 1.15,
         autoAlpha: 1,
-        duration: 0.21,
+        duration: 0.16,
         ease: 'power1.inOut',
-      }, 0.12);
+      }, 0.27);
       tl.to(orbitLogoItems, {
         autoAlpha: 1,
-        duration: 0.12,
-        stagger: 0.003,
+        duration: 0.1,
+        stagger: 0.002,
         ease: 'power1.out',
-      }, 0.12);
+      }, 0.34);
       tl.to(orbitFadeRef.current, {
         autoAlpha: 1,
-        duration: 0.2,
+        duration: 0.16,
         ease: 'power1.out',
-      }, 0.12);
+      }, 0.34);
 
       // ── Stage 1: About Me ──────────────────────────
       // Fade in (0% → 5%)
       tl.to(content1Ref.current, {
         autoAlpha: 1, y: 0, duration: 0.05, ease: 'power2.out',
       }, 0);
-      // Start fading the About copy almost immediately after scroll begins.
       tl.to(content1Ref.current, {
         autoAlpha: 0, y: -moveY * 0.6, duration: 0.08, ease: 'power2.in',
-      }, 0.15);
+      }, 0.25);
 
-      // ── Stage 3: Projects ──────────────────────────
-      // Fade in (66% → 73%)
+      // Let the About copy settle after scroll begins, then draw its underline
+      // independently so it has a deliberate pause and a slower left-to-right reveal.
+      if (aboutHighlightRef.current) {
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top top',
+          onEnter: () => {
+            gsap.killTweensOf(aboutHighlightRef.current);
+            gsap.set(aboutHighlightRef.current, { strokeDashoffset: 1 });
+            gsap.to(aboutHighlightRef.current, {
+              strokeDashoffset: 0,
+              delay: 2,
+              duration: 2.8,
+              ease: 'none',
+              overwrite: true,
+            });
+          },
+          onEnterBack: () => {
+            gsap.killTweensOf(aboutHighlightRef.current);
+            gsap.set(aboutHighlightRef.current, { strokeDashoffset: 1 });
+            gsap.to(aboutHighlightRef.current, {
+              strokeDashoffset: 0,
+              delay: 2,
+              duration: 2.8,
+              ease: 'none',
+              overwrite: true,
+            });
+          },
+          onLeaveBack: () => {
+            gsap.killTweensOf(aboutHighlightRef.current);
+            gsap.set(aboutHighlightRef.current, { strokeDashoffset: 1 });
+          },
+        });
+      }
+
+      // ── Stage 3: clean, reduced orbital sphere ──────
+      tl.to(orbitTransformRef.current, {
+        x: 0, y: 0, scale: window.innerWidth < 768 ? 0.56 : 0.72,
+        duration: 0.13, ease: 'power1.inOut',
+      }, 0.73);
+      tl.to(orbitLogosRef.current, {
+        x: 0, y: 0, scale: 0.72, autoAlpha: 0,
+        duration: 0.11, ease: 'power1.inOut',
+      }, 0.73);
+
+      // ── Projects ───────────────────────────────────
       tl.to(content3Ref.current, {
         autoAlpha: 1, y: 0, duration: 0.07, ease: 'power2.out',
-      }, 0.66);
-      // Hold (73% → 95%)
-      // Fade out (95% → 100%)
+      }, 0.78);
+      tl.to(projectConnectionsRef.current, { autoAlpha: 1, duration: 0.04 }, 0.80);
+      tl.to(content3Ref.current?.querySelectorAll('.eedoo-about__project-card'), {
+        autoAlpha: 1,
+        duration: 0.09,
+        stagger: 0.025,
+        ease: 'power2.out',
+      }, 0.84);
       tl.to(content3Ref.current, {
         autoAlpha: 0, y: -moveY * 0.4, duration: 0.05, ease: 'power2.in',
-      }, 0.95);
+      }, 0.98);
 
     }, section);
 
@@ -257,6 +318,17 @@ const EedooAboutSection = () => {
 
         <div ref={orbitFadeRef} className="eedoo-about__orbit-fade" aria-hidden="true" />
 
+        <svg ref={projectConnectionsRef} className="eedoo-about__project-connections" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+          <path className="eedoo-about__connector-line animated-robot-line" d="M 470 470 C 420 405, 355 340, 300 300" />
+          <path className="eedoo-about__connector-line animated-robot-line" d="M 530 470 C 580 405, 645 340, 700 300" />
+          <path className="eedoo-about__connector-line animated-robot-line" d="M 470 530 C 415 595, 350 665, 300 700" />
+          <path className="eedoo-about__connector-line animated-robot-line" d="M 530 530 C 585 595, 650 665, 700 700" />
+          <circle className="eedoo-about__connector-origin" cx="470" cy="470" r="3" />
+          <circle className="eedoo-about__connector-origin" cx="530" cy="470" r="3" />
+          <circle className="eedoo-about__connector-origin" cx="470" cy="530" r="3" />
+          <circle className="eedoo-about__connector-origin" cx="530" cy="530" r="3" />
+        </svg>
+
         {/* Content layers — only one visible at a time */}
         <div className="eedoo-about__content-layer">
 
@@ -271,7 +343,7 @@ const EedooAboutSection = () => {
             >
               <div className="eedoo-about__stage-label">01 — About</div>
               <h2 className="eedoo-about__heading">
-                Human with <em>ideas.</em><br />
+                Human with <span className="eedoo-about__highlight-word"><em>ideas.</em><svg viewBox="0 0 150 20" preserveAspectRatio="none" aria-hidden="true"><path ref={aboutHighlightRef} pathLength="1" d="M3 15 C39 5 88 4 146 12" /></svg></span><br />
                 AI with <em>attitude.</em>
               </h2>
               <p className="eedoo-about__body">
@@ -304,60 +376,50 @@ const EedooAboutSection = () => {
             </div>
           </div>
 
-          {/* Stage 03 — Projects (left side) */}
+          {/* Stage 03 — Projects connected to the orbital hub */}
           <div
             ref={content3Ref}
-            className="eedoo-about__panel eedoo-about__panel--left"
+            className="eedoo-about__projects-stage"
           >
-            <div 
-              className="eedoo-about__panel-inner"
-              style={{ pointerEvents: activeStage === 2 ? 'auto' : 'none' }}
-            >
+            <div className="eedoo-about__projects-heading">
               <div className="eedoo-about__stage-label">03 — Work</div>
               <h2 className="eedoo-about__heading">
                 Featured <em>Projects</em>
               </h2>
+            </div>
 
-              {/* Project dots */}
-              <div className="eedoo-about__project-dots">
-                {PROJECTS.map((_, i) => (
-                  <button
-                    key={i}
-                    className={`eedoo-about__project-dot ${i === activeProject ? 'eedoo-about__project-dot--active' : ''}`}
-                    onClick={() => setActiveProject(i)}
-                    aria-label={`View project ${i + 1}`}
-                    type="button"
-                  />
-                ))}
-              </div>
-
-              <div className="eedoo-about__project">
-                <div className="eedoo-about__project-preview">
-                  <img
-                    src={PROJECTS[activeProject].image}
-                    alt={PROJECTS[activeProject].title}
-                    loading="lazy"
-                  />
-                </div>
-                <h3 className="eedoo-about__project-title">
-                  {PROJECTS[activeProject].title}
-                </h3>
-                <p className="eedoo-about__project-desc">
-                  {PROJECTS[activeProject].desc}
-                </p>
-                {PROJECTS[activeProject].href && (
-                  <a
-                    href={PROJECTS[activeProject].href}
-                    className="eedoo-about__link"
-                  >
-                    View Project
-                    <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                      <path d="M1 11L11 1M11 1H3M11 1V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <div className="eedoo-about__projects-grid" style={{ pointerEvents: activeStage === 2 ? 'auto' : 'none' }}>
+              {PROJECTS.map((project, i) => (
+                <article
+                  key={project.title}
+                  className={`eedoo-about__project-card robot-tooltip ${i % 2 === 0 ? 'float-anim-1' : 'float-anim-2'} ${i === activeProject ? 'eedoo-about__project-card--active' : ''}`}
+                  onMouseEnter={() => setActiveProject(i)}
+                  onFocusCapture={() => setActiveProject(i)}
+                >
+                  <div className="tooltip-content eedoo-about__project-card-copy">
+                    <span className="eedoo-about__project-index">0{i + 1} — {project.kind}</span>
+                    <div className="tooltip-title">{project.title}</div>
+                    <div className="tooltip-subtitle eedoo-about__project-desc">{project.desc}</div>
+                  </div>
+                  <a href={project.href} className="tooltip-btn" aria-label={`View ${project.title}`}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F4ED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
                     </svg>
                   </a>
-                )}
-              </div>
+                </article>
+              ))}
             </div>
+
+            <nav className="eedoo-about__project-nav" aria-label="Choose a featured project">
+              <button type="button" onClick={() => setActiveProject((activeProject + PROJECTS.length - 1) % PROJECTS.length)} aria-label="Previous project">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+              <span>0{activeProject + 1} <i /> 0{PROJECTS.length}</span>
+              <button type="button" onClick={() => setActiveProject((activeProject + 1) % PROJECTS.length)} aria-label="Next project">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+            </nav>
           </div>
 
         </div>
